@@ -138,7 +138,7 @@ nav::-webkit-scrollbar{display:none;}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;}}
 </style>
-</head>
+<style>#annie{width:52px!important;height:52px!important}</style></head>
 <body>
 <header>
   <button class="syncbtn" id="syncBtn" aria-label="Sync">&#8635;</button>
@@ -1072,7 +1072,12 @@ document.getElementById('annie').addEventListener('click',()=>say(annieContextLi
 (function greet(){
   const h=new Date().getHours();
   const greeting=h<5?"Burning the midnight oil? Hoo needs sleep... you do.":h<12?"Mornin'. Let's see what the board says.":h<17?"Afternoon check-in.":"Evenin'. Let's make tomorrow easier.";
-  setTimeout(()=>say(greeting+" "+annieContextLine()),900);
+  {
+  const key = "annieScreenChanges";
+  const count = Number(sessionStorage.getItem(key) || 0) + 1;
+  sessionStorage.setItem(key, String(count));
+  if (count % 10 === 0) setTimeout(() => say(greeting + " " + annieContextLine()), 900);
+}
 })();
 loadDB();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
