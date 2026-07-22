@@ -1,5 +1,5 @@
-const CACHE='arborwise-os-v19';
-const CORE=['/','/index.html','/app.css?v=19','/app.js?v=19','/operational-overrides.js?v=19','/contact-actions.js?v=19','/manifest.webmanifest','/assets/annie-icon-192.png','/assets/annie-icon-512.png','/assets/arborwise-logo.png?v=19','/assets/annie-main-icon.png'];
+const CACHE='arborwise-os-v20';
+const CORE=['/','/index.html','/app.css?v=20','/app.js?v=20','/operational-overrides.js?v=20','/contact-actions.js?v=20','/runtime-fixes.js?v=20','/manifest.webmanifest','/assets/annie-icon-192.png','/assets/annie-icon-512.png','/assets/arborwise-logo.png?v=20','/assets/annie-main-icon.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
