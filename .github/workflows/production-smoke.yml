@@ -41,9 +41,10 @@ jobs:
 
           wait_for_code "/" GET "200"
           grep -q "Arborwise OS" /tmp/response.txt
-          wait_for_code "/app.css?v=14" GET "200"
-          wait_for_code "/app.js?v=14" GET "200"
-          wait_for_code "/assets/arborwise-logo.png?v=14" GET "200"
+          wait_for_code "/app.css?v=15" GET "200"
+          wait_for_code "/app.js?v=15" GET "200"
+          wait_for_code "/operational-overrides.js?v=15" GET "200"
+          wait_for_code "/assets/arborwise-logo.png?v=15" GET "200"
           wait_for_code "/api/health" GET "200"
           wait_for_code "/api/connections" GET "401"
           wait_for_code "/api/data" GET "401"
