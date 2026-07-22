@@ -1,1 +1,25 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","builds":[{"src":"api/*.js","use":"@vercel/node"},{"src":"public/**","use":"@vercel/static"}],"rewrites":[{"source":"/((?!api/).*)","destination":"/public/$1"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    {"src": "api/app.js", "use": "@vercel/node"},
+    {"src": "api/oauth.js", "use": "@vercel/node"},
+    {"src": "api/sync.js", "use": "@vercel/node"},
+    {"src": "public/**", "use": "@vercel/static"}
+  ],
+  "rewrites": [
+    {"source": "/api/login", "destination": "/api/app?route=login"},
+    {"source": "/api/logout", "destination": "/api/app?route=logout"},
+    {"source": "/api/data", "destination": "/api/app?route=data"},
+    {"source": "/api/connections", "destination": "/api/app?route=connections"},
+    {"source": "/api/setup", "destination": "/api/app?route=setup"},
+    {"source": "/api/records", "destination": "/api/app?route=records"},
+    {"source": "/api/state", "destination": "/api/app?route=state"},
+    {"source": "/api/health", "destination": "/api/app?route=health"},
+    {"source": "/api/oauth/google/start", "destination": "/api/oauth?provider=google&action=start"},
+    {"source": "/api/oauth/google/callback", "destination": "/api/oauth?provider=google&action=callback"},
+    {"source": "/api/oauth/quickbooks/start", "destination": "/api/oauth?provider=quickbooks&action=start"},
+    {"source": "/api/oauth/quickbooks/callback", "destination": "/api/oauth?provider=quickbooks&action=callback"},
+    {"source": "/", "destination": "/public/index.html"},
+    {"source": "/((?!api/).*)", "destination": "/public/$1"}
+  ]
+}
