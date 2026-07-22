@@ -30,6 +30,37 @@
   for(const record of snapshot)recordsById.set(record.id,{...(recordsById.get(record.id)||{}),...record});
   state.records=[...recordsById.values()];
 
+  visibleRecords=()=>{
+    let rows=state.records.filter(matches);
+    if(state.tab==='ESTIMATES')rows=rows.filter(record=>record.type==='est'&&!record.closed);
+    if(state.tab==='JOBS')rows=rows.filter(record=>record.type==='job'&&!record.closed);
+    if(state.tab==='TODAY'){
+      const start=today();
+      const endDate=new Date(`${start}T12:00:00`);
+      endDate.setDate(endDate.getDate()+7);
+      const end=`${endDate.getFullYear()}-${String(endDate.getMonth()+1).padStart(2,'0')}-${String(endDate.getDate()).padStart(2,'0')}`;
+      rows=rows.filter(record=>{
+        if(record.closed)return false;
+        const due=record.workDate||record.followUp||'';
+        if(!due)return true;
+        if(due>=start&&due<=end)return true;
+        return !record.workDate&&due<start&&/due|overdue|follow/i.test(String(record.status||''));
+      });
+    }
+    return rows.sort((a,b)=>{
+      const aDue=a.workDate||a.followUp||'9999-99-99';
+      const bDue=b.workDate||b.followUp||'9999-99-99';
+      return aDue.localeCompare(bDue)||String(a.workTime||'').localeCompare(String(b.workTime||''))||String(a.name||'').localeCompare(String(b.name||''));
+    });
+  };
+
+  renderRecords=()=>{
+    const rows=visibleRecords();
+    const heading=state.tab==='TODAY'?'Today + Next 7 Days / Unscheduled':state.tab;
+    main.innerHTML=`<div class="title"><span>${heading}</span><span class="count">${rows.length}</span></div>${rows.length?rows.map(card).join(''):'<div class="empty">Nothing here.</div>'}`;
+    main.querySelectorAll('[data-record]').forEach(element=>element.onclick=()=>openRecord(element.dataset.record));
+  };
+
   const sync=document.getElementById('syncButton');
   if(sync)sync.onclick=async()=>{
     sync.disabled=true;
@@ -54,11 +85,11 @@
   const annieBubble=document.getElementById('annieBubble');
   if(annieButton&&annieBubble)annieButton.onclick=()=>{
     const lines=[
-      'Today includes two overdue estimate follow-ups and the daily operations review.',
+      'Today includes two estimate follow-ups and the daily operations review.',
       'Thursday includes the daily review and Susan Garrison follow-up.',
       'Friday has four approved mowing stops assigned to KW Landscaping.',
       'Saturday has Rick Lanicek from 8–12 and Johanna Friedel from 1–5.',
-      'Approved unscheduled work remains visible under Today / Unscheduled.'
+      'Approved unscheduled work remains visible on the main board.'
     ];
     annieBubble.textContent=lines[Math.floor(Math.random()*lines.length)];
     annieBubble.hidden=false;
