@@ -138,7 +138,75 @@ nav::-webkit-scrollbar{display:none;}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;}}
 </style>
-<style>#annie{width:52px!important;height:52px!important}</style></head>
+<style>#annie{width:52px!important;height:52px!important}</style>
+<style id="annie-cute-bubble">
+#annie{
+  width:52px!important;
+  height:52px!important;
+}
+
+#bubble{
+  position:fixed!important;
+  right:70px!important;
+  bottom:178px!important;
+  width:auto!important;
+  max-width:205px!important;
+  min-width:0!important;
+  padding:10px 14px!important;
+  margin:0!important;
+  border:3px solid #174f38!important;
+  border-radius:24px 26px 22px 25px!important;
+  background:#fffdf5!important;
+  color:#174f38!important;
+  font-family:"Comic Sans MS","Segoe Print","Bradley Hand",cursive!important;
+  font-size:16px!important;
+  font-weight:700!important;
+  line-height:1.25!important;
+  text-align:center!important;
+  box-shadow:0 6px 14px rgba(23,79,56,.20)!important;
+  z-index:70!important;
+}
+
+#bubble::before{
+  content:""!important;
+  position:absolute!important;
+  right:8px!important;
+  bottom:-9px!important;
+  width:18px!important;
+  height:18px!important;
+  background:#fffdf5!important;
+  border-right:3px solid #174f38!important;
+  border-bottom:3px solid #174f38!important;
+  border-radius:3px 0 8px 0!important;
+  transform:rotate(32deg)!important;
+}
+
+#bubble::after{
+  content:""!important;
+  position:absolute!important;
+  left:18px!important;
+  top:-7px!important;
+  width:24px!important;
+  height:14px!important;
+  background:#fffdf5!important;
+  border-radius:50%!important;
+  box-shadow:
+    28px 1px 0 2px #fffdf5,
+    58px 0 0 1px #fffdf5,
+    88px 2px 0 0 #fffdf5!important;
+}
+
+@media (max-width:700px){
+  #bubble{
+    right:66px!important;
+    bottom:174px!important;
+    max-width:190px!important;
+    font-size:15px!important;
+  }
+}
+</style>
+
+</head>
 <body>
 <header>
   <button class="syncbtn" id="syncBtn" aria-label="Sync">&#8635;</button>
