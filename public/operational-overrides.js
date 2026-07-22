@@ -25,15 +25,25 @@
     {id:'WO-GTC-0009',type:'job',name:'Johanna Friedel',address:'1103 Hyde Park Dr, McKinney, TX 75069',service:'Remove lower visible red-oak deadwood over the roof and rear fence; climb and rig as needed; clean up debris.',amount:650,category:'ARBORWISE',who:'Dallas 3-man crew',status:'Scheduled',workDate:'2026-07-25',workTime:'1:00 PM – 5:00 PM',followUp:'',notes:'Google Calendar job. Approved at $650.',closed:false}
   ];
 
+  const LOCAL_SNAPSHOT_KEY='arborwise-ops-snapshot-2026-07-22-v2';
+  const snapshotAlreadyApplied=localStorage.getItem(LOCAL_SNAPSHOT_KEY)==='1';
   state.records=state.records.filter(record=>!/^WO-20(10|11|12|13|14|15|16|17|18|19)$/.test(String(record.id||'')));
   const recordsById=new Map(state.records.map(record=>[String(record.id||''),record]));
-  for(const record of snapshot)recordsById.set(record.id,{...(recordsById.get(record.id)||{}),...record});
+  for(const record of snapshot){
+    const existing=recordsById.get(record.id);
+    if(!existing)recordsById.set(record.id,record);
+    else if(!snapshotAlreadyApplied)recordsById.set(record.id,{...existing,...record,closed:Boolean(existing.closed),status:existing.closed?(existing.status||'Complete'):record.status});
+  }
   state.records=[...recordsById.values()];
+  localStorage.setItem(LOCAL_SNAPSHOT_KEY,'1');
+
+  if(!TABS.includes('COMPLETED'))TABS.splice(3,0,'COMPLETED');
 
   visibleRecords=()=>{
     let rows=state.records.filter(matches);
     if(state.tab==='ESTIMATES')rows=rows.filter(record=>record.type==='est'&&!record.closed);
     if(state.tab==='JOBS')rows=rows.filter(record=>record.type==='job'&&!record.closed);
+    if(state.tab==='COMPLETED')rows=rows.filter(record=>record.closed);
     if(state.tab==='TODAY'){
       const start=today();
       const endDate=new Date(`${start}T12:00:00`);
@@ -56,9 +66,87 @@
 
   renderRecords=()=>{
     const rows=visibleRecords();
-    const heading=state.tab==='TODAY'?'Today + Next 7 Days / Unscheduled':state.tab;
+    const heading=state.tab==='TODAY'?'Today + Next 7 Days / Unscheduled':state.tab==='COMPLETED'?'Completed — Tap Any Item to Reopen':state.tab;
     main.innerHTML=`<div class="title"><span>${heading}</span><span class="count">${rows.length}</span></div>${rows.length?rows.map(card).join(''):'<div class="empty">Nothing here.</div>'}`;
     main.querySelectorAll('[data-record]').forEach(element=>element.onclick=()=>openRecord(element.dataset.record));
+  };
+
+  render=()=>{
+    renderFilters();
+    renderTabs();
+    $('dateLine').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    if(['TODAY','ESTIMATES','JOBS','COMPLETED'].includes(state.tab))renderRecords();
+    else if(state.tab==='HOURS')renderHours();
+    else if(state.tab==='FLEET')renderFleet();
+    else renderNotes();
+  };
+
+  const persistRecord=async(record,isExisting=true)=>{
+    state.records=state.records.filter(item=>item.id!==record.id);
+    state.records.push(record);
+    save();
+    render();
+    if(state.live){
+      try{
+        await api('/api/records',{method:isExisting?'PATCH':'POST',body:JSON.stringify({id:record.id,type:record.type,name:record.name,addr:record.address,service:record.service,money:record.amount,category:record.category,who:record.who,status:record.status,date:record.workDate,fuDate:record.followUp,time:record.workTime,notes:record.notes,closed:record.closed})});
+      }catch(error){toast('Saved on this phone; shared-board save failed');}
+    }
+  };
+
+  openRecord=id=>{
+    const original=id?state.records.find(record=>record.id===id):null;
+    const record=original||{id:'',type:'est',name:'',address:'',service:'',amount:'',category:'ARBORWISE',who:'Greg',status:'Estimate Sent',followUp:'',workDate:'',workTime:'',notes:'',closed:false};
+    const completionButton=original?`<button class="${record.closed?'primary':'secondary'}" id="toggleComplete">${record.closed?'REOPEN / MARK INCOMPLETE':'MARK COMPLETE'}</button>`:'';
+    sheet.innerHTML=`<h2>${original?'Edit':'Add'} record</h2><div class="row">${field('r-id','Record ID',record.id)}<div class="field"><label>Type</label><select id="r-type"><option value="est" ${record.type==='est'?'selected':''}>Estimate</option><option value="job" ${record.type==='job'?'selected':''}>Job</option></select></div></div>${field('r-name','Customer',record.name)}${field('r-address','Address',record.address)}<div class="field"><label>Service</label><textarea id="r-service">${esc(record.service)}</textarea></div><div class="row">${field('r-amount','Amount',record.amount,'number')}${field('r-category','Category',record.category)}</div><div class="row">${field('r-who','Assigned to',record.who)}${field('r-status','Status',record.status)}</div><div class="row">${field('r-work','Work date',record.workDate,'date')}${field('r-follow','Follow-up',record.followUp,'date')}</div>${field('r-time','Time window',record.workTime)}<div class="field"><label>Notes</label><textarea id="r-notes">${esc(record.notes)}</textarea></div>${completionButton}<div class="buttons"><button class="secondary" id="cancel">CANCEL</button>${original?'<button class="danger" id="delete">DELETE</button>':''}<button class="primary" id="saveRecord">SAVE</button></div>`;
+    veil.hidden=false;
+    $('cancel').onclick=closeSheet;
+
+    const collect=closed=>({
+      id:$('r-id').value.trim()||`${$('r-type').value==='job'?'WO':'EST'}-${Date.now()}`,
+      type:$('r-type').value,
+      name:$('r-name').value.trim(),
+      address:$('r-address').value.trim(),
+      service:$('r-service').value.trim(),
+      amount:Number($('r-amount').value)||0,
+      category:$('r-category').value.trim()||'ARBORWISE',
+      who:$('r-who').value.trim(),
+      status:$('r-status').value.trim(),
+      workDate:$('r-work').value,
+      followUp:$('r-follow').value,
+      workTime:$('r-time').value.trim(),
+      notes:$('r-notes').value.trim(),
+      closed:Boolean(closed)
+    });
+
+    if(original)$('delete').onclick=async()=>{
+      state.records=state.records.filter(item=>item.id!==original.id);
+      save();closeSheet();render();
+      if(state.live)try{await api('/api/records',{method:'DELETE',body:JSON.stringify({id:original.id})});}catch{}
+    };
+
+    if(original)$('toggleComplete').onclick=async()=>{
+      const next=collect(!original.closed);
+      if(!next.name){toast('Customer name is required');return;}
+      next.status=next.closed?'Complete':'Reopened — Needs Attention';
+      closeSheet();
+      await persistRecord(next,true);
+      toast(next.closed?'Moved to Completed':'Reopened and returned to the active board');
+    };
+
+    $('saveRecord').onclick=async()=>{
+      const next=collect(original?.closed||false);
+      if(!next.name){toast('Customer name is required');return;}
+      closeSheet();
+      await persistRecord(next,Boolean(original));
+    };
+  };
+
+  $('addButton').onclick=()=>{
+    if(['TODAY','ESTIMATES','JOBS'].includes(state.tab))openRecord();
+    else if(state.tab==='COMPLETED')toast('Open Today, Estimates, or Jobs to add new work');
+    else if(state.tab==='HOURS')openHours();
+    else if(state.tab==='FLEET')openMileage();
+    else openNote();
   };
 
   const sync=document.getElementById('syncButton');
@@ -85,7 +173,7 @@
   const annieBubble=document.getElementById('annieBubble');
   if(annieButton&&annieBubble)annieButton.onclick=()=>{
     const lines=[
-      'Today includes two estimate follow-ups and the daily operations review.',
+      'Completed work can always be reopened from the Completed tab.',
       'Thursday includes the daily review and Susan Garrison follow-up.',
       'Friday has four approved mowing stops assigned to KW Landscaping.',
       'Saturday has Rick Lanicek from 8–12 and Johanna Friedel from 1–5.',
