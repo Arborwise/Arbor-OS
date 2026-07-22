@@ -1,0 +1,19 @@
+name: Arborwise hourly sync
+
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Arborwise OS
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET" || { echo "CRON_SECRET repository secret is required"; exit 1; }
+          curl --fail-with-body --retry 2 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://arborwise-os.vercel.app/api/sync?scheduled=hourly"
