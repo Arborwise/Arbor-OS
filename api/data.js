@@ -1,9 +1,15 @@
 import {json,fail} from '../lib/http.js';
 import {requireSession} from '../lib/auth.js';
 import {initDb,db} from '../lib/db.js';
+import {repairSeededQuickBooksRows} from '../lib/repair.js';
+
+const empty={items:[],inbox:[],mileage:[],hours:[],notes:[],equipment:[],maintenance:[],lastSync:null,setupRequired:false};
 export default async function handler(req,res){
   try{
-    requireSession(req);await initDb();
+    requireSession(req);
+    if(!process.env.DATABASE_URL)return json(res,200,{ok:true,localMode:true,...empty});
+    await initDb();
+    await repairSeededQuickBooksRows();
     const [records,inbox,mileage,hours,notes,equipment,maintenance,sync]=await Promise.all([
       db().query('select * from records order by closed asc,coalesce(work_date,follow_up_date) asc nulls last,updated_at desc'),
       db().query("select * from inbox_items where status='open' order by occurred_at desc nulls last limit 100"),
@@ -14,7 +20,7 @@ export default async function handler(req,res){
       db().query('select * from maintenance order by week_of desc,equipment_id'),
       db().query('select * from sync_runs order by id desc limit 1')
     ]);
-    const items=records.rows.map(r=>({id:r.id,type:r.kind,name:r.customer_name||'',addr:r.address||'',phone:r.phone||'',email:r.email||'',service:r.service||'',desc:r.description||'',date:r.work_date?r.work_date.toISOString().slice(0,10):'',time:r.work_time||'',fuDate:r.follow_up_date?r.follow_up_date.toISOString().slice(0,10):'',fuWhy:r.follow_up_date?'Follow up':'',who:r.assigned_to||'',status:r.status||'',notes:r.notes||'',money:r.amount?`$${Number(r.amount).toFixed(2)}`:'',closed:r.closed,category:r.category}));
-    json(res,200,{ok:true,items,inbox:inbox.rows,mileage:mileage.rows,hours:hours.rows,notes:notes.rows,equipment:equipment.rows,maintenance:maintenance.rows,lastSync:sync.rows[0]||null,setupRequired:equipment.rows.length===0||records.rows.length===0});
+    const items=records.rows.map(r=>({id:r.id,type:r.kind,name:r.customer_name||'',addr:r.address||'',phone:r.phone||'',email:r.email||'',service:r.service||'',desc:r.description||'',date:r.work_date?String(r.work_date).slice(0,10):'',time:r.work_time||'',fuDate:r.follow_up_date?String(r.follow_up_date).slice(0,10):'',fuWhy:r.follow_up_date?'Follow up':'',who:r.assigned_to||'',status:r.status||'',notes:r.notes||'',money:r.amount?`$${Number(r.amount).toFixed(2)}`:'',closed:r.closed,category:r.category}));
+    json(res,200,{ok:true,localMode:false,items,inbox:inbox.rows,mileage:mileage.rows,hours:hours.rows,notes:notes.rows,equipment:equipment.rows,maintenance:maintenance.rows,lastSync:sync.rows[0]||null,setupRequired:equipment.rows.length===0||records.rows.length===0});
   }catch(e){fail(res,e);}
 }
