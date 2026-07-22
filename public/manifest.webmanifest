@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "Arborwise OS",
+  "short_name": "Arborwise",
+  "description": "Arborwise Tree Care operations, estimates, jobs, hours, fleet, and synchronization.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F6F5F0",
+  "theme_color": "#17402B",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/annie-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/annie-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/annie-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

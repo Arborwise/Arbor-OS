@@ -1,0 +1,72 @@
+[
+  {
+    "doc": "2019",
+    "customer": "Sicily Laguna Azure",
+    "service": "Mow, edge, pull weeds - 3004 Cremini Falls",
+    "total": 162.38,
+    "category": "KW"
+  },
+  {
+    "doc": "2018",
+    "customer": "Sicily Laguna Azure",
+    "service": "Mow, edge, pull weeds - 3007 Isla Terrace",
+    "total": 162.38,
+    "category": "KW"
+  },
+  {
+    "doc": "2017",
+    "customer": "Venetian HOA",
+    "service": "Mow, edge, pull weeds - 437 Hoot Owl",
+    "total": 162.38,
+    "category": "KW"
+  },
+  {
+    "doc": "2016",
+    "customer": "Venetian HOA",
+    "service": "Mow, edge, pull weeds - 1737 Barnwood",
+    "total": 162.38,
+    "category": "KW"
+  },
+  {
+    "doc": "2015",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 517 Parrino Parkway",
+    "total": 866.0,
+    "category": "SBB"
+  },
+  {
+    "doc": "2014",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 3116 Lucia Way",
+    "total": 866.0,
+    "category": "SBB"
+  },
+  {
+    "doc": "2013",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 3016 Isla Terrace",
+    "total": 866.0,
+    "category": "SBB"
+  },
+  {
+    "doc": "2012",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 3107 Lucia Way",
+    "total": 866.0,
+    "category": "SBB"
+  },
+  {
+    "doc": "2011",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 2902 Cremini Falls",
+    "total": 866.0,
+    "category": "SBB"
+  },
+  {
+    "doc": "2010",
+    "customer": "Sicily Laguna Azure",
+    "service": "Tree removal and replacement - 3110 Giovanni Way",
+    "total": 866.0,
+    "category": "SBB"
+  }
+]
