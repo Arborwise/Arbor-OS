@@ -1,9 +1,1 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {"api/**/*.js": {"maxDuration": 60}},
-  "crons": [
-    {"path": "/api/sync?scheduled=morning", "schedule": "0 11 * * *"},
-    {"path": "/api/sync?scheduled=evening", "schedule": "0 23 * * *"}
-  ],
-  "rewrites": [{"source": "/((?!api/).*)", "destination": "/public/$1"}]
-}
+{"$schema":"https://openapi.vercel.sh/vercel.json","builds":[{"src":"api/*.js","use":"@vercel/node"},{"src":"public/**","use":"@vercel/static"}],"rewrites":[{"source":"/((?!api/).*)","destination":"/public/$1"}]}
