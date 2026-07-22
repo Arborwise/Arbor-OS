@@ -12,6 +12,19 @@
       Object.assign(record,{type:'est',status:'Approved',category:'SBB',who:'Greg',workDate:'',workTime:'',followUp:'',notes:'Approved tree work; not scheduled yet.',closed:false});
     }
   }
+  const annieButton=document.getElementById('annieButton');
+  const annieBubble=document.getElementById('annieBubble');
+  if(annieButton&&annieBubble)annieButton.onclick=()=>{
+    const lines=[
+      'Estimates 2010 through 2019 are approved.',
+      'Mowing estimates 2016 through 2019 are assigned to KW Landscaping for Friday, July 24.',
+      'Tree estimates 2010 through 2015 are approved but not scheduled yet.'
+    ];
+    annieBubble.textContent=lines[Math.floor(Math.random()*lines.length)];
+    annieBubble.hidden=false;
+    clearTimeout(window.annieTimer);
+    window.annieTimer=setTimeout(()=>annieBubble.hidden=true,6000);
+  };
   save();
   render();
 })();
