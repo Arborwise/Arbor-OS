@@ -34,7 +34,14 @@ export default async function handler(req,res){
     if(!process.env.DATABASE_URL)return json(res,200,{ok:true,localMode:true,equipment:equipment.length,seededEstimates:current.length,seededJobs:0});
     await initDb();
     for(const e of equipment)await db().query(`insert into equipment(id,name,group_name,task,fuel_filter_due) values($1,$2,$3,$4,$5) on conflict(id) do update set name=excluded.name,group_name=excluded.group_name,task=excluded.task,fuel_filter_due=excluded.fuel_filter_due,updated_at=now()`,[e.id,e.name,e.group,e.task,e.fuel]);
-    for(const [doc,customer,rawService,total,category] of current){const {service,address}=splitService(rawService);await db().query(`insert into records(id,source,source_id,kind,category,customer_name,address,service,description,amount,status,assigned_to,follow_up_date,notes,closed,raw,updated_at) values($1,'seed',$2,'est',$3,$4,$5,$6,$7,$8,'Estimate Sent','Greg','2026-07-24',$9,false,$10,now()) on conflict(id) do nothing`,[doc,`seed-est:${doc}`,category,customer,address,service,rawService,total,'QuickBooks estimate was pending as of July 21, 2026. Follow up before creating a work order.',{doc,customer,rawService,total,category}]);}
+    for(const [doc,customer,rawService,total,category] of current){
+      const {service,address}=splitService(rawService);
+      const mowing=category==='KW';
+      const assigned=mowing?'KW Landscaping':'Greg';
+      const workDate=mowing?'2026-07-24':null;
+      const notes=mowing?'Approved mowing assigned to KW Landscaping for Friday, July 24, 2026.':'Approved tree work; not scheduled yet.';
+      await db().query(`insert into records(id,source,source_id,kind,category,customer_name,address,service,description,amount,status,assigned_to,work_date,follow_up_date,notes,closed,raw,updated_at) values($1,'seed',$2,'est',$3,$4,$5,$6,$7,$8,'Approved',$9,$10,null,$11,false,$12,now()) on conflict(id) do nothing`,[doc,`seed-est:${doc}`,category,customer,address,service,rawService,total,assigned,workDate,notes,{doc,customer,rawService,total,category}]);
+    }
     await repairSeededQuickBooksRows();
     json(res,200,{ok:true,localMode:false,equipment:equipment.length,seededEstimates:current.length,seededJobs:0});
   }catch(e){fail(res,e);}
