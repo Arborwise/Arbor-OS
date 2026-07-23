@@ -50,13 +50,13 @@ jobs:
           }
 
           wait_for_current_board() {
-            local path="/board-now.html?board=44&smoke=$BUST"
+            local path="/board-now.html?board=45&smoke=$BUST"
             local code="000"
             for attempt in $(seq 1 40); do
               code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
               if [[ "$code" == "200" ]] \
-                && grep -Fq '/board-current-44.js?board=44' /tmp/board.html \
-                && grep -Fq '/live-sync-44.js?board=44' /tmp/board.html \
+                && grep -Fq '/board-current-45.js?board=45' /tmp/board.html \
+                && grep -Fq '/live-sync-45.js?board=45' /tmp/board.html \
                 && grep -Fq 'Arborwise OS Board' /tmp/board.html; then
                 echo "PASS current finished board is deployed"
                 return 0
@@ -71,27 +71,29 @@ jobs:
 
           wait_for_current_board
 
-          if grep -Fq '/board-current-41.js' /tmp/board.html; then
-            echo 'FAIL finished board still references the stale snapshot'
-            exit 1
-          fi
-
-          wait_for_code "/board-current-44.js?smoke=$BUST" GET "200" "" /tmp/current.js
+          wait_for_code "/board-current-45.js?smoke=$BUST" GET "200" "" /tmp/current.js
           grep -Fq "Today's Route" /tmp/current.js
           grep -Fq 'Toby Palmer; Hannah McElrae; Jonathan McElrae' /tmp/current.js
           grep -Fq 'Operations oversight: Greg.' /tmp/current.js
+          grep -Fq 'remoteDataUpdatedAt' /tmp/current.js
           if grep -Fq 'Approved job needs a date' /tmp/current.js; then
             echo 'FAIL current operations still contain the stale scheduling message'
             exit 1
           fi
 
-          wait_for_code "/live-sync-44.js?smoke=$BUST" GET "200" "" /tmp/live-sync.js
-          grep -Fq 'mergeAuthority' /tmp/live-sync.js
-          grep -Fq 'CURRENT OPERATIONS' /tmp/live-sync.js
+          wait_for_code "/live-sync-45.js?smoke=$BUST" GET "200" "" /tmp/live-sync.js
+          grep -Fq 'Checked now • no changes' /tmp/live-sync.js
+          grep -Fq 'sync(false,true)' /tmp/live-sync.js
+          grep -Fq 'remotePreservesCurrent' /tmp/live-sync.js
+          grep -Fq 'fingerprint!==before' /tmp/live-sync.js
+          if grep -Fq 'setTimeout(()=>location.reload(),120)' /tmp/live-sync.js; then
+            echo 'FAIL refresh still performs the old blind reload'
+            exit 1
+          fi
 
           wait_for_code "/board-live.js?smoke=$BUST" GET "200"
-          wait_for_code "/app.css?board=44&smoke=$BUST" GET "200"
-          wait_for_code "/board-manifest.webmanifest?v=44&smoke=$BUST" GET "200"
+          wait_for_code "/app.css?board=45&smoke=$BUST" GET "200"
+          wait_for_code "/board-manifest.webmanifest?v=45&smoke=$BUST" GET "200"
           wait_for_code "/assets/annie-launcher-v42.svg?smoke=$BUST" GET "200"
           wait_for_code "/assets/arborwise-logo.png?smoke=$BUST" GET "200"
 
