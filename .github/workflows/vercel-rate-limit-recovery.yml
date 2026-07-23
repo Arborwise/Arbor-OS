@@ -23,23 +23,26 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Check whether board 48 is already live
+      - name: Check whether board 49 is already live
         id: live
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://arborwise-os.vercel.app'
           BUST="recovery-$(date +%s)"
-          code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=48&$BUST" || true)
+          code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=49&$BUST" || true)
           if [[ "$code" == '200' ]] \
-            && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
-            && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
-            && grep -Fq '/arborwise-personality-48.js?board=48' /tmp/board.html; then
+            && grep -Fq '/board-current-47.js?board=49' /tmp/board.html \
+            && grep -Fq '/weather-chip-48.js?board=49' /tmp/board.html \
+            && grep -Fq '/arborwise-personality-48.js?board=49' /tmp/board.html \
+            && grep -Fq '/arborwise-personality-49.css?board=49' /tmp/board.html \
+            && grep -Fq 'class="brandTagline"' /tmp/board.html \
+            && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
             echo 'live=true' >> "$GITHUB_OUTPUT"
-            echo 'Board 48 is already live. No deployment retry needed.'
+            echo 'Board 49 is already live. No deployment retry needed.'
           else
             echo 'live=false' >> "$GITHUB_OUTPUT"
-            echo "Board 48 is not live yet; production returned $code."
+            echo "Board 49 is not live yet; production returned $code."
           fi
 
       - name: Respect the rate-limit cooldown
@@ -85,7 +88,7 @@ jobs:
           git commit -m 'Retry production after Vercel rate-limit cooldown'
           git push origin HEAD:main
 
-      - name: Wait for board 48 and verify the real production result
+      - name: Wait for board 49 and verify the real production result
         if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
         shell: bash
         run: |
@@ -93,21 +96,27 @@ jobs:
           BASE='https://arborwise-os.vercel.app'
           for attempt in $(seq 1 40); do
             bust="verify-$(date +%s)-$attempt"
-            code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=48&$bust" || true)
+            code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=49&$bust" || true)
             if [[ "$code" == '200' ]] \
-              && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
-              && grep -Fq '/annie-bubble-48.js?board=48' /tmp/board.html \
-              && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
-              && grep -Fq '/arborwise-personality-48.css?board=48' /tmp/board.html; then
+              && grep -Fq '/board-current-47.js?board=49' /tmp/board.html \
+              && grep -Fq '/annie-bubble-48.js?board=49' /tmp/board.html \
+              && grep -Fq '/weather-chip-48.js?board=49' /tmp/board.html \
+              && grep -Fq '/arborwise-personality-49.css?board=49' /tmp/board.html \
+              && grep -Fq 'class="brandTagline"' /tmp/board.html \
+              && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
               curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/board-current-47.js?$bust" -o /tmp/current.js
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/arborwise-personality-49.css?$bust" -o /tmp/personality.css
               grep -Fq "name:'Dana & Tom Pierson'" /tmp/current.js
               grep -Fq "who:'Scheduling: Brandon',status:'Accepted',workDate:'',workTime:''" /tmp/current.js
               grep -Fq 'no date, arrival window, or field crew assigned' /tmp/current.js
+              grep -Fq '.brandTagline' /tmp/personality.css
+              grep -Fq 'color:#f7d992' /tmp/personality.css
+              grep -Fq 'text-shadow:' /tmp/personality.css
               if grep -Fq 'Dana and Tom are scheduled' /tmp/current.js; then
                 echo 'Production still contains the stale Pierson schedule.'
                 exit 1
               fi
-              echo 'Board 48 is live and passed the operational truth checks.'
+              echo 'Board 49 is live and passed the operational and brand-visibility checks.'
               exit 0
             fi
             echo "Waiting for controlled deployment; attempt $attempt returned $code."
