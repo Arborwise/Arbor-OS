@@ -1,5 +1,5 @@
-const CACHE='arborwise-os-v21';
-const CORE=['/','/index.html','/app.css?v=21','/app.js?v=21','/operational-overrides.js?v=21','/contact-actions.js?v=21','/runtime-fixes.js?v=21','/manifest.webmanifest','/assets/annie-icon-192.png','/assets/annie-icon-512.png','/assets/arborwise-logo.png?v=21','/assets/annie-main-icon.png'];
+const CACHE='arborwise-os-v22';
+const CORE=['/','/index.html','/boot-repair.js?v=22','/app.css?v=22','/app.js?v=22','/operational-overrides.js?v=22','/contact-actions.js?v=22','/runtime-fixes.js?v=22','/manifest.webmanifest?v=22','/assets/annie-icon-192.png','/assets/annie-icon-512.png','/assets/arborwise-logo.png?v=22','/assets/annie-main-icon.png?v=22'];
 
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE);
@@ -18,23 +18,47 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{
   await self.clients.claim();
 })()));
 
+const networkWithTimeout=async(request,timeoutMs=3500)=>{
+  const timeout=new Promise(resolve=>setTimeout(()=>resolve(null),timeoutMs));
+  const network=fetch(request,{cache:'no-store'}).then(response=>response.ok?response:null).catch(()=>null);
+  return Promise.race([network,timeout]);
+};
+
 self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);
   if(event.request.method!=='GET'||url.origin!==location.origin||url.pathname.startsWith('/api/'))return;
 
   if(event.request.mode==='navigate'){
-    event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
-      if(response.ok)caches.open(CACHE).then(cache=>Promise.all([
-        cache.put('/',response.clone()),
-        cache.put('/index.html',response.clone())
-      ])).catch(()=>{});
-      return response;
-    }).catch(async()=>await caches.match('/')||await caches.match('/index.html')));
+    event.respondWith((async()=>{
+      const cache=await caches.open(CACHE);
+      const cached=await cache.match('/index.html')||await cache.match('/');
+      const networkPromise=networkWithTimeout(event.request).then(async response=>{
+        if(response){
+          await Promise.all([cache.put('/',response.clone()),cache.put('/index.html',response.clone())]);
+        }
+        return response;
+      });
+
+      if(cached){
+        event.waitUntil(networkPromise.catch(()=>{}));
+        return cached;
+      }
+
+      const network=await networkPromise;
+      if(network)return network;
+      return new Response('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Arborwise OS</title><body style="font-family:Arial;padding:24px;background:#f6f5f0;color:#17402b"><h1>Arborwise OS</h1><p>The board could not reach the server. Close and reopen it once.</p></body>',{headers:{'Content-Type':'text/html; charset=utf-8'}});
+    })());
     return;
   }
 
-  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{
-    if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone())).catch(()=>{});
+  event.respondWith((async()=>{
+    const cached=await caches.match(event.request);
+    if(cached)return cached;
+    const response=await fetch(event.request);
+    if(response.ok){
+      const cache=await caches.open(CACHE);
+      await cache.put(event.request,response.clone());
+    }
     return response;
-  })));
+  })());
 });
