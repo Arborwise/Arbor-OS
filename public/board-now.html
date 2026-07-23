@@ -10,32 +10,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Arborwise OS Board</title>
-  <link rel="manifest" href="/board-manifest.webmanifest?v=31">
+  <link rel="manifest" href="/board-manifest.webmanifest?v=32">
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/annie-icon-192.png">
   <link rel="apple-touch-icon" href="/assets/annie-icon-192.png">
-  <link rel="stylesheet" href="/app.css?board=31">
+  <link rel="stylesheet" href="/app.css?board=32">
+  <link rel="stylesheet" href="/annie-bubble-30.css?board=32">
   <style>
     header{min-height:178px;padding-top:10px}
     header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 2px}
     .annie{left:8px;bottom:83px}
-    .bubble{
-      left:18px;bottom:171px;width:min(176px,calc(100vw - 36px));max-width:none;max-height:none;
-      overflow:visible;padding:14px 16px 13px;background:#fff;border:2px solid #17402b;
-      border-radius:48% 52% 46% 54% / 58% 55% 45% 42%;
-      box-shadow:0 5px 14px #0003;font-size:12px;font-weight:800;line-height:1.27;
-      color:#18231c;text-align:center;
-    }
-    .bubble:before{
-      content:"";position:absolute;left:35px;bottom:-16px;width:18px;height:18px;
-      background:#fff;border:2px solid #17402b;border-radius:50%;transform:none;
-    }
-    .bubble:after{
-      content:"";position:absolute;left:25px;bottom:-28px;width:8px;height:8px;
-      background:#fff;border:2px solid #17402b;border-radius:50%;
-    }
-    @media(max-width:390px){
-      .bubble{left:14px;bottom:169px;width:min(164px,calc(100vw - 28px));font-size:11px;padding:13px 14px 12px}
-    }
   </style>
   <script>
     try {
@@ -54,7 +37,7 @@
   <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations board">
     <span class="syncIcon">↻</span><span>REFRESH</span>
   </button>
-  <img class="logo" src="/assets/arborwise-logo.png?board=31" alt="Arborwise, Nurture Your Nature">
+  <img class="logo" src="/assets/arborwise-logo.png?board=32" alt="Arborwise, Nurture Your Nature">
   <div id="dateLine" class="dateLine"></div>
   <button id="statusButton" class="status" type="button">LOADING CURRENT OPERATIONS</button>
 </header>
@@ -64,12 +47,12 @@
   <div class="empty">Loading jobs, estimates, people, equipment, notes, and schedule...</div>
 </main>
 <button id="addButton" class="add" type="button" aria-label="Add item">+</button>
-<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=31" alt="Annie"></button>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=32" alt="Annie"></button>
 <div id="annieBubble" class="bubble" hidden></div>
 <nav id="tabs" aria-label="Arborwise sections"></nav>
 <div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
 <div id="toast" class="toast" hidden></div>
-<script src="/board-live.js?board=31" defer></script>
-<script src="/board-workflow-26.js?board=31" defer></script>
+<script src="/board-live.js?board=32" defer></script>
+<script src="/board-workflow-26.js?board=32" defer></script>
 </body>
 </html>
