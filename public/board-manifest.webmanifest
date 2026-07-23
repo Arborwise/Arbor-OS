@@ -1,0 +1,35 @@
+{
+  "id": "/arborwise-os-app",
+  "name": "Arborwise OS",
+  "short_name": "Arborwise",
+  "description": "Arborwise Tree Care daily operations, jobs, estimates, crews, management groups, and equipment.",
+  "start_url": "/board-now.html?source=home",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#F6F5F0",
+  "theme_color": "#17402B",
+  "prefer_related_applications": false,
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/annie-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/annie-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/annie-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
