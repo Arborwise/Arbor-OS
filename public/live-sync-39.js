@@ -1,0 +1,74 @@
+'use strict';
+(() => {
+  const VERSION='39';
+  const STORAGE_KEY='arborwise-live-board-v24';
+  const AUTO_SYNC_KEY='arborwise-live-sync-last';
+  const FINGERPRINT_KEY='arborwise-live-sync-fingerprint';
+  const HOUR=60*60*1000;
+  const $=id=>document.getElementById(id);
+  const refresh=$('syncButton'),status=$('statusButton'),veil=$('veil'),sheet=$('sheet'),toastEl=$('toast');
+  if(!refresh||!status||!veil||!sheet)return;
+  let live=false,lastSync=null,writingStatus=false;
+  const bridgeStyle=document.createElement('style');bridgeStyle.textContent='.connection{border:1px solid #ddd9cc;border-radius:14px;padding:13px;margin:10px 0}.connection h3{margin:0 0 6px;color:#17402b}.connection .good{color:#176b38;font-weight:900}.connection .warn{color:#9b4d00;font-weight:900}';document.head.appendChild(bridgeStyle);
+
+  function safeParse(value,fallback){try{return JSON.parse(value);}catch{return fallback;}}
+  function toast(message){if(!toastEl)return;toastEl.textContent=message;toastEl.hidden=false;clearTimeout(toast._liveTimer);toast._liveTimer=setTimeout(()=>toastEl.hidden=true,3400);}
+  function closeSheet(){veil.hidden=true;sheet.innerHTML='';}
+  function esc(value=''){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+  async function api(path,options={}){const response=await fetch(path,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let data={};try{data=await response.json();}catch{}if(!response.ok){const error=new Error(data.error||`Request failed ${response.status}`);error.status=response.status;throw error;}return data;}
+  function setStatus(text){if(status.textContent===text)return;writingStatus=true;status.textContent=text;writingStatus=false;}
+  function liveLabel(){return live?`LIVE SHARED DATA${lastSync?` • ${new Date(lastSync).toLocaleString()}`:''}`:'OFFLINE SNAPSHOT • TAP REFRESH';}
+  function enforceStatus(){if(!writingStatus)setStatus(liveLabel());}
+  new MutationObserver(enforceStatus).observe(status,{childList:true,subtree:true,characterData:true});
+
+  function operationalType(item){const raw=String(item.status||'');if(item.type==='job'||/approved|accepted|scheduled|converted|invoiced|overdue|paid|complete/i.test(raw))return 'job';return 'est';}
+  function closed(item){return Boolean(item.closed)||/rejected|declined|converted|closed|paid|completed|complete|done/i.test(String(item.status||''));}
+  function mapState(data){
+    const current=safeParse(localStorage.getItem(STORAGE_KEY),{})||{};
+    const records=(data.items||[]).map(item=>({
+      id:String(item.id||''),type:operationalType(item),name:item.name||'',address:item.addr||'',phone:item.phone||'',email:item.email||'',service:item.service||item.desc||'',
+      amount:Number(String(item.money||'').replace(/[$,]/g,''))||0,category:item.category||'RESIDENTIAL',who:item.who||'Greg',status:item.status||'Open',
+      workDate:item.date||'',workTime:item.time||'',followUp:item.fuDate||'',notes:item.notes||item.desc||'',closed:closed(item),sentDate:item.sentDate||'',secondFollowUp:item.secondFollowUp||''
+    })).filter(item=>item.id);
+    const hours=(data.hours||[]).map(item=>({date:String(item.work_date||'').slice(0,10),employee:item.employee||'',job:item.job_ref||'',start:String(item.start_time||'').slice(0,5),end:String(item.end_time||'').slice(0,5),breakMinutes:Number(item.break_minutes||0),hours:Number(item.hours_worked||0),notes:item.notes||'',status:item.status||'Submitted'}));
+    const mileage=(data.mileage||[]).map(item=>({date:String(item.trip_date||'').slice(0,10),from:item.origin||'',to:item.destination||'',miles:Number(item.miles||0),why:item.purpose||''}));
+    const notes=(data.notes||[]).map(item=>({body:item.body||'',author:item.author||'',time:item.created_at?new Date(item.created_at).toLocaleString():''}));
+    const next={...current,records:records.length?records:(current.records||[]),hours,mileage,notes,live:true,lastSync:data.lastSync?.finished_at||data.lastSync?.started_at||null};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
+    lastSync=next.lastSync;live=true;
+    return JSON.stringify({records:records.map(item=>[item.id,item.status,item.workDate,item.workTime,item.closed]),hours,mileage,notes,lastSync:next.lastSync});
+  }
+  function reloadFor(fingerprint){const prior=sessionStorage.getItem(FINGERPRINT_KEY);if(prior!==fingerprint){sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);location.reload();return true;}return false;}
+  async function loadShared(showError=false,reload=true){
+    try{
+      const data=await api('/api/data');
+      if(data.localMode){live=false;setStatus('DATABASE NOT CONNECTED • OFFLINE SNAPSHOT');if(showError)toast('Shared database is not configured');return false;}
+      const fingerprint=mapState(data);if(reload&&reloadFor(fingerprint))return true;setStatus(liveLabel());return true;
+    }catch(error){live=false;setStatus(error.status===401?'SHARED DATA LOCKED • TAP REFRESH TO LOGIN':'OFFLINE SNAPSHOT • TAP REFRESH');if(showError&&error.status!==401)toast(error.message);return false;}
+  }
+  function field(id,label,type='text'){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}"></div>`;}
+  function login(){sheet.innerHTML=`<h2>Open shared Arborwise data</h2><p>Enter the shared Arborwise OS PIN.</p>${field('livePin','Shared PIN','password')}<div class="buttons"><button class="secondary" id="liveCancel">CANCEL</button><button class="primary" id="liveLogin">OPEN</button></div>`;veil.hidden=false;$('liveCancel').onclick=closeSheet;$('liveLogin').onclick=async()=>{try{await api('/api/login',{method:'POST',body:JSON.stringify({pin:$('livePin').value})});closeSheet();await sync(false);}catch(error){toast(error.message);}};}
+  function connections(info){const qb=info.quickbooks||{},google=info.google||{};sheet.innerHTML=`<h2>Shared data connections</h2><div class="connection"><h3>QuickBooks</h3><div class="${qb.authorized?'good':'warn'}">${qb.authorized?'CONNECTED':qb.configured?'RECONNECT REQUIRED':'APP SETUP REQUIRED'}</div><p>${qb.authorized?'Estimates, invoices and payment status can synchronize.':'Authorize the Arborwise app directly; the ChatGPT connection is separate.'}</p>${qb.configured?'<button class="wideButton primary" id="liveQB">CONNECT / RECONNECT QUICKBOOKS</button>':''}</div><div class="connection"><h3>Google</h3><div class="${google.authorized?'good':'warn'}">${google.authorized?'CONNECTED':google.configured?'RECONNECT REQUIRED':'APP SETUP REQUIRED'}</div><p>${google.authorized?'Sheets, Gmail and Calendar can synchronize.':'Authorize Google for the shared schedule.'}</p>${google.configured?'<button class="wideButton primary" id="liveGoogle">CONNECT / RECONNECT GOOGLE</button>':''}</div><div class="buttons"><button class="secondary" id="liveClose">CLOSE</button>${qb.authorized||google.authorized?'<button class="primary" id="liveSync">SYNC NOW</button>':''}</div>`;veil.hidden=false;$('liveClose').onclick=closeSheet;if($('liveQB'))$('liveQB').onclick=()=>location.assign('/api/oauth/quickbooks/start');if($('liveGoogle'))$('liveGoogle').onclick=()=>location.assign('/api/oauth/google/start');if($('liveSync'))$('liveSync').onclick=()=>{closeSheet();sync(false);};}
+  async function connectionInfo(){return api('/api/connections');}
+  async function sync(silent=false){refresh.disabled=true;refresh.classList.add('spinning');try{let info;try{info=await connectionInfo();}catch(error){if(error.status===401){if(!silent)login();return;}throw error;}if(!info.quickbooks?.authorized&&!info.google?.authorized){if(!silent)connections(info);return;}const result=await api('/api/sync',{method:'POST'});localStorage.setItem(AUTO_SYNC_KEY,String(Date.now()));const data=await api('/api/data');const fingerprint=mapState(data);sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);if(!silent){const qb=result.summary?.quickbooks||{},google=result.summary?.google||{};toast(`Synced • ${qb.estimates||0} estimates • ${qb.invoices||0} invoices • ${google.calendarRecords||0} schedule records`);}location.reload();}catch(error){if(!silent)toast(error.message);}finally{refresh.disabled=false;refresh.classList.remove('spinning');}}
+  async function autoSync(){const last=Number(localStorage.getItem(AUTO_SYNC_KEY)||0);if(!navigator.onLine||Date.now()-last<HOUR)return;await sync(true);}
+
+  function value(id){return String($(id)?.value||'').trim();}
+  function recordPayload(closedValue){const id=value('r-id')||`${value('r-type')==='job'?'WO':'EST'}-${Date.now()}`;return {id,type:value('r-type')||'est',name:value('r-name'),addr:value('r-address'),phone:value('r-phone'),email:value('r-email'),service:value('r-service'),money:Number(value('r-amount'))||0,category:value('r-category')||'RESIDENTIAL',who:value('r-who'),status:value('r-status'),date:value('r-work')||null,fuDate:value('r-follow')||null,time:value('r-time'),notes:value('r-notes'),closed:Boolean(closedValue),sharedVersion:39};}
+  async function saveRecord(payload){try{await api('/api/records',{method:'POST',body:JSON.stringify(payload)});toast('Saved to shared Arborwise data');}catch(error){toast(`Saved on this device; shared save failed: ${error.message}`);}}
+  document.addEventListener('click',event=>{
+    const button=event.target.closest?.('button');if(!button)return;
+    if(button.id==='saveRecord'){const payload=recordPayload(false);setTimeout(()=>saveRecord(payload),40);}
+    else if(button.id==='toggleComplete'){const completing=/MARK COMPLETE/i.test(button.textContent);const payload=recordPayload(completing);payload.status=completing?'Complete':'Reopened — Needs Attention';setTimeout(()=>saveRecord(payload),40);}
+    else if(button.id==='delete'){const id=value('r-id');if(id)setTimeout(async()=>{try{await api('/api/records',{method:'DELETE',body:JSON.stringify({id})});toast('Removed from shared Arborwise data');}catch(error){toast(`Shared delete failed: ${error.message}`);}},40);}
+    else if(button.id==='saveHours'){const start=value('h-start'),end=value('h-end');const [sh,sm]=start.split(':').map(Number),[eh,em]=end.split(':').map(Number);let minutes=(eh*60+em)-(sh*60+sm);if(minutes<0)minutes+=1440;const breakMinutes=Number(value('h-break'))||0;minutes-=breakMinutes;const payload={action:'hours',date:value('h-date'),employee:value('h-employee'),job:value('h-job'),start,end,breakMinutes,hours:Math.max(0,minutes/60),notes:value('h-notes'),status:'Submitted'};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared hours save failed: ${error.message}`)),40);}
+    else if(button.id==='saveMileage'){const payload={action:'mileage',date:value('m-date'),from:value('m-from'),to:value('m-to'),miles:Number(value('m-miles'))||0,why:value('m-why')};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared mileage save failed: ${error.message}`)),40);}
+    else if(button.id==='saveNote'){const payload={action:'note',body:value('n-body'),author:value('n-author'),lane:'general'};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared note save failed: ${error.message}`)),40);}
+  },true);
+
+  refresh.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();sync(false);},true);
+  status.addEventListener('click',async event=>{event.preventDefault();event.stopImmediatePropagation();try{connections(await connectionInfo());}catch(error){if(error.status===401)login();else toast(error.message);}},true);
+  const connected=new URLSearchParams(location.search).get('connected');if(connected){history.replaceState({},'',location.pathname);setTimeout(()=>{toast(`${connected} connected`);sync(false);},400);}
+  loadShared(false,true).then(()=>setTimeout(enforceStatus,50));
+  setInterval(autoSync,60*1000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')autoSync();});window.addEventListener('online',autoSync);
+})();
