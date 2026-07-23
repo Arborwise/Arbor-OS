@@ -1,64 +1,65 @@
-/* Compact comic-style Annie speech cloud. This layer only changes the bubble. */
+/* Compact comic-strip speech bubble anchored above Annie. */
 #annieBubble.bubble{
   position:fixed;
   z-index:26;
-  left:12px;
-  bottom:176px;
+  left:13px;
+  bottom:174px;
   width:max-content;
-  min-width:150px;
-  max-width:min(236px,calc(100vw - 28px));
-  max-height:none;
-  overflow:visible;
-  padding:14px 18px 15px;
+  min-width:126px;
+  max-width:min(194px,calc(100vw - 26px));
+  max-height:98px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  padding:12px 15px 13px;
   background:#fff;
   color:#18231c;
   border:2px solid #17402b;
-  border-radius:47% 53% 45% 55% / 54% 46% 56% 44%;
-  box-shadow:0 5px 14px rgba(0,0,0,.2);
-  font-size:13px;
+  border-radius:46% 54% 48% 52% / 54% 48% 52% 46%;
+  box-shadow:0 5px 13px rgba(0,0,0,.20);
+  font-size:12.5px;
   font-weight:800;
   line-height:1.28;
   text-align:center;
-  pointer-events:none;
   white-space:normal;
-  display:block;
-  -webkit-line-clamp:unset;
-  -webkit-box-orient:initial;
+  pointer-events:auto;
 }
 
-/* Green outer edge of the comic-strip pointer aimed at Annie. */
+/* Comic-strip tail pointing down toward Annie. */
 #annieBubble.bubble::before{
   content:"";
   position:absolute;
-  left:38px;
-  bottom:-22px;
-  width:31px;
-  height:24px;
+  left:35px;
+  bottom:-18px;
+  width:27px;
+  height:21px;
   background:#17402b;
-  clip-path:polygon(0 0,100% 0,18% 100%);
-  transform:rotate(4deg);
+  clip-path:polygon(0 0,100% 0,17% 100%);
+  transform:rotate(5deg);
 }
 
-/* White center joins the pointer cleanly to the white bubble. */
 #annieBubble.bubble::after{
   content:"";
   position:absolute;
-  left:41px;
-  bottom:-17px;
-  width:25px;
-  height:20px;
+  left:38px;
+  bottom:-14px;
+  width:21px;
+  height:17px;
   background:#fff;
-  clip-path:polygon(0 0,100% 0,18% 100%);
-  transform:rotate(4deg);
+  clip-path:polygon(0 0,100% 0,17% 100%);
+  transform:rotate(5deg);
 }
+
+#annieBubble.bubble::-webkit-scrollbar{width:4px}
+#annieBubble.bubble::-webkit-scrollbar-thumb{background:#17402b55;border-radius:999px}
 
 @media(max-width:390px){
   #annieBubble.bubble{
     left:10px;
-    bottom:173px;
-    min-width:142px;
-    max-width:min(220px,calc(100vw - 24px));
-    padding:13px 16px 14px;
-    font-size:12.5px;
+    bottom:171px;
+    min-width:120px;
+    max-width:min(184px,calc(100vw - 22px));
+    max-height:90px;
+    padding:11px 13px 12px;
+    font-size:12px;
   }
 }
