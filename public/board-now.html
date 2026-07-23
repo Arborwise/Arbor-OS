@@ -12,8 +12,10 @@
   <title>Arborwise OS Board</title>
   <script>
     (() => {
-      const openedFromHomeCard = new URLSearchParams(location.search).get('source') === 'home';
-      if (openedFromHomeCard) {
+      const params = new URLSearchParams(location.search);
+      const openedFromHomeCard = params.get('source') === 'home';
+      const openedStandalone = window.matchMedia?.('(display-mode: standalone)').matches === true || window.navigator.standalone === true;
+      if (openedFromHomeCard || openedStandalone) {
         location.replace('https://docs.google.com/spreadsheets/d/17XTUBhP7zC01qc6aNavMYCoFBEsnE9wUvmMmd-5lt1w/edit#gid=8173387');
       }
     })();
