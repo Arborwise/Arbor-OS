@@ -38,6 +38,8 @@ jobs:
               && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
               && grep -Fq '/live-sync-45.js?board=51' /tmp/board.html \
               && grep -Fq '/plan-b-refresh-46.js?board=51' /tmp/board.html \
+              && grep -Fq '/weather-chip-48.js?board=51' /tmp/board.html \
+              && grep -Fq 'id="weatherChip"' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
               live=true
               break
@@ -62,6 +64,7 @@ jobs:
 
           curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-current-51.js?$BUST" -o /tmp/current.js
           curl -sS -L -H 'Cache-Control: no-cache' "$BASE/daily-brief-51.js?$BUST" -o /tmp/daily.js
+          curl -sS -L -H 'Cache-Control: no-cache' "$BASE/weather-chip-48.js?$BUST" -o /tmp/weather.js
           curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?v=51&$BUST" -o /tmp/manifest.json
 
           grep -Fq "address:'3116 Lucia Way, Princeton, TX'" /tmp/current.js
@@ -85,9 +88,14 @@ jobs:
             exit 1
           fi
 
+          grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
+          grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
+          grep -Fq "cache:'no-store'" /tmp/weather.js
+          grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
+
           grep -Fq 'board=51' /tmp/manifest.json
           grep -Fq '#1D4B34' /tmp/manifest.json
 
           health=$(curl -sS -L --connect-timeout 10 --max-time 30 "$BASE/api/health")
           grep -q '"ok":true' <<<"$health"
-          echo 'Board 51 passed completion attribution, cost separation, rolling-date, brand, and health checks.'
+          echo 'Board 51 passed completion attribution, cost separation, Van Alstyne weather, rolling-date, brand, and health checks.'
