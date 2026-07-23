@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#17402b">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <title>Arborwise OS Board</title>
+  <link rel="stylesheet" href="/app.css?board=23">
+  <style>
+    .boardWordmark{font-size:28px;font-weight:900;letter-spacing:.08em;padding-top:8px}
+    .boardSub{font-size:12px;font-weight:800;letter-spacing:.12em;color:#dbe5de;margin:4px 0 8px}
+  </style>
+  <script>
+    // This page deliberately bypasses the installed-app splash and service-worker cache.
+    try {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register = function(){ return Promise.resolve(null); };
+        navigator.serviceWorker.getRegistrations().then(function(registrations){
+          return Promise.all(registrations.map(function(registration){ return registration.unregister(); }));
+        }).catch(function(){});
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(keys){
+          return Promise.all(keys.map(function(key){ return caches.delete(key); }));
+        }).catch(function(){});
+      }
+    } catch (error) {}
+  </script>
+</head>
+<body>
+<header>
+  <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations board">
+    <span class="syncIcon">↻</span><span>REFRESH</span>
+  </button>
+  <div class="boardWordmark">ARBORWISE OS</div>
+  <div class="boardSub">OPERATIONS BOARD</div>
+  <div id="dateLine" class="dateLine"></div>
+  <button id="statusButton" class="status" type="button">OPENING CURRENT BOARD</button>
+</header>
+<section id="filters" class="filters" aria-label="Employee and crew filters"></section>
+<main id="main">
+  <div class="title"><span>Operations board</span></div>
+  <div class="empty">Opening jobs, estimates, people, equipment, and schedule...</div>
+</main>
+<button id="addButton" class="add" type="button" aria-label="Add item">+</button>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=23" alt="Annie"></button>
+<div id="annieBubble" class="bubble" hidden></div>
+<nav id="tabs" aria-label="Arborwise sections"></nav>
+<div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
+<div id="toast" class="toast" hidden></div>
+<script src="/app.js?board=23" defer></script>
+<script src="/operational-overrides.js?board=23" defer></script>
+<script src="/contact-actions.js?board=23" defer></script>
+<script src="/runtime-fixes.js?board=23" defer></script>
+</body>
+</html>
