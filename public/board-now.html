@@ -6,13 +6,12 @@
   <meta name="theme-color" content="#17402b">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Arborwise OS Board</title>
-  <link rel="stylesheet" href="/app.css?board=23">
+  <link rel="stylesheet" href="/app.css?board=24">
   <style>
-    .boardWordmark{font-size:28px;font-weight:900;letter-spacing:.08em;padding-top:8px}
-    .boardSub{font-size:12px;font-weight:800;letter-spacing:.12em;color:#dbe5de;margin:4px 0 8px}
+    header{min-height:178px;padding-top:10px}
+    header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 2px}
   </style>
   <script>
-    // This page deliberately bypasses the installed-app splash and service-worker cache.
     try {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register = function(){ return Promise.resolve(null); };
@@ -20,11 +19,7 @@
           return Promise.all(registrations.map(function(registration){ return registration.unregister(); }));
         }).catch(function(){});
       }
-      if ('caches' in window) {
-        caches.keys().then(function(keys){
-          return Promise.all(keys.map(function(key){ return caches.delete(key); }));
-        }).catch(function(){});
-      }
+      if ('caches' in window) caches.keys().then(function(keys){ return Promise.all(keys.map(function(key){ return caches.delete(key); })); }).catch(function(){});
     } catch (error) {}
   </script>
 </head>
@@ -33,25 +28,21 @@
   <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations board">
     <span class="syncIcon">↻</span><span>REFRESH</span>
   </button>
-  <div class="boardWordmark">ARBORWISE OS</div>
-  <div class="boardSub">OPERATIONS BOARD</div>
+  <img class="logo" src="/assets/arborwise-logo.png?board=24" alt="Arborwise — Nurture Your Nature">
   <div id="dateLine" class="dateLine"></div>
-  <button id="statusButton" class="status" type="button">OPENING CURRENT BOARD</button>
+  <button id="statusButton" class="status" type="button">LOADING CURRENT OPERATIONS</button>
 </header>
 <section id="filters" class="filters" aria-label="Employee and crew filters"></section>
 <main id="main">
-  <div class="title"><span>Operations board</span></div>
-  <div class="empty">Opening jobs, estimates, people, equipment, and schedule...</div>
+  <div class="title"><span>Opening current operations</span></div>
+  <div class="empty">Loading jobs, estimates, people, equipment, and schedule...</div>
 </main>
 <button id="addButton" class="add" type="button" aria-label="Add item">+</button>
-<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=23" alt="Annie"></button>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=24" alt="Annie"></button>
 <div id="annieBubble" class="bubble" hidden></div>
 <nav id="tabs" aria-label="Arborwise sections"></nav>
 <div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
 <div id="toast" class="toast" hidden></div>
-<script src="/app.js?board=23" defer></script>
-<script src="/operational-overrides.js?board=23" defer></script>
-<script src="/contact-actions.js?board=23" defer></script>
-<script src="/runtime-fixes.js?board=23" defer></script>
+<script src="/board-live.js?board=24" defer></script>
 </body>
 </html>
