@@ -1,0 +1,70 @@
+#addButton.micEstimateButton{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+#addButton.micEstimateButton svg{
+  width:31px;
+  height:31px;
+  fill:currentColor;
+  pointer-events:none;
+}
+#addButton.micEstimateButton.listening{
+  animation:estimateMicPulse 1s ease-in-out infinite;
+}
+@keyframes estimateMicPulse{
+  0%,100%{transform:scale(1);box-shadow:0 4px 10px #0005}
+  50%{transform:scale(1.08);box-shadow:0 0 0 9px rgba(228,89,12,.18),0 4px 10px #0005}
+}
+.voiceIntro{
+  margin:-3px 0 12px;
+  color:#4f5851;
+  font-size:14px;
+  line-height:1.4;
+}
+.voiceStatus{
+  margin-bottom:9px;
+  border-radius:10px;
+  background:#fff8e4;
+  color:#714900;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:800;
+}
+.voiceTranscript{
+  width:100%;
+  min-height:190px;
+  resize:vertical;
+  border:1.5px solid #deddd4;
+  border-radius:12px;
+  background:#fff;
+  padding:12px;
+  font:inherit;
+  line-height:1.45;
+}
+.voiceButtons{
+  flex-wrap:wrap;
+}
+.voiceButtons button{
+  min-width:120px;
+}
+.voiceButtons button.listening{
+  background:#e4590c;
+  color:#fff;
+}
+.voiceReviewNotice{
+  margin:0 0 13px;
+  border-left:5px solid #f59f0a;
+  border-radius:9px;
+  background:#fff8e4;
+  color:#4e3a08;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.4;
+}
+@media(max-width:390px){
+  .voiceTranscript{min-height:150px}
+  .voiceButtons button{min-width:0;flex:1 1 42%}
+}
