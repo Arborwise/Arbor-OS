@@ -1,0 +1,117 @@
+name: Recover Vercel production after rate limit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vercel-production-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.repository == 'Arborwise/Arbor-OS'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Check whether board 48 is already live
+        id: live
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os.vercel.app'
+          BUST="recovery-$(date +%s)"
+          code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=48&$BUST" || true)
+          if [[ "$code" == '200' ]] \
+            && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
+            && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
+            && grep -Fq '/arborwise-personality-48.js?board=48' /tmp/board.html; then
+            echo 'live=true' >> "$GITHUB_OUTPUT"
+            echo 'Board 48 is already live. No deployment retry needed.'
+          else
+            echo 'live=false' >> "$GITHUB_OUTPUT"
+            echo "Board 48 is not live yet; production returned $code."
+          fi
+
+      - name: Respect the rate-limit cooldown
+        id: cooldown
+        if: steps.live.outputs.live != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          now=$(date +%s)
+          latest_commit=$(git log -1 --format=%ct)
+          marker='public/deploy-recovery-marker.txt'
+          if [[ -f "$marker" ]]; then
+            last_attempt=$(sed -n 's/^epoch=//p' "$marker" | head -n 1)
+            last_attempt=${last_attempt:-0}
+            minimum_wait=21600
+            reason='six-hour retry spacing'
+          else
+            last_attempt=$latest_commit
+            minimum_wait=3900
+            reason='initial Vercel one-hour reset window'
+          fi
+          age=$((now-last_attempt))
+          if (( age >= minimum_wait )); then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+            echo "Cooldown complete: $reason."
+          else
+            remaining=$((minimum_wait-age))
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+            echo "Cooldown still active for about $remaining seconds; leaving production alone."
+          fi
+
+      - name: Trigger one controlled Vercel retry
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          epoch=$(date +%s)
+          stamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          printf 'epoch=%s\nutc=%s\nreason=controlled retry after Vercel build-rate limit\n' "$epoch" "$stamp" > public/deploy-recovery-marker.txt
+          git config user.name 'Arborwise deployment recovery'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/deploy-recovery-marker.txt
+          git commit -m 'Retry production after Vercel rate-limit cooldown'
+          git push origin HEAD:main
+
+      - name: Wait for board 48 and verify the real production result
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os.vercel.app'
+          for attempt in $(seq 1 40); do
+            bust="verify-$(date +%s)-$attempt"
+            code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=48&$bust" || true)
+            if [[ "$code" == '200' ]] \
+              && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
+              && grep -Fq '/annie-bubble-48.js?board=48' /tmp/board.html \
+              && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
+              && grep -Fq '/arborwise-personality-48.css?board=48' /tmp/board.html; then
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/board-current-47.js?$bust" -o /tmp/current.js
+              grep -Fq "name:'Dana & Tom Pierson'" /tmp/current.js
+              grep -Fq "who:'Scheduling: Brandon',status:'Accepted',workDate:'',workTime:''" /tmp/current.js
+              grep -Fq 'no date, arrival window, or field crew assigned' /tmp/current.js
+              if grep -Fq 'Dana and Tom are scheduled' /tmp/current.js; then
+                echo 'Production still contains the stale Pierson schedule.'
+                exit 1
+              fi
+              echo 'Board 48 is live and passed the operational truth checks.'
+              exit 0
+            fi
+            echo "Waiting for controlled deployment; attempt $attempt returned $code."
+            sleep 15
+          done
+          echo 'Controlled deployment did not become live during the verification window.'
+          exit 1
