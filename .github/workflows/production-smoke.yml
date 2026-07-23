@@ -23,6 +23,8 @@ jobs:
           node --check public/arborwise-personality-48.js
       - name: Wait for current board deployment and test production
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           BASE="https://arborwise-os.vercel.app"
@@ -54,18 +56,20 @@ jobs:
           }
 
           wait_for_current_board() {
-            local path="/board-now.html?board=48&smoke=$BUST"
+            local path="/board-now.html?board=49&smoke=$BUST"
             local code="000"
             for attempt in $(seq 1 40); do
               code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
               if [[ "$code" == "200" ]] \
-                && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
-                && grep -Fq '/live-sync-45.js?board=48' /tmp/board.html \
-                && grep -Fq '/plan-b-refresh-46.js?board=48' /tmp/board.html \
-                && grep -Fq '/annie-bubble-48.js?board=48' /tmp/board.html \
-                && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
-                && grep -Fq '/arborwise-personality-48.js?board=48' /tmp/board.html \
-                && grep -Fq '/arborwise-personality-48.css?board=48' /tmp/board.html \
+                && grep -Fq '/board-current-47.js?board=49' /tmp/board.html \
+                && grep -Fq '/live-sync-45.js?board=49' /tmp/board.html \
+                && grep -Fq '/plan-b-refresh-46.js?board=49' /tmp/board.html \
+                && grep -Fq '/annie-bubble-48.js?board=49' /tmp/board.html \
+                && grep -Fq '/weather-chip-48.js?board=49' /tmp/board.html \
+                && grep -Fq '/arborwise-personality-48.js?board=49' /tmp/board.html \
+                && grep -Fq '/arborwise-personality-49.css?board=49' /tmp/board.html \
+                && grep -Fq 'class="brandTagline"' /tmp/board.html \
+                && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
                 && grep -Fq 'id="weatherChip"' /tmp/board.html \
                 && grep -Fq 'id="operationsVoice"' /tmp/board.html \
                 && grep -Fq 'Arborwise OS Board' /tmp/board.html; then
@@ -80,7 +84,17 @@ jobs:
             return 1
           }
 
-          wait_for_current_board
+          if ! wait_for_current_board; then
+            status_json=$(curl -sS --connect-timeout 10 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" || true)
+            if grep -Fq 'upgradeToPro=build-rate-limit' <<<"$status_json"; then
+              echo '::notice title=Vercel quota cooldown::Code validation passed. Production deployment is deferred to the controlled recovery workflow because Vercel reported its build-rate limit.'
+              exit 0
+            fi
+            exit 1
+          fi
 
           wait_for_code "/board-current-47.js?smoke=$BUST" GET "200" "" /tmp/current.js
           grep -Fq "Today's Route" /tmp/current.js
@@ -146,17 +160,20 @@ jobs:
           grep -Fq 'classifyCards' /tmp/personality.js
           grep -Fq 'ARBORWISE_PERSONALITY_VERSION' /tmp/personality.js
 
-          wait_for_code "/arborwise-personality-48.css?smoke=$BUST" GET "200" "" /tmp/personality.css
+          wait_for_code "/arborwise-personality-49.css?smoke=$BUST" GET "200" "" /tmp/personality.css
           grep -Fq -- '--bark:' /tmp/personality.css
           grep -Fq '.weatherChip' /tmp/personality.css
           grep -Fq '.operationsVoice' /tmp/personality.css
+          grep -Fq '.brandTagline' /tmp/personality.css
+          grep -Fq 'color:#f7d992' /tmp/personality.css
+          grep -Fq 'text-shadow:' /tmp/personality.css
           grep -Fq '.card.isAttention' /tmp/personality.css
           grep -Fq '.annie.hasAttention' /tmp/personality.css
 
           wait_for_code "/board-live.js?smoke=$BUST" GET "200"
-          wait_for_code "/app.css?board=48&smoke=$BUST" GET "200"
-          wait_for_code "/board-manifest.webmanifest?v=48&smoke=$BUST" GET "200" "" /tmp/manifest.json
-          grep -Fq 'board=48' /tmp/manifest.json
+          wait_for_code "/app.css?board=49&smoke=$BUST" GET "200"
+          wait_for_code "/board-manifest.webmanifest?v=49&smoke=$BUST" GET "200" "" /tmp/manifest.json
+          grep -Fq 'board=49' /tmp/manifest.json
           grep -Fq '#1D4B34' /tmp/manifest.json
           wait_for_code "/assets/annie-launcher-v42.svg?smoke=$BUST" GET "200"
           wait_for_code "/assets/arborwise-logo.png?smoke=$BUST" GET "200"
