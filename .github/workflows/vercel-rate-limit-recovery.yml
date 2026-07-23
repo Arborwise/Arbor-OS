@@ -35,6 +35,9 @@ jobs:
             && grep -Fq '/board-current-51.js?board=51' /tmp/board.html \
             && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
             && grep -Fq '/weather-chip-48.js?board=51' /tmp/board.html \
+            && grep -Fq '/arborwise-personality-48.js?board=51' /tmp/board.html \
+            && grep -Fq '/arborwise-personality-49.css?board=51' /tmp/board.html \
+            && grep -Fq 'class="brandTagline"' /tmp/board.html \
             && grep -Fq 'id="weatherChip"' /tmp/board.html \
             && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
             echo 'live=true' >> "$GITHUB_OUTPUT"
@@ -87,7 +90,7 @@ jobs:
           git commit -m 'Retry production after Vercel rate-limit cooldown'
           git push origin HEAD:main
 
-      - name: Wait for board 51 and verify production result
+      - name: Wait for board 51 and verify the real production result
         if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
         shell: bash
         run: |
@@ -99,24 +102,46 @@ jobs:
             if [[ "$code" == '200' ]] \
               && grep -Fq '/board-current-51.js?board=51' /tmp/board.html \
               && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
+              && grep -Fq '/annie-bubble-48.js?board=51' /tmp/board.html \
               && grep -Fq '/weather-chip-48.js?board=51' /tmp/board.html \
+              && grep -Fq '/arborwise-personality-49.css?board=51' /tmp/board.html \
+              && grep -Fq 'class="brandTagline"' /tmp/board.html \
               && grep -Fq 'id="weatherChip"' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
-              curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-current-51.js?$bust" -o /tmp/current.js
-              curl -sS -L -H 'Cache-Control: no-cache' "$BASE/daily-brief-51.js?$bust" -o /tmp/daily.js
-              curl -sS -L -H 'Cache-Control: no-cache' "$BASE/weather-chip-48.js?$bust" -o /tmp/weather.js
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/board-current-51.js?$bust" -o /tmp/current.js
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/arborwise-personality-49.css?$bust" -o /tmp/personality.css
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/daily-brief-51.js?$bust" -o /tmp/daily-brief.js
+              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/weather-chip-48.js?$bust" -o /tmp/weather.js
+              grep -Fq "name:'Dana & Tom Pierson'" /tmp/current.js
+              grep -Fq "who:'Scheduling: Brandon',status:'Accepted',workDate:'',workTime:''" /tmp/current.js
+              grep -Fq 'no date, arrival window, or field crew assigned' /tmp/current.js
               grep -Fq "address:'3116 Lucia Way, Princeton, TX'" /tmp/current.js
               grep -Fq "completionType:'arborwise'" /tmp/current.js
               grep -Fq "address:'3016 Isla Terrace, Princeton, TX'" /tmp/current.js
               grep -Fq "who:'Homeowner',status:'Homeowner Completed'" /tmp/current.js
               grep -Fq "completionType:'homeowner',laborCost:0,otherCost:280.13" /tmp/current.js
-              grep -Fq "label:'HOMEOWNER COMPLETED'" /tmp/daily.js
-              grep -Fq 'Arborwise completed' /tmp/daily.js
-              grep -Fq 'homeowner completed' /tmp/daily.js
+              grep -Fq '.brandTagline' /tmp/personality.css
+              grep -Fq 'color:#f7d992' /tmp/personality.css
+              grep -Fq 'text-shadow:' /tmp/personality.css
+              grep -Fq "label:'COMPLETED'" /tmp/daily-brief.js
+              grep -Fq "label:'HOMEOWNER COMPLETED'" /tmp/daily-brief.js
+              grep -Fq 'rank:90' /tmp/daily-brief.js
+              grep -Fq 'rank:91' /tmp/daily-brief.js
+              grep -Fq '.briefItem.isCompleted' /tmp/daily-brief.js
+              grep -Fq '.briefItem.isHomeownerCompleted' /tmp/daily-brief.js
+              grep -Fq 'TODAY + 7 DAYS' /tmp/daily-brief.js
               grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
               grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
               grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
-              echo 'Board 51 is live and passed attribution, cost-separation, and Van Alstyne weather checks.'
+              if grep -Fq "label:'SCHEDULE'" /tmp/daily-brief.js; then
+                echo 'Production still counts accepted unscheduled work as due today.'
+                exit 1
+              fi
+              if grep -Fq 'Dana and Tom are scheduled' /tmp/current.js; then
+                echo 'Production still contains the stale Pierson schedule.'
+                exit 1
+              fi
+              echo 'Board 51 is live and passed operational, completion-attribution, cost-separation, rolling-date, weather, and brand checks.'
               exit 0
             fi
             echo "Waiting for controlled deployment; attempt $attempt returned $code."
