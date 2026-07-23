@@ -1,10 +1,11 @@
 'use strict';
 (() => {
-  const VERSION='39';
+  const VERSION='40';
   const STORAGE_KEY='arborwise-live-board-v24';
   const AUTO_SYNC_KEY='arborwise-live-sync-last';
   const FINGERPRINT_KEY='arborwise-live-sync-fingerprint';
-  const HOUR=60*60*1000;
+  const BOOT_SYNC_KEY='arborwise-live-boot-sync-v40';
+  const AUTO_SYNC_INTERVAL=5*60*1000;
   const $=id=>document.getElementById(id);
   const refresh=$('syncButton'),status=$('statusButton'),veil=$('veil'),sheet=$('sheet'),toastEl=$('toast');
   if(!refresh||!status||!veil||!sheet)return;
@@ -36,7 +37,7 @@
     const next={...current,records:records.length?records:(current.records||[]),hours,mileage,notes,live:true,lastSync:data.lastSync?.finished_at||data.lastSync?.started_at||null};
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
     lastSync=next.lastSync;live=true;statusMode='live';
-    return JSON.stringify({records:records.map(item=>[item.id,item.status,item.workDate,item.workTime,item.closed]),hours,mileage,notes,lastSync:next.lastSync});
+    return JSON.stringify({records:records.map(item=>[item.id,item.status,item.workDate,item.workTime,item.who,item.notes,item.closed]),hours,mileage,notes,lastSync:next.lastSync});
   }
   function reloadFor(fingerprint){const prior=sessionStorage.getItem(FINGERPRINT_KEY);if(prior!==fingerprint){sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);location.reload();return true;}return false;}
   async function loadShared(showError=false,reload=true){
@@ -47,14 +48,14 @@
     }catch(error){live=false;statusMode=error.status===401?'locked':'offline';setStatus(liveLabel());if(showError&&error.status!==401)toast(error.message);return false;}
   }
   function field(id,label,type='text'){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}"></div>`;}
-  function login(){sheet.innerHTML=`<h2>Open shared Arborwise data</h2><p>Enter the shared Arborwise OS PIN.</p>${field('livePin','Shared PIN','password')}<div class="buttons"><button class="secondary" id="liveCancel">CANCEL</button><button class="primary" id="liveLogin">OPEN</button></div>`;veil.hidden=false;$('liveCancel').onclick=closeSheet;$('liveLogin').onclick=async()=>{try{await api('/api/login',{method:'POST',body:JSON.stringify({pin:$('livePin').value})});closeSheet();await sync(false);}catch(error){toast(error.message);}};}
+  function login(){sheet.innerHTML=`<h2>Open shared Arborwise data</h2><p>Enter the shared Arborwise OS PIN.</p>${field('livePin','Shared PIN','password')}<div class="buttons"><button class="secondary" id="liveCancel">CANCEL</button><button class="primary" id="liveLogin">OPEN</button></div>`;veil.hidden=false;$('liveCancel').onclick=closeSheet;$('liveLogin').onclick=async()=>{try{await api('/api/login',{method:'POST',body:JSON.stringify({pin:$('livePin').value})});closeSheet();sessionStorage.removeItem(BOOT_SYNC_KEY);await sync(false);}catch(error){toast(error.message);}};}
   function connections(info){const qb=info.quickbooks||{},google=info.google||{};sheet.innerHTML=`<h2>Shared data connections</h2><div class="connection"><h3>QuickBooks</h3><div class="${qb.authorized?'good':'warn'}">${qb.authorized?'CONNECTED':qb.configured?'RECONNECT REQUIRED':'APP SETUP REQUIRED'}</div><p>${qb.authorized?'Estimates, invoices and payment status can synchronize.':'Authorize the Arborwise app directly; the ChatGPT connection is separate.'}</p>${qb.configured?'<button class="wideButton primary" id="liveQB">CONNECT / RECONNECT QUICKBOOKS</button>':''}</div><div class="connection"><h3>Google</h3><div class="${google.authorized?'good':'warn'}">${google.authorized?'CONNECTED':google.configured?'RECONNECT REQUIRED':'APP SETUP REQUIRED'}</div><p>${google.authorized?'Sheets, Gmail and Calendar can synchronize.':'Authorize Google for the shared schedule.'}</p>${google.configured?'<button class="wideButton primary" id="liveGoogle">CONNECT / RECONNECT GOOGLE</button>':''}</div><div class="buttons"><button class="secondary" id="liveClose">CLOSE</button>${qb.authorized||google.authorized?'<button class="primary" id="liveSync">SYNC NOW</button>':''}</div>`;veil.hidden=false;$('liveClose').onclick=closeSheet;if($('liveQB'))$('liveQB').onclick=()=>location.assign('/api/oauth/quickbooks/start');if($('liveGoogle'))$('liveGoogle').onclick=()=>location.assign('/api/oauth/google/start');if($('liveSync'))$('liveSync').onclick=()=>{closeSheet();sync(false);};}
   async function connectionInfo(){return api('/api/connections');}
-  async function sync(silent=false){refresh.disabled=true;refresh.classList.add('spinning');try{let info;try{info=await connectionInfo();}catch(error){if(error.status===401){if(!silent)login();return;}throw error;}if(!info.quickbooks?.authorized&&!info.google?.authorized){if(!silent)connections(info);return;}const result=await api('/api/sync',{method:'POST'});localStorage.setItem(AUTO_SYNC_KEY,String(Date.now()));const data=await api('/api/data');const fingerprint=mapState(data);sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);if(!silent){const qb=result.summary?.quickbooks||{},google=result.summary?.google||{};toast(`Synced • ${qb.estimates||0} estimates • ${qb.invoices||0} invoices • ${google.calendarRecords||0} schedule records`);}location.reload();}catch(error){if(!silent)toast(error.message);}finally{refresh.disabled=false;refresh.classList.remove('spinning');}}
-  async function autoSync(){const last=Number(localStorage.getItem(AUTO_SYNC_KEY)||0);if(!navigator.onLine||Date.now()-last<HOUR)return;await sync(true);}
+  async function sync(silent=false){refresh.disabled=true;refresh.classList.add('spinning');try{let info;try{info=await connectionInfo();}catch(error){if(error.status===401){if(!silent)login();return;}throw error;}if(!info.quickbooks?.authorized&&!info.google?.authorized){if(!silent)connections(info);return;}const result=await api('/api/sync',{method:'POST'});localStorage.setItem(AUTO_SYNC_KEY,String(Date.now()));const data=await api('/api/data');const fingerprint=mapState(data);sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);if(!silent){const qb=result.summary?.quickbooks||{},google=result.summary?.google||{};toast(`Synced • ${qb.estimates||0} estimates • ${qb.invoices||0} invoices • ${google.sheetRecords||0} sheet records • ${google.calendarRecords||0} schedule records`);}location.reload();}catch(error){if(!silent)toast(error.message);}finally{refresh.disabled=false;refresh.classList.remove('spinning');}}
+  async function autoSync(){const last=Number(localStorage.getItem(AUTO_SYNC_KEY)||0);if(!navigator.onLine||Date.now()-last<AUTO_SYNC_INTERVAL)return;await sync(true);}
 
   function value(id){return String($(id)?.value||'').trim();}
-  function recordPayload(closedValue){const id=value('r-id')||`${value('r-type')==='job'?'WO':'EST'}-${Date.now()}`;return {id,type:value('r-type')||'est',name:value('r-name'),addr:value('r-address'),phone:value('r-phone'),email:value('r-email'),service:value('r-service'),money:Number(value('r-amount'))||0,category:value('r-category')||'RESIDENTIAL',who:value('r-who'),status:value('r-status'),date:value('r-work')||null,fuDate:value('r-follow')||null,time:value('r-time'),notes:value('r-notes'),closed:Boolean(closedValue),sharedVersion:39};}
+  function recordPayload(closedValue){const id=value('r-id')||`${value('r-type')==='job'?'WO':'EST'}-${Date.now()}`;return {id,type:value('r-type')||'est',name:value('r-name'),addr:value('r-address'),phone:value('r-phone'),email:value('r-email'),service:value('r-service'),money:Number(value('r-amount'))||0,category:value('r-category')||'RESIDENTIAL',who:value('r-who'),status:value('r-status'),date:value('r-work')||null,fuDate:value('r-follow')||null,time:value('r-time'),notes:value('r-notes'),closed:Boolean(closedValue),sharedVersion:40};}
   async function saveRecord(payload){try{await api('/api/records',{method:'POST',body:JSON.stringify(payload)});toast('Saved to shared Arborwise data');}catch(error){toast(`Saved on this device; shared save failed: ${error.message}`);}}
   document.addEventListener('click',event=>{
     const button=event.target.closest?.('button');if(!button)return;
@@ -68,7 +69,15 @@
 
   refresh.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();sync(false);},true);
   status.addEventListener('click',async event=>{event.preventDefault();event.stopImmediatePropagation();try{connections(await connectionInfo());}catch(error){if(error.status===401)login();else toast(error.message);}},true);
-  const connected=new URLSearchParams(location.search).get('connected');if(connected){history.replaceState({},'',location.pathname);setTimeout(()=>{toast(`${connected} connected`);sync(false);},400);}
-  loadShared(false,true).then(()=>setTimeout(enforceStatus,50));
+  const connected=new URLSearchParams(location.search).get('connected');if(connected){history.replaceState({},'',location.pathname);setTimeout(()=>{toast(`${connected} connected`);sessionStorage.removeItem(BOOT_SYNC_KEY);sync(false);},400);}
+  async function boot(){
+    await loadShared(false,true);
+    if(!sessionStorage.getItem(BOOT_SYNC_KEY)){
+      sessionStorage.setItem(BOOT_SYNC_KEY,'1');
+      await sync(true);
+    }
+    setTimeout(enforceStatus,50);
+  }
+  boot();
   setInterval(autoSync,60*1000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')autoSync();});window.addEventListener('online',autoSync);
 })();
