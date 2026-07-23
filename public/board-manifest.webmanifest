@@ -3,7 +3,7 @@
   "name": "Arborwise OS",
   "short_name": "Arborwise",
   "description": "Arborwise Tree Care daily operations, jobs, estimates, crews, management groups, and equipment.",
-  "start_url": "/board-now.html?source=home&board=49",
+  "start_url": "/board-now.html?source=home&board=50",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
