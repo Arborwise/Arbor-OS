@@ -9,6 +9,14 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate current code
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
       - name: Wait for deployment and test public routes
         shell: bash
         run: |
