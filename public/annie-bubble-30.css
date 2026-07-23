@@ -4,8 +4,8 @@
   z-index:26;
   left:8px;
   bottom:165px;
-  width:min(210px,calc(100vw - 16px));
-  aspect-ratio:220 / 116;
+  width:min(220px,calc(100vw - 16px));
+  aspect-ratio:220 / 122;
   min-width:0;
   min-height:0;
   max-width:none;
@@ -48,28 +48,50 @@
   vector-effect:non-scaling-stroke;
 }
 
+/* Keep copy inside the cloud's central safe area, away from every scallop. */
 #annieBubble .annieCloudText{
   position:absolute;
   z-index:1;
-  left:17px;
-  right:17px;
-  top:21px;
-  bottom:25px;
+  left:27px;
+  right:27px;
+  top:25px;
+  bottom:31px;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  padding:0 4px;
+  padding:0;
   background:transparent;
   border:0;
   border-radius:0;
   color:#18231c;
-  font-size:12.5px;
+  font-size:12px;
   font-weight:800;
-  line-height:1.25;
+  line-height:1.18;
+  letter-spacing:-.08px;
   text-align:center;
   white-space:normal;
   text-wrap:balance;
+  overflow-wrap:normal;
+  word-break:normal;
+  hyphens:none;
+}
+
+#annieBubble .annieCloudText.isLong{
+  left:25px;
+  right:25px;
+  font-size:11.2px;
+  line-height:1.16;
+  letter-spacing:-.12px;
+}
+
+#annieBubble .annieCloudText.isExtraLong{
+  left:23px;
+  right:23px;
+  top:24px;
+  bottom:30px;
+  font-size:10.7px;
+  line-height:1.14;
 }
 
 @keyframes annieCloudPop{
@@ -81,14 +103,24 @@
   #annieBubble.bubble{
     left:7px;
     bottom:165px;
-    width:min(198px,calc(100vw - 14px));
+    width:min(208px,calc(100vw - 14px));
   }
   #annieBubble .annieCloudText{
-    left:15px;
-    right:15px;
-    top:20px;
-    bottom:24px;
-    font-size:12px;
+    left:25px;
+    right:25px;
+    top:24px;
+    bottom:30px;
+    font-size:11.6px;
+  }
+  #annieBubble .annieCloudText.isLong{
+    left:23px;
+    right:23px;
+    font-size:10.8px;
+  }
+  #annieBubble .annieCloudText.isExtraLong{
+    left:22px;
+    right:22px;
+    font-size:10.3px;
   }
 }
 

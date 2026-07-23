@@ -17,7 +17,7 @@
 
   bubble.setAttribute('role', 'status');
   bubble.setAttribute('aria-live', 'polite');
-  bubble.dataset.cloudStyle = 'scalloped-37';
+  bubble.dataset.cloudStyle = 'scalloped-38';
   annie.setAttribute('aria-controls', 'annieBubble');
   annie.setAttribute('aria-expanded', 'false');
 
@@ -44,6 +44,8 @@
 
     const cloudText = document.createElement('span');
     cloudText.className = 'annieCloudText';
+    if (message.length > 64) cloudText.classList.add('isExtraLong');
+    else if (message.length > 52) cloudText.classList.add('isLong');
     cloudText.textContent = message;
 
     bubble.append(art, cloudText);
