@@ -8,7 +8,7 @@
   const $=id=>document.getElementById(id);
   const refresh=$('syncButton'),status=$('statusButton'),veil=$('veil'),sheet=$('sheet'),toastEl=$('toast');
   if(!refresh||!status||!veil||!sheet)return;
-  let live=false,lastSync=null,writingStatus=false;
+  let live=false,lastSync=null,writingStatus=false,statusMode='offline';
   const bridgeStyle=document.createElement('style');bridgeStyle.textContent='.connection{border:1px solid #ddd9cc;border-radius:14px;padding:13px;margin:10px 0}.connection h3{margin:0 0 6px;color:#17402b}.connection .good{color:#176b38;font-weight:900}.connection .warn{color:#9b4d00;font-weight:900}';document.head.appendChild(bridgeStyle);
 
   function safeParse(value,fallback){try{return JSON.parse(value);}catch{return fallback;}}
@@ -17,7 +17,7 @@
   function esc(value=''){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
   async function api(path,options={}){const response=await fetch(path,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let data={};try{data=await response.json();}catch{}if(!response.ok){const error=new Error(data.error||`Request failed ${response.status}`);error.status=response.status;throw error;}return data;}
   function setStatus(text){if(status.textContent===text)return;writingStatus=true;status.textContent=text;writingStatus=false;}
-  function liveLabel(){return live?`LIVE SHARED DATA${lastSync?` • ${new Date(lastSync).toLocaleString()}`:''}`:'OFFLINE SNAPSHOT • TAP REFRESH';}
+  function liveLabel(){if(statusMode==='locked')return 'SHARED DATA LOCKED • TAP REFRESH TO LOGIN';if(statusMode==='database')return 'DATABASE NOT CONNECTED • OFFLINE SNAPSHOT';return live?`LIVE SHARED DATA${lastSync?` • ${new Date(lastSync).toLocaleString()}`:''}`:'OFFLINE SNAPSHOT • TAP REFRESH';}
   function enforceStatus(){if(!writingStatus)setStatus(liveLabel());}
   new MutationObserver(enforceStatus).observe(status,{childList:true,subtree:true,characterData:true});
 
@@ -35,16 +35,16 @@
     const notes=(data.notes||[]).map(item=>({body:item.body||'',author:item.author||'',time:item.created_at?new Date(item.created_at).toLocaleString():''}));
     const next={...current,records:records.length?records:(current.records||[]),hours,mileage,notes,live:true,lastSync:data.lastSync?.finished_at||data.lastSync?.started_at||null};
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
-    lastSync=next.lastSync;live=true;
+    lastSync=next.lastSync;live=true;statusMode='live';
     return JSON.stringify({records:records.map(item=>[item.id,item.status,item.workDate,item.workTime,item.closed]),hours,mileage,notes,lastSync:next.lastSync});
   }
   function reloadFor(fingerprint){const prior=sessionStorage.getItem(FINGERPRINT_KEY);if(prior!==fingerprint){sessionStorage.setItem(FINGERPRINT_KEY,fingerprint);location.reload();return true;}return false;}
   async function loadShared(showError=false,reload=true){
     try{
       const data=await api('/api/data');
-      if(data.localMode){live=false;setStatus('DATABASE NOT CONNECTED • OFFLINE SNAPSHOT');if(showError)toast('Shared database is not configured');return false;}
+      if(data.localMode){live=false;statusMode='database';setStatus(liveLabel());if(showError)toast('Shared database is not configured');return false;}
       const fingerprint=mapState(data);if(reload&&reloadFor(fingerprint))return true;setStatus(liveLabel());return true;
-    }catch(error){live=false;setStatus(error.status===401?'SHARED DATA LOCKED • TAP REFRESH TO LOGIN':'OFFLINE SNAPSHOT • TAP REFRESH');if(showError&&error.status!==401)toast(error.message);return false;}
+    }catch(error){live=false;statusMode=error.status===401?'locked':'offline';setStatus(liveLabel());if(showError&&error.status!==401)toast(error.message);return false;}
   }
   function field(id,label,type='text'){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}"></div>`;}
   function login(){sheet.innerHTML=`<h2>Open shared Arborwise data</h2><p>Enter the shared Arborwise OS PIN.</p>${field('livePin','Shared PIN','password')}<div class="buttons"><button class="secondary" id="liveCancel">CANCEL</button><button class="primary" id="liveLogin">OPEN</button></div>`;veil.hidden=false;$('liveCancel').onclick=closeSheet;$('liveLogin').onclick=async()=>{try{await api('/api/login',{method:'POST',body:JSON.stringify({pin:$('livePin').value})});closeSheet();await sync(false);}catch(error){toast(error.message);}};}
@@ -58,12 +58,12 @@
   async function saveRecord(payload){try{await api('/api/records',{method:'POST',body:JSON.stringify(payload)});toast('Saved to shared Arborwise data');}catch(error){toast(`Saved on this device; shared save failed: ${error.message}`);}}
   document.addEventListener('click',event=>{
     const button=event.target.closest?.('button');if(!button)return;
-    if(button.id==='saveRecord'){const payload=recordPayload(false);setTimeout(()=>saveRecord(payload),40);}
-    else if(button.id==='toggleComplete'){const completing=/MARK COMPLETE/i.test(button.textContent);const payload=recordPayload(completing);payload.status=completing?'Complete':'Reopened — Needs Attention';setTimeout(()=>saveRecord(payload),40);}
+    if(button.id==='saveRecord'){const wasClosed=/REOPEN/i.test($('toggleComplete')?.textContent||'');const payload=recordPayload(wasClosed);if(payload.name)setTimeout(()=>saveRecord(payload),40);}
+    else if(button.id==='toggleComplete'){const completing=/MARK COMPLETE/i.test(button.textContent);const payload=recordPayload(completing);payload.status=completing?'Complete':'Reopened — Needs Attention';if(payload.name)setTimeout(()=>saveRecord(payload),40);}
     else if(button.id==='delete'){const id=value('r-id');if(id)setTimeout(async()=>{try{await api('/api/records',{method:'DELETE',body:JSON.stringify({id})});toast('Removed from shared Arborwise data');}catch(error){toast(`Shared delete failed: ${error.message}`);}},40);}
-    else if(button.id==='saveHours'){const start=value('h-start'),end=value('h-end');const [sh,sm]=start.split(':').map(Number),[eh,em]=end.split(':').map(Number);let minutes=(eh*60+em)-(sh*60+sm);if(minutes<0)minutes+=1440;const breakMinutes=Number(value('h-break'))||0;minutes-=breakMinutes;const payload={action:'hours',date:value('h-date'),employee:value('h-employee'),job:value('h-job'),start,end,breakMinutes,hours:Math.max(0,minutes/60),notes:value('h-notes'),status:'Submitted'};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared hours save failed: ${error.message}`)),40);}
-    else if(button.id==='saveMileage'){const payload={action:'mileage',date:value('m-date'),from:value('m-from'),to:value('m-to'),miles:Number(value('m-miles'))||0,why:value('m-why')};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared mileage save failed: ${error.message}`)),40);}
-    else if(button.id==='saveNote'){const payload={action:'note',body:value('n-body'),author:value('n-author'),lane:'general'};setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared note save failed: ${error.message}`)),40);}
+    else if(button.id==='saveHours'){const start=value('h-start'),end=value('h-end');const [sh,sm]=start.split(':').map(Number),[eh,em]=end.split(':').map(Number);let minutes=(eh*60+em)-(sh*60+sm);if(minutes<0)minutes+=1440;const breakMinutes=Number(value('h-break'))||0;minutes-=breakMinutes;const payload={action:'hours',date:value('h-date'),employee:value('h-employee'),job:value('h-job'),start,end,breakMinutes,hours:Math.max(0,minutes/60),notes:value('h-notes'),status:'Submitted'};if(payload.date&&payload.employee&&start&&end&&payload.hours>0)setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared hours save failed: ${error.message}`)),40);}
+    else if(button.id==='saveMileage'){const payload={action:'mileage',date:value('m-date'),from:value('m-from'),to:value('m-to'),miles:Number(value('m-miles'))||0,why:value('m-why')};if(payload.date&&payload.miles>0)setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared mileage save failed: ${error.message}`)),40);}
+    else if(button.id==='saveNote'){const payload={action:'note',body:value('n-body'),author:value('n-author'),lane:'general'};if(payload.body)setTimeout(()=>api('/api/state',{method:'POST',body:JSON.stringify(payload)}).catch(error=>toast(`Shared note save failed: ${error.message}`)),40);}
   },true);
 
   refresh.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();sync(false);},true);
