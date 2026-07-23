@@ -1,14 +1,14 @@
 'use strict';
 (() => {
   const STORAGE_KEY = 'arborwise-live-board-v24';
-  const updatedAt = '2026-07-23T16:58:00-05:00';
+  const updatedAt = '2026-07-23T18:04:00-05:00';
   const treeCrew = 'Toby Palmer; Hannah McElrae; Jonathan McElrae';
   const treeNotes = 'Today’s six-stop Sicily Laguna route. Six 30-gallon live oaks: three container-grown and three field-dug. Shades of Green receipt $1,513.34 allocated equally at $252.22 per job. Crew labor $550 allocated across Arborwise-performed work only. Before and after photos required. Operations oversight: Greg.';
 
   const records = [
     {id:'2010',type:'job',name:'Sicily Laguna Azure',address:'3110 Giovanni Way, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:"Today's Route",workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:treeNotes,closed:false,oversight:'Greg'},
     {id:'2011',type:'job',name:'Sicily Laguna Azure',address:'2902 Cremini Falls, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:"Today's Route",workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:treeNotes,closed:false,oversight:'Greg'},
-    {id:'2012',type:'job',name:'Sicily Laguna Azure',address:'3107 Lucia Way, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:"Today's Route",workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:treeNotes,closed:false,oversight:'Greg'},
+    {id:'2012',type:'job',name:'Sicily Laguna Azure',address:'3107 Lucia Way, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:'Completed',workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:'Completed by Arborwise crew today. Before and after photos required. Tree and material cost remains allocated. Operations oversight: Greg.',closed:true,completionType:'arborwise',laborCost:91.67,otherCost:280.13,oversight:'Greg'},
     {id:'2013',type:'job',name:'Sicily Laguna Azure',address:'3016 Isla Terrace, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:'Homeowner',status:'Homeowner Completed',workDate:'2026-07-23',workTime:'',notes:'Homeowner completed this tree replacement. Arborwise crew did not perform the work. Arborwise labor cost is $0. Tree and material cost remains allocated pending final reconciliation. Operations oversight: Greg.',closed:true,completionType:'homeowner',laborCost:0,otherCost:280.13,oversight:'Greg'},
     {id:'2014',type:'job',name:'Sicily Laguna Azure',address:'3116 Lucia Way, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:'Completed',workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:'Completed by Arborwise crew today. Before and after photos required. Tree and material cost remains allocated. Operations oversight: Greg.',closed:true,completionType:'arborwise',laborCost:91.67,otherCost:280.13,oversight:'Greg'},
     {id:'2015',type:'job',name:'Sicily Laguna Azure',address:'517 Parrino Parkway, Princeton, TX',phone:'972-707-4862',service:'Remove and replace tree; secure replacement tree and install mulch; haul off debris.',amount:866,category:'SBB',who:treeCrew,status:"Today's Route",workDate:'2026-07-23',workTime:'8:30 AM–5:00 PM route',notes:treeNotes,closed:false,oversight:'Greg'},
@@ -43,6 +43,6 @@
   const existing = Array.isArray(state.records) ? state.records : [];
   const byId = new Map(existing.map(item => [normalizeId(item.id), item]));
   for (const record of records) byId.set(normalizeId(record.id), {...byId.get(normalizeId(record.id)), ...record});
-  state = {...state, records:[...byId.values()], currentOperationsUpdatedAt:updatedAt, currentSnapshotVersion:51, live:false, lastSync:updatedAt};
+  state = {...state, records:[...byId.values()], currentOperationsUpdatedAt:updatedAt, currentSnapshotVersion:52, live:false, lastSync:updatedAt};
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 })();
