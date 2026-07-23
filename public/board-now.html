@@ -13,7 +13,7 @@
   <link rel="manifest" href="/board-manifest.webmanifest?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/annie-icon-192.png">
   <link rel="apple-touch-icon" href="/assets/annie-icon-192.png">
-  <link rel="stylesheet" href="/app.css?board=26">
+  <link rel="stylesheet" href="/app.css?board=28">
   <style>
     header{min-height:178px;padding-top:10px}
     header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 2px}
@@ -35,22 +35,23 @@
   <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations board">
     <span class="syncIcon">↻</span><span>REFRESH</span>
   </button>
-  <img class="logo" src="/assets/arborwise-logo.png?board=26" alt="Arborwise — Nurture Your Nature">
+  <img class="logo" src="/assets/arborwise-logo.png?board=28" alt="Arborwise — Nurture Your Nature">
   <div id="dateLine" class="dateLine"></div>
-  <button id="statusButton" class="status" type="button">LOADING CURRENT OPERATIONS</button>
+  <button id="statusButton" class="status" type="button">LOADING SHARED OPERATIONS</button>
 </header>
 <section id="filters" class="filters" aria-label="Employee and crew filters"></section>
 <main id="main">
-  <div class="title"><span>Opening current operations</span></div>
-  <div class="empty">Loading jobs, estimates, people, equipment, and schedule...</div>
+  <div class="title"><span>Opening shared operations</span></div>
+  <div class="empty">Loading jobs, estimates, people, equipment, notes, and schedule...</div>
 </main>
 <button id="addButton" class="add" type="button" aria-label="Add item">+</button>
-<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=26" alt="Annie"></button>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=28" alt="Annie"></button>
 <div id="annieBubble" class="bubble" hidden></div>
 <nav id="tabs" aria-label="Arborwise sections"></nav>
 <div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
 <div id="toast" class="toast" hidden></div>
-<script src="/board-live.js?board=26" defer></script>
-<script src="/board-workflow-26.js?board=26" defer></script>
+<script src="/board-live.js?board=28" defer></script>
+<script src="/board-workflow-26.js?board=28" defer></script>
+<script src="/board-shared-28.js?board=28" defer></script>
 </body>
 </html>
