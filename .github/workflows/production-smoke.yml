@@ -50,13 +50,14 @@ jobs:
           }
 
           wait_for_current_board() {
-            local path="/board-now.html?board=45&smoke=$BUST"
+            local path="/board-now.html?board=46&smoke=$BUST"
             local code="000"
             for attempt in $(seq 1 40); do
               code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
               if [[ "$code" == "200" ]] \
-                && grep -Fq '/board-current-45.js?board=45' /tmp/board.html \
-                && grep -Fq '/live-sync-45.js?board=45' /tmp/board.html \
+                && grep -Fq '/board-current-45.js?board=46' /tmp/board.html \
+                && grep -Fq '/live-sync-45.js?board=46' /tmp/board.html \
+                && grep -Fq '/plan-b-refresh-46.js?board=46' /tmp/board.html \
                 && grep -Fq 'Arborwise OS Board' /tmp/board.html; then
                 echo "PASS current finished board is deployed"
                 return 0
@@ -91,9 +92,24 @@ jobs:
             exit 1
           fi
 
+          wait_for_code "/plan-b-refresh-46.js?smoke=$BUST" GET "200" "" /tmp/plan-b-refresh.js
+          grep -Fq "cloneNode(true)" /tmp/plan-b-refresh.js
+          grep -Fq "CURRENT OPERATIONS" /tmp/plan-b-refresh.js
+          grep -Fq "Checked now • no changes" /tmp/plan-b-refresh.js
+          grep -Fq "New operations available • updating..." /tmp/plan-b-refresh.js
+          grep -Fq "cache:'no-store'" /tmp/plan-b-refresh.js
+          if grep -Fq '/api/oauth/' /tmp/plan-b-refresh.js; then
+            echo 'FAIL Plan B refresh exposes the retired OAuth path'
+            exit 1
+          fi
+          if grep -Fq 'Shared data connections' /tmp/plan-b-refresh.js; then
+            echo 'FAIL Plan B refresh still opens the dead connection modal'
+            exit 1
+          fi
+
           wait_for_code "/board-live.js?smoke=$BUST" GET "200"
-          wait_for_code "/app.css?board=45&smoke=$BUST" GET "200"
-          wait_for_code "/board-manifest.webmanifest?v=45&smoke=$BUST" GET "200"
+          wait_for_code "/app.css?board=46&smoke=$BUST" GET "200"
+          wait_for_code "/board-manifest.webmanifest?v=46&smoke=$BUST" GET "200"
           wait_for_code "/assets/annie-launcher-v42.svg?smoke=$BUST" GET "200"
           wait_for_code "/assets/arborwise-logo.png?smoke=$BUST" GET "200"
 
