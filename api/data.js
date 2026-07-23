@@ -11,12 +11,8 @@ export default async function handler(req,res){
     if(!process.env.DATABASE_URL)return json(res,200,{ok:true,localMode:true,...empty});
     await initDb();
 
-    const sharedReady=await db().query(
-      `select 1 from records
-       where coalesce((raw->>'sharedVersion')::int,0)>=28
-       limit 1`
-    );
-    if(!sharedReady.rowCount)await repairSeededQuickBooksRows();
+    const recordCount=await db().query('select count(*)::int as count from records');
+    if(Number(recordCount.rows[0]?.count||0)===0)await repairSeededQuickBooksRows();
 
     const [records,inbox,mileage,hours,notes,equipment,maintenance,sync]=await Promise.all([
       db().query('select * from records order by closed asc,coalesce(work_date,follow_up_date) asc nulls last,updated_at desc'),
@@ -29,48 +25,19 @@ export default async function handler(req,res){
       db().query('select * from sync_runs order by id desc limit 1')
     ]);
 
-    const items=records.rows.map(r=>{
-      const raw=r.raw&&typeof r.raw==='object'?r.raw:{};
+    const items=records.rows.map(record=>{
+      const raw=record.raw&&typeof record.raw==='object'?record.raw:{};
       return {
-        id:r.id,
-        type:r.kind,
-        name:r.customer_name||'',
-        addr:r.address||'',
-        phone:r.phone||'',
-        email:r.email||'',
-        service:r.service||'',
-        desc:r.description||'',
-        date:r.work_date?String(r.work_date).slice(0,10):'',
-        time:r.work_time||'',
-        fuDate:r.follow_up_date?String(r.follow_up_date).slice(0,10):'',
-        fuWhy:r.follow_up_date?'Follow up':'',
-        who:r.assigned_to||'',
-        status:r.status||'',
-        notes:r.notes||'',
-        money:r.amount?`$${Number(r.amount).toFixed(2)}`:'',
-        closed:r.closed,
-        category:r.category,
-        sentDate:raw.sentDate||'',
-        secondFollowUp:raw.secondFollowUp||'',
-        sharedVersion:Number(raw.sharedVersion||0)||0,
-        updatedAt:r.updated_at?new Date(r.updated_at).toISOString():null
+        id:record.id,type:record.kind,name:record.customer_name||'',addr:record.address||'',phone:record.phone||'',email:record.email||'',
+        service:record.service||'',desc:record.description||'',date:record.work_date?String(record.work_date).slice(0,10):'',time:record.work_time||'',
+        fuDate:record.follow_up_date?String(record.follow_up_date).slice(0,10):'',fuWhy:record.follow_up_date?'Follow up':'',who:record.assigned_to||'',
+        status:record.status||'',notes:record.notes||'',money:record.amount?`$${Number(record.amount).toFixed(2)}`:'',closed:record.closed,category:record.category,
+        sentDate:raw.sentDate||'',secondFollowUp:raw.secondFollowUp||'',sharedVersion:Number(raw.sharedVersion||0)||0,
+        updatedAt:record.updated_at?new Date(record.updated_at).toISOString():null
       };
     });
 
-    json(res,200,{
-      ok:true,
-      localMode:false,
-      items,
-      inbox:inbox.rows,
-      mileage:mileage.rows,
-      hours:hours.rows,
-      notes:notes.rows,
-      equipment:equipment.rows,
-      maintenance:maintenance.rows,
-      lastSync:sync.rows[0]||null,
-      setupRequired:equipment.rows.length===0||records.rows.length===0
-    });
-  }catch(e){
-    fail(res,e);
-  }
+    json(res,200,{ok:true,localMode:false,items,inbox:inbox.rows,mileage:mileage.rows,hours:hours.rows,notes:notes.rows,equipment:equipment.rows,
+      maintenance:maintenance.rows,lastSync:sync.rows[0]||null,setupRequired:equipment.rows.length===0||records.rows.length===0});
+  }catch(error){fail(res,error);}
 }
