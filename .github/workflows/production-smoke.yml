@@ -17,6 +17,10 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run check
+          node --check public/board-current-47.js
+          node --check public/annie-bubble-48.js
+          node --check public/weather-chip-48.js
+          node --check public/arborwise-personality-48.js
       - name: Wait for current board deployment and test production
         shell: bash
         run: |
@@ -50,14 +54,20 @@ jobs:
           }
 
           wait_for_current_board() {
-            local path="/board-now.html?board=46&smoke=$BUST"
+            local path="/board-now.html?board=48&smoke=$BUST"
             local code="000"
             for attempt in $(seq 1 40); do
               code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
               if [[ "$code" == "200" ]] \
-                && grep -Fq '/board-current-45.js?board=46' /tmp/board.html \
-                && grep -Fq '/live-sync-45.js?board=46' /tmp/board.html \
-                && grep -Fq '/plan-b-refresh-46.js?board=46' /tmp/board.html \
+                && grep -Fq '/board-current-47.js?board=48' /tmp/board.html \
+                && grep -Fq '/live-sync-45.js?board=48' /tmp/board.html \
+                && grep -Fq '/plan-b-refresh-46.js?board=48' /tmp/board.html \
+                && grep -Fq '/annie-bubble-48.js?board=48' /tmp/board.html \
+                && grep -Fq '/weather-chip-48.js?board=48' /tmp/board.html \
+                && grep -Fq '/arborwise-personality-48.js?board=48' /tmp/board.html \
+                && grep -Fq '/arborwise-personality-48.css?board=48' /tmp/board.html \
+                && grep -Fq 'id="weatherChip"' /tmp/board.html \
+                && grep -Fq 'id="operationsVoice"' /tmp/board.html \
                 && grep -Fq 'Arborwise OS Board' /tmp/board.html; then
                 echo "PASS current finished board is deployed"
                 return 0
@@ -72,13 +82,20 @@ jobs:
 
           wait_for_current_board
 
-          wait_for_code "/board-current-45.js?smoke=$BUST" GET "200" "" /tmp/current.js
+          wait_for_code "/board-current-47.js?smoke=$BUST" GET "200" "" /tmp/current.js
           grep -Fq "Today's Route" /tmp/current.js
           grep -Fq 'Toby Palmer; Hannah McElrae; Jonathan McElrae' /tmp/current.js
           grep -Fq 'Operations oversight: Greg.' /tmp/current.js
           grep -Fq 'remoteDataUpdatedAt' /tmp/current.js
+          grep -Fq "name:'Dana & Tom Pierson'" /tmp/current.js
+          grep -Fq "who:'Scheduling: Brandon',status:'Accepted',workDate:'',workTime:''" /tmp/current.js
+          grep -Fq 'no date, arrival window, or field crew assigned' /tmp/current.js
           if grep -Fq 'Approved job needs a date' /tmp/current.js; then
             echo 'FAIL current operations still contain the stale scheduling message'
+            exit 1
+          fi
+          if grep -Fq 'Dana and Tom are scheduled' /tmp/current.js; then
+            echo 'FAIL Pierson job is incorrectly scheduled'
             exit 1
           fi
 
@@ -93,10 +110,10 @@ jobs:
           fi
 
           wait_for_code "/plan-b-refresh-46.js?smoke=$BUST" GET "200" "" /tmp/plan-b-refresh.js
-          grep -Fq "cloneNode(true)" /tmp/plan-b-refresh.js
-          grep -Fq "CURRENT OPERATIONS" /tmp/plan-b-refresh.js
-          grep -Fq "Checked now • no changes" /tmp/plan-b-refresh.js
-          grep -Fq "New operations available • updating..." /tmp/plan-b-refresh.js
+          grep -Fq 'cloneNode(true)' /tmp/plan-b-refresh.js
+          grep -Fq 'CURRENT OPERATIONS' /tmp/plan-b-refresh.js
+          grep -Fq 'Checked now • no changes' /tmp/plan-b-refresh.js
+          grep -Fq 'New operations available • updating...' /tmp/plan-b-refresh.js
           grep -Fq "cache:'no-store'" /tmp/plan-b-refresh.js
           if grep -Fq '/api/oauth/' /tmp/plan-b-refresh.js; then
             echo 'FAIL Plan B refresh exposes the retired OAuth path'
@@ -107,9 +124,40 @@ jobs:
             exit 1
           fi
 
+          wait_for_code "/annie-bubble-48.js?smoke=$BUST" GET "200" "" /tmp/annie.js
+          grep -Fq 'buildMessages' /tmp/annie.js
+          grep -Fq 'accepted' /tmp/annie.js
+          grep -Fq 'Van Alstyne' /tmp/annie.js
+          grep -Fq 'Operations oversight stays with Greg' /tmp/annie.js
+          if grep -Fq 'Dana and Tom are scheduled' /tmp/annie.js; then
+            echo 'FAIL Annie still repeats the stale Pierson schedule'
+            exit 1
+          fi
+
+          wait_for_code "/weather-chip-48.js?smoke=$BUST" GET "200" "" /tmp/weather.js
+          grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
+          grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
+          grep -Fq "cache:'no-store'" /tmp/weather.js
+          grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
+
+          wait_for_code "/arborwise-personality-48.js?smoke=$BUST" GET "200" "" /tmp/personality.js
+          grep -Fq 'operationsVoice' /tmp/personality.js
+          grep -Fq 'acceptedUnscheduled' /tmp/personality.js
+          grep -Fq 'classifyCards' /tmp/personality.js
+          grep -Fq 'ARBO RWISE_PERSONALITY_VERSION' /tmp/personality.js || grep -Fq 'ARBORWISE_PERSONALITY_VERSION' /tmp/personality.js
+
+          wait_for_code "/arborwise-personality-48.css?smoke=$BUST" GET "200" "" /tmp/personality.css
+          grep -Fq -- '--bark:' /tmp/personality.css
+          grep -Fq '.weatherChip' /tmp/personality.css
+          grep -Fq '.operationsVoice' /tmp/personality.css
+          grep -Fq '.card.isAttention' /tmp/personality.css
+          grep -Fq '.annie.hasAttention' /tmp/personality.css
+
           wait_for_code "/board-live.js?smoke=$BUST" GET "200"
-          wait_for_code "/app.css?board=46&smoke=$BUST" GET "200"
-          wait_for_code "/board-manifest.webmanifest?v=46&smoke=$BUST" GET "200"
+          wait_for_code "/app.css?board=48&smoke=$BUST" GET "200"
+          wait_for_code "/board-manifest.webmanifest?v=48&smoke=$BUST" GET "200" "" /tmp/manifest.json
+          grep -Fq 'board=48' /tmp/manifest.json
+          grep -Fq '#1D4B34' /tmp/manifest.json
           wait_for_code "/assets/annie-launcher-v42.svg?smoke=$BUST" GET "200"
           wait_for_code "/assets/arborwise-logo.png?smoke=$BUST" GET "200"
 
