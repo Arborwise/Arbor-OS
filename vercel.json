@@ -20,6 +20,12 @@
       ]
     },
     {
+      "source": "/board-now.html",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
       "source": "/sw.js",
       "headers": [
         {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},
@@ -47,7 +53,7 @@
     {"source": "/api/oauth/google/callback", "destination": "/api/oauth.js?provider=google&action=callback"},
     {"source": "/api/oauth/quickbooks/start", "destination": "/api/oauth.js?provider=quickbooks&action=start"},
     {"source": "/api/oauth/quickbooks/callback", "destination": "/api/oauth.js?provider=quickbooks&action=callback"},
-    {"source": "/", "destination": "/public/index.html"},
+    {"source": "/", "destination": "/public/board-now.html"},
     {"source": "/((?!api/).*)", "destination": "/public/$1"}
   ]
 }
