@@ -23,9 +23,9 @@ jobs:
             local code="000"
             for attempt in $(seq 1 40); do
               if [[ "$method" == "POST" ]]; then
-                code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data "$body" "$BASE$path" || true)
+                code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/response.txt -w '%{http_code}' -X POST -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' --data "$body" "$BASE$path" || true)
               else
-                code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' "$BASE$path" || true)
+                code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/response.txt -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
               fi
               if [[ ",$expected," == *",$code,"* ]]; then
                 echo "PASS $method $path -> $code"
@@ -39,13 +39,18 @@ jobs:
             return 1
           }
 
-          wait_for_code "/" GET "200"
+          wait_for_code "/?deploy=21" GET "200"
           grep -q "Arborwise OS" /tmp/response.txt
-          wait_for_code "/app.css?v=15" GET "200"
-          wait_for_code "/app.js?v=15" GET "200"
-          wait_for_code "/operational-overrides.js?v=15" GET "200"
-          wait_for_code "/assets/arborwise-logo.png?v=15" GET "200"
+          grep -q "runtime-fixes.js?v=21" /tmp/response.txt
+          wait_for_code "/app.css?v=21" GET "200"
+          wait_for_code "/app.js?v=21" GET "200"
+          wait_for_code "/operational-overrides.js?v=21" GET "200"
+          wait_for_code "/contact-actions.js?v=21" GET "200"
+          wait_for_code "/runtime-fixes.js?v=21" GET "200"
+          wait_for_code "/sw.js?deploy=21" GET "200"
+          wait_for_code "/assets/arborwise-logo.png?v=21" GET "200"
           wait_for_code "/api/health" GET "200"
+          grep -q '"ok":true' /tmp/response.txt
           wait_for_code "/api/connections" GET "401"
           wait_for_code "/api/data" GET "401"
           wait_for_code "/api/sync" GET "401"
