@@ -10,7 +10,13 @@ export default async function handler(req,res){
     requireSession(req);
     if(!process.env.DATABASE_URL)return json(res,200,{ok:true,localMode:true,...empty});
     await initDb();
-    await repairSeededQuickBooksRows();
+
+    const sharedReady=await db().query(
+      `select 1 from records
+       where coalesce((raw->>'sharedVersion')::int,0)>=28
+       limit 1`
+    );
+    if(!sharedReady.rowCount)await repairSeededQuickBooksRows();
 
     const [records,inbox,mileage,hours,notes,equipment,maintenance,sync]=await Promise.all([
       db().query('select * from records order by closed asc,coalesce(work_date,follow_up_date) asc nulls last,updated_at desc'),
