@@ -34,6 +34,8 @@ jobs:
           if [[ "$code" == '200' ]] \
             && grep -Fq '/board-current-51.js?board=51' /tmp/board.html \
             && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
+            && grep -Fq '/weather-chip-48.js?board=51' /tmp/board.html \
+            && grep -Fq 'id="weatherChip"' /tmp/board.html \
             && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
             echo 'live=true' >> "$GITHUB_OUTPUT"
             echo 'Board 51 is already live. No deployment retry needed.'
@@ -97,9 +99,12 @@ jobs:
             if [[ "$code" == '200' ]] \
               && grep -Fq '/board-current-51.js?board=51' /tmp/board.html \
               && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
+              && grep -Fq '/weather-chip-48.js?board=51' /tmp/board.html \
+              && grep -Fq 'id="weatherChip"' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
               curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-current-51.js?$bust" -o /tmp/current.js
               curl -sS -L -H 'Cache-Control: no-cache' "$BASE/daily-brief-51.js?$bust" -o /tmp/daily.js
+              curl -sS -L -H 'Cache-Control: no-cache' "$BASE/weather-chip-48.js?$bust" -o /tmp/weather.js
               grep -Fq "address:'3116 Lucia Way, Princeton, TX'" /tmp/current.js
               grep -Fq "completionType:'arborwise'" /tmp/current.js
               grep -Fq "address:'3016 Isla Terrace, Princeton, TX'" /tmp/current.js
@@ -108,7 +113,10 @@ jobs:
               grep -Fq "label:'HOMEOWNER COMPLETED'" /tmp/daily.js
               grep -Fq 'Arborwise completed' /tmp/daily.js
               grep -Fq 'homeowner completed' /tmp/daily.js
-              echo 'Board 51 is live and passed attribution and cost-separation checks.'
+              grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
+              grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
+              grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
+              echo 'Board 51 is live and passed attribution, cost-separation, and Van Alstyne weather checks.'
               exit 0
             fi
             echo "Waiting for controlled deployment; attempt $attempt returned $code."
