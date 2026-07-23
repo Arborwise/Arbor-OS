@@ -2,7 +2,8 @@
 (() => {
   const VERSION='46';
   const CHECKED_KEY='arborwise-plan-b-refresh-checked-v46';
-  const ASSET_PATTERN=/(?:board-current|live-sync|plan-b-refresh)-\d+\.js/g;
+  const ASSET_NAME_PATTERN=/^(?:board-current|live-sync|plan-b-refresh)-\d+\.js$/;
+  const ASSET_SCAN_PATTERN=/(?:board-current|live-sync|plan-b-refresh)-\d+\.js/g;
   const oldRefresh=document.getElementById('syncButton');
   const oldStatus=document.getElementById('statusButton');
   const veil=document.getElementById('veil');
@@ -40,14 +41,14 @@
   function localAssets(){
     return [...document.scripts]
       .map(script=>{try{return new URL(script.src,location.href).pathname.split('/').pop()||'';}catch{return '';}})
-      .filter(name=>ASSET_PATTERN.test(name))
+      .filter(name=>ASSET_NAME_PATTERN.test(name))
       .sort()
       .join('|');
   }
 
   function remoteAssets(html){
-    ASSET_PATTERN.lastIndex=0;
-    return [...new Set(html.match(ASSET_PATTERN)||[])].sort().join('|');
+    ASSET_SCAN_PATTERN.lastIndex=0;
+    return [...new Set(html.match(ASSET_SCAN_PATTERN)||[])].sort().join('|');
   }
 
   function markChecked(){
