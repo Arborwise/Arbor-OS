@@ -144,7 +144,7 @@ jobs:
           grep -Fq 'operationsVoice' /tmp/personality.js
           grep -Fq 'acceptedUnscheduled' /tmp/personality.js
           grep -Fq 'classifyCards' /tmp/personality.js
-          grep -Fq 'ARBO RWISE_PERSONALITY_VERSION' /tmp/personality.js || grep -Fq 'ARBORWISE_PERSONALITY_VERSION' /tmp/personality.js
+          grep -Fq 'ARBORWISE_PERSONALITY_VERSION' /tmp/personality.js
 
           wait_for_code "/arborwise-personality-48.css?smoke=$BUST" GET "200" "" /tmp/personality.css
           grep -Fq -- '--bark:' /tmp/personality.css
