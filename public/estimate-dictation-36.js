@@ -243,7 +243,7 @@
     if (!tobyCard) return;
 
     const tobyDetail = tobyCard.querySelector('small');
-    if (tobyDetail) tobyDetail.textContent = 'Estimator / crew • Arborwise';
+    if (tobyDetail && tobyDetail.textContent !== 'Estimator / crew • Arborwise') tobyDetail.textContent = 'Estimator / crew • Arborwise';
 
     if (!main.querySelector('[data-person="hannah-mcelrae"]')) {
       const hannahCard = document.createElement('div');
@@ -254,7 +254,8 @@
     }
 
     const count = main.querySelector('.title .count');
-    if (count) count.textContent = String(main.querySelectorAll('.directoryCard').length);
+    const total = String(main.querySelectorAll('.directoryCard').length);
+    if (count && count.textContent !== total) count.textContent = total;
   }
 
   let peopleTimer = 0;
