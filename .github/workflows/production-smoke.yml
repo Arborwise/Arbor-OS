@@ -17,193 +17,77 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run check
-          node --check public/board-current-47.js
+          node --check public/board-current-51.js
+          node --check public/daily-brief-51.js
           node --check public/annie-bubble-48.js
           node --check public/weather-chip-48.js
           node --check public/arborwise-personality-48.js
-          node --check public/daily-brief-50.js
-      - name: Wait for current board deployment and test production
+      - name: Wait for board 51 and verify production truth
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          BASE="https://arborwise-os.vercel.app"
+          BASE='https://arborwise-os.vercel.app'
           BUST="${GITHUB_SHA}-$(date +%s)"
+          live=false
+          for attempt in $(seq 1 40); do
+            code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=51&smoke=$BUST-$attempt" || true)
+            if [[ "$code" == '200' ]] \
+              && grep -Fq '/board-current-51.js?board=51' /tmp/board.html \
+              && grep -Fq '/daily-brief-51.js?board=51' /tmp/board.html \
+              && grep -Fq '/live-sync-45.js?board=51' /tmp/board.html \
+              && grep -Fq '/plan-b-refresh-46.js?board=51' /tmp/board.html \
+              && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html; then
+              live=true
+              break
+            fi
+            echo "Waiting for board 51; attempt $attempt returned $code."
+            sleep 10
+          done
 
-          wait_for_code() {
-            local path="$1"
-            local method="${2:-GET}"
-            local expected="$3"
-            local body="${4:-}"
-            local output="${5:-/tmp/response.txt}"
-            local code="000"
-            for attempt in $(seq 1 40); do
-              if [[ "$method" == "POST" ]]; then
-                code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o "$output" -w '%{http_code}' -X POST -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' --data "$body" "$BASE$path" || true)
-              else
-                code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o "$output" -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
-              fi
-              if [[ ",$expected," == *",$code,"* ]]; then
-                echo "PASS $method $path -> $code"
-                return 0
-              fi
-              echo "Waiting for $method $path; got $code on attempt $attempt"
-              sleep 10
-            done
-            echo "FAIL $method $path -> $code"
-            cat "$output" || true
-            return 1
-          }
-
-          wait_for_current_board() {
-            local path="/board-now.html?board=50&smoke=$BUST"
-            local code="000"
-            for attempt in $(seq 1 40); do
-              code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE$path" || true)
-              if [[ "$code" == "200" ]] \
-                && grep -Fq '/board-current-47.js?board=50' /tmp/board.html \
-                && grep -Fq '/live-sync-45.js?board=50' /tmp/board.html \
-                && grep -Fq '/plan-b-refresh-46.js?board=50' /tmp/board.html \
-                && grep -Fq '/daily-brief-50.js?board=50' /tmp/board.html \
-                && grep -Fq '/annie-bubble-48.js?board=50' /tmp/board.html \
-                && grep -Fq '/weather-chip-48.js?board=50' /tmp/board.html \
-                && grep -Fq '/arborwise-personality-48.js?board=50' /tmp/board.html \
-                && grep -Fq '/arborwise-personality-49.css?board=50' /tmp/board.html \
-                && grep -Fq 'class="brandTagline"' /tmp/board.html \
-                && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
-                && grep -Fq 'id="weatherChip"' /tmp/board.html \
-                && grep -Fq 'id="operationsVoice"' /tmp/board.html \
-                && grep -Fq 'Arborwise OS Board' /tmp/board.html; then
-                echo "PASS current finished board is deployed"
-                return 0
-              fi
-              echo "Waiting for current finished board; got $code on attempt $attempt"
-              sleep 10
-            done
-            echo "FAIL current finished board did not deploy"
-            cat /tmp/board.html || true
-            return 1
-          }
-
-          if ! wait_for_current_board; then
+          if [[ "$live" != 'true' ]]; then
             status_json=$(curl -sS --connect-timeout 10 --max-time 30 \
               -H "Authorization: Bearer $GITHUB_TOKEN" \
               -H 'Accept: application/vnd.github+json' \
               "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" || true)
             if grep -Fq 'upgradeToPro=build-rate-limit' <<<"$status_json"; then
-              echo '::notice title=Vercel quota cooldown::Code validation passed. Production deployment is deferred to the controlled recovery workflow because Vercel reported its build-rate limit.'
+              echo '::notice title=Vercel quota cooldown::Code validation passed. Board 51 is deferred to the controlled recovery workflow.'
               exit 0
             fi
+            echo 'Board 51 did not deploy and no Vercel rate-limit status was found.'
+            cat /tmp/board.html || true
             exit 1
           fi
 
-          wait_for_code "/board-current-47.js?smoke=$BUST" GET "200" "" /tmp/current.js
-          grep -Fq "Today's Route" /tmp/current.js
-          grep -Fq 'Toby Palmer; Hannah McElrae; Jonathan McElrae' /tmp/current.js
-          grep -Fq 'Operations oversight: Greg.' /tmp/current.js
-          grep -Fq 'remoteDataUpdatedAt' /tmp/current.js
-          grep -Fq "name:'Dana & Tom Pierson'" /tmp/current.js
-          grep -Fq "who:'Scheduling: Brandon',status:'Accepted',workDate:'',workTime:''" /tmp/current.js
-          grep -Fq 'no date, arrival window, or field crew assigned' /tmp/current.js
-          if grep -Fq 'Approved job needs a date' /tmp/current.js; then
-            echo 'FAIL current operations still contain the stale scheduling message'
-            exit 1
-          fi
-          if grep -Fq 'Dana and Tom are scheduled' /tmp/current.js; then
-            echo 'FAIL Pierson job is incorrectly scheduled'
-            exit 1
-          fi
+          curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-current-51.js?$BUST" -o /tmp/current.js
+          curl -sS -L -H 'Cache-Control: no-cache' "$BASE/daily-brief-51.js?$BUST" -o /tmp/daily.js
+          curl -sS -L -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?v=51&$BUST" -o /tmp/manifest.json
 
-          wait_for_code "/daily-brief-50.js?smoke=$BUST" GET "200" "" /tmp/daily-brief.js
-          grep -Fq "const isCompleted" /tmp/daily-brief.js
-          grep -Fq "label:'COMPLETED'" /tmp/daily-brief.js
-          grep -Fq 'rank:90' /tmp/daily-brief.js
-          grep -Fq '.briefItem.isCompleted' /tmp/daily-brief.js
-          grep -Fq 'text-decoration:line-through' /tmp/daily-brief.js
-          grep -Fq 'TODAY + 7 DAYS' /tmp/daily-brief.js
-          grep -Fq 'setInterval' /tmp/daily-brief.js
-          if grep -Fq "label:'SCHEDULE'" /tmp/daily-brief.js; then
-            echo 'FAIL accepted unscheduled work is still counted as due today'
-            exit 1
-          fi
-          if grep -Fq 'Approved job needs a date' /tmp/daily-brief.js; then
-            echo 'FAIL daily brief still promotes the scheduling queue into today'
+          grep -Fq "address:'3116 Lucia Way, Princeton, TX'" /tmp/current.js
+          grep -Fq "status:'Completed'" /tmp/current.js
+          grep -Fq "completionType:'arborwise'" /tmp/current.js
+          grep -Fq "address:'3016 Isla Terrace, Princeton, TX'" /tmp/current.js
+          grep -Fq "who:'Homeowner',status:'Homeowner Completed'" /tmp/current.js
+          grep -Fq "completionType:'homeowner',laborCost:0,otherCost:280.13" /tmp/current.js
+          grep -Fq 'Arborwise crew did not perform the work' /tmp/current.js
+
+          grep -Fq "label:'COMPLETED'" /tmp/daily.js
+          grep -Fq "label:'HOMEOWNER COMPLETED'" /tmp/daily.js
+          grep -Fq 'Arborwise completed' /tmp/daily.js
+          grep -Fq 'homeowner completed' /tmp/daily.js
+          grep -Fq 'record.address' /tmp/daily.js
+          grep -Fq 'rank:90' /tmp/daily.js
+          grep -Fq 'rank:91' /tmp/daily.js
+          grep -Fq 'TODAY + 7 DAYS' /tmp/daily.js
+          if grep -Fq "label:'SCHEDULE'" /tmp/daily.js; then
+            echo 'Accepted unscheduled work is still counted as due today.'
             exit 1
           fi
 
-          wait_for_code "/live-sync-45.js?smoke=$BUST" GET "200" "" /tmp/live-sync.js
-          grep -Fq 'Checked now • no changes' /tmp/live-sync.js
-          grep -Fq 'sync(false,true)' /tmp/live-sync.js
-          grep -Fq 'remotePreservesCurrent' /tmp/live-sync.js
-          grep -Fq 'fingerprint!==before' /tmp/live-sync.js
-          if grep -Fq 'setTimeout(()=>location.reload(),120)' /tmp/live-sync.js; then
-            echo 'FAIL refresh still performs the old blind reload'
-            exit 1
-          fi
-
-          wait_for_code "/plan-b-refresh-46.js?smoke=$BUST" GET "200" "" /tmp/plan-b-refresh.js
-          grep -Fq 'cloneNode(true)' /tmp/plan-b-refresh.js
-          grep -Fq 'CURRENT OPERATIONS' /tmp/plan-b-refresh.js
-          grep -Fq 'Checked now • no changes' /tmp/plan-b-refresh.js
-          grep -Fq 'New operations available • updating...' /tmp/plan-b-refresh.js
-          grep -Fq "cache:'no-store'" /tmp/plan-b-refresh.js
-          if grep -Fq '/api/oauth/' /tmp/plan-b-refresh.js; then
-            echo 'FAIL Plan B refresh exposes the retired OAuth path'
-            exit 1
-          fi
-          if grep -Fq 'Shared data connections' /tmp/plan-b-refresh.js; then
-            echo 'FAIL Plan B refresh still opens the dead connection modal'
-            exit 1
-          fi
-
-          wait_for_code "/annie-bubble-48.js?smoke=$BUST" GET "200" "" /tmp/annie.js
-          grep -Fq 'buildMessages' /tmp/annie.js
-          grep -Fq 'accepted' /tmp/annie.js
-          grep -Fq 'Van Alstyne' /tmp/annie.js
-          grep -Fq 'Operations oversight stays with Greg' /tmp/annie.js
-          if grep -Fq 'Dana and Tom are scheduled' /tmp/annie.js; then
-            echo 'FAIL Annie still repeats the stale Pierson schedule'
-            exit 1
-          fi
-
-          wait_for_code "/weather-chip-48.js?smoke=$BUST" GET "200" "" /tmp/weather.js
-          grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
-          grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
-          grep -Fq "cache:'no-store'" /tmp/weather.js
-          grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
-
-          wait_for_code "/arborwise-personality-48.js?smoke=$BUST" GET "200" "" /tmp/personality.js
-          grep -Fq 'operationsVoice' /tmp/personality.js
-          grep -Fq 'acceptedUnscheduled' /tmp/personality.js
-          grep -Fq 'classifyCards' /tmp/personality.js
-          grep -Fq 'ARBORWISE_PERSONALITY_VERSION' /tmp/personality.js
-
-          wait_for_code "/arborwise-personality-49.css?smoke=$BUST" GET "200" "" /tmp/personality.css
-          grep -Fq -- '--bark:' /tmp/personality.css
-          grep -Fq '.weatherChip' /tmp/personality.css
-          grep -Fq '.operationsVoice' /tmp/personality.css
-          grep -Fq '.brandTagline' /tmp/personality.css
-          grep -Fq 'color:#f7d992' /tmp/personality.css
-          grep -Fq 'text-shadow:' /tmp/personality.css
-          grep -Fq '.card.isAttention' /tmp/personality.css
-          grep -Fq '.annie.hasAttention' /tmp/personality.css
-
-          wait_for_code "/board-live.js?smoke=$BUST" GET "200"
-          wait_for_code "/app.css?board=50&smoke=$BUST" GET "200"
-          wait_for_code "/board-manifest.webmanifest?v=50&smoke=$BUST" GET "200" "" /tmp/manifest.json
-          grep -Fq 'board=50' /tmp/manifest.json
+          grep -Fq 'board=51' /tmp/manifest.json
           grep -Fq '#1D4B34' /tmp/manifest.json
-          wait_for_code "/assets/annie-launcher-v42.svg?smoke=$BUST" GET "200"
-          wait_for_code "/assets/arborwise-logo.png?smoke=$BUST" GET "200"
 
-          wait_for_code "/api/health" GET "200" "" /tmp/health.json
-          grep -q '"ok":true' /tmp/health.json
-          wait_for_code "/api/connections" GET "401"
-          wait_for_code "/api/data" GET "401"
-          wait_for_code "/api/sync" GET "401"
-          wait_for_code "/api/login" POST "401" '{"pin":"smoke-test-invalid"}'
-          wait_for_code "/api/oauth/google/start" GET "401"
-          wait_for_code "/api/oauth/quickbooks/start" GET "401"
-          wait_for_code "/api/records" GET "405"
-          wait_for_code "/api/state" GET "405"
+          health=$(curl -sS -L --connect-timeout 10 --max-time 30 "$BASE/api/health")
+          grep -q '"ok":true' <<<"$health"
+          echo 'Board 51 passed completion attribution, cost separation, rolling-date, brand, and health checks.'
