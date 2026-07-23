@@ -10,6 +10,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Arborwise OS Board</title>
+  <script>
+    (() => {
+      const openedFromHomeCard = new URLSearchParams(location.search).get('source') === 'home';
+      if (openedFromHomeCard) {
+        location.replace('https://docs.google.com/spreadsheets/d/17XTUBhP7zC01qc6aNavMYCoFBEsnE9wUvmMmd-5lt1w/edit#gid=8173387');
+      }
+    })();
+  </script>
   <link rel="manifest" href="/board-manifest.webmanifest?v=42">
   <link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
   <link rel="apple-touch-icon" href="/assets/annie-launcher-v42.svg">
