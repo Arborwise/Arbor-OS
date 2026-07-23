@@ -14,6 +14,8 @@
 
   bubble.setAttribute('role', 'status');
   bubble.setAttribute('aria-live', 'polite');
+  annie.setAttribute('aria-controls', 'annieBubble');
+  annie.setAttribute('aria-expanded', 'false');
 
   const hide = () => {
     bubble.hidden = true;
@@ -22,27 +24,34 @@
   };
 
   const show = () => {
-    const next = messages[Math.floor(Math.random() * messages.length)];
-    bubble.textContent = next;
-    bubble.scrollTop = 0;
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    bubble.replaceChildren();
+    const cloudText = document.createElement('span');
+    cloudText.className = 'annieCloudText';
+    cloudText.textContent = message;
+    bubble.appendChild(cloudText);
     bubble.hidden = false;
     annie.setAttribute('aria-expanded', 'true');
     clearTimeout(window.annieTimer);
     window.annieTimer = setTimeout(hide, 8000);
   };
 
-  annie.setAttribute('aria-controls', 'annieBubble');
-  annie.setAttribute('aria-expanded', 'false');
   annie.onclick = event => {
+    event.preventDefault();
     event.stopPropagation();
     if (bubble.hidden) show();
     else hide();
   };
 
-  bubble.onclick = event => event.stopPropagation();
+  bubble.onclick = event => {
+    event.stopPropagation();
+    hide();
+  };
+
   document.addEventListener('click', event => {
     if (!bubble.hidden && !bubble.contains(event.target) && !annie.contains(event.target)) hide();
   });
+
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') hide();
   });
