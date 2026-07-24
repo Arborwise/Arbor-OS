@@ -32,6 +32,12 @@
       ]
     },
     {
+      "source": "/retired-board-data.js",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
       "source": "/sw.js",
       "headers": [
         {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},
@@ -46,6 +52,10 @@
     }
   ],
   "rewrites": [
+    {"source": "/board-live.js", "destination": "/public/retired-board-data.js"},
+    {"source": "/board-current-:version.js", "destination": "/public/retired-board-data.js"},
+    {"source": "/board-correction-:version.js", "destination": "/public/retired-board-data.js"},
+    {"source": "/board-holds-:version.js", "destination": "/public/retired-board-data.js"},
     {"source": "/api/login", "destination": "/api/app.js?route=login"},
     {"source": "/api/logout", "destination": "/api/app.js?route=logout"},
     {"source": "/api/board", "destination": "/api/app.js?route=board"},
