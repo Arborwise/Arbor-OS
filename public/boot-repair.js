@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  const VERSION = '22';
+  const VERSION = '23';
   const STATE_KEY = 'arborwise-os-v12';
   const CACHE_REPAIR_KEY = `arborwise-cache-repair-v${VERSION}`;
   const RUNTIME_REPAIR_KEY = `arborwise-runtime-repair-v${VERSION}`;
