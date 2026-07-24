@@ -64,5 +64,62 @@
 <script src="/weather-chip-48.js?board=54" defer></script>
 <script src="/arborwise-personality-48.js?board=54" defer></script>
 <script src="/boot-reveal-42.js?board=54" defer></script>
+<script>
+  window.addEventListener('DOMContentLoaded',()=>{
+    const statusButton=document.getElementById('statusButton');
+    const refreshButton=document.getElementById('syncButton');
+    const veil=document.getElementById('veil');
+    const sheet=document.getElementById('sheet');
+    const toast=document.getElementById('toast');
+    if(!statusButton||!veil||!sheet)return;
+
+    const showToast=message=>{
+      if(!toast)return;
+      toast.textContent=message;
+      toast.hidden=false;
+      clearTimeout(showToast.timer);
+      showToast.timer=setTimeout(()=>{toast.hidden=true;},4200);
+    };
+    const close=()=>{veil.hidden=true;sheet.innerHTML='';};
+    const connectionRow=(name,provider)=>{
+      const state=provider.authorized?'CONNECTED':provider.configured?'APPROVAL NEEDED':'APP SETUP NEEDED';
+      const detail=provider.authorized
+        ? (provider.email||provider.realmId||'Ready to synchronize')
+        : provider.configured
+          ? `Tap Connect ${name} to approve Arborwise OS.`
+          : `Missing ${Array.isArray(provider.missing)?provider.missing.join(' and '):'app credentials'}.`;
+      const button=provider.connectUrl?`<button class="primary wideButton" data-connect="${provider.connectUrl}">CONNECT / RECONNECT ${name.toUpperCase()}</button>`:'';
+      return `<div class="card"><h3>${name}</h3><strong>${state}</strong><p class="loginHelp">${detail}</p>${button}</div>`;
+    };
+    const openConnections=async()=>{
+      statusButton.disabled=true;
+      try{
+        const response=await fetch('/api/connections',{credentials:'same-origin',cache:'no-store'});
+        let data={};
+        try{data=await response.json();}catch{}
+        if(response.status===401){
+          showToast('Board login expired. Tap Refresh and enter the Arborwise OS PIN.');
+          if(refreshButton)refreshButton.click();
+          return;
+        }
+        if(!response.ok)throw new Error(data.error||`Connections check failed ${response.status}`);
+        sheet.innerHTML=`<h2>Connections</h2>${connectionRow('Google',data.google||{})}${connectionRow('QuickBooks',data.quickbooks||{})}<div class="buttons"><button class="secondary" id="closeConnections">CLOSE</button></div>`;
+        veil.hidden=false;
+        document.getElementById('closeConnections').onclick=close;
+        sheet.querySelectorAll('[data-connect]').forEach(button=>{
+          button.onclick=()=>location.assign(button.dataset.connect);
+        });
+      }catch(error){
+        showToast(error.message||'Could not open Connections.');
+      }finally{
+        statusButton.disabled=false;
+      }
+    };
+
+    statusButton.title='Tap to open Google and QuickBooks connections';
+    statusButton.setAttribute('aria-label','Open Google and QuickBooks connections');
+    statusButton.onclick=openConnections;
+  });
+</script>
 </body>
 </html>
