@@ -26,6 +26,12 @@
       ]
     },
     {
+      "source": "/board-live-54.js",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
+      ]
+    },
+    {
       "source": "/sw.js",
       "headers": [
         {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},
@@ -42,6 +48,7 @@
   "rewrites": [
     {"source": "/api/login", "destination": "/api/app.js?route=login"},
     {"source": "/api/logout", "destination": "/api/app.js?route=logout"},
+    {"source": "/api/board", "destination": "/api/app.js?route=board"},
     {"source": "/api/data", "destination": "/api/app.js?route=data"},
     {"source": "/api/connections", "destination": "/api/app.js?route=connections"},
     {"source": "/api/setup", "destination": "/api/app.js?route=setup"},
