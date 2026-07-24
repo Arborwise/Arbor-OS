@@ -1,9 +1,9 @@
 {
   "name":"arborwise-os",
-  "version":"1.3.2",
+  "version":"1.4.0",
   "private":true,
   "type":"module",
   "engines":{"node":"24.x"},
-  "scripts":{"check":"node --check api/app.js && node --check api/oauth.js && node --check api/sync.js && node --check api/connections.js && node --check api/setup.js && node --check api/state.js && node --check api/data.js && node --check api/health.js && node --check lib/repair.js && node --check lib/sync.js && node --check lib/google.js && node --check lib/qbo.js && node --check public/app.js && node --check public/operational-overrides.js && node --check public/contact-actions.js && node --check public/runtime-fixes.js && node --check public/sw.js"},
+  "scripts":{"check":"node --check api/app.js && node --check api/board.js && node --check api/oauth.js && node --check api/sync.js && node --check api/connections.js && node --check api/setup.js && node --check api/state.js && node --check api/data.js && node --check api/health.js && node --check lib/repair.js && node --check lib/sync.js && node --check lib/google.js && node --check lib/qbo.js && node --check public/board-live-54.js && node --check public/app.js && node --check public/operational-overrides.js && node --check public/contact-actions.js && node --check public/runtime-fixes.js && node --check public/sw.js"},
   "dependencies":{"googleapis":"^160.0.0","intuit-oauth":"^4.2.2","pg":"^8.16.3"}
 }
