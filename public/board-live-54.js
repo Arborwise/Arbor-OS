@@ -7,10 +7,11 @@
   const $=id=>document.getElementById(id);
   const main=$('main'),filters=$('filters'),tabs=$('tabs'),refresh=$('syncButton'),statusButton=$('statusButton');
   const operationsVoice=$('operationsVoice'),veil=$('veil'),sheet=$('sheet'),toastEl=$('toast'),addButton=$('addButton');
-  if(!main||!filters||!tabs||!refresh||!statusButton||!veil||!sheet||!toastEl)return;
+  if(!main||!filters||!tabs||!refresh||!statusButton||!operationsVoice||!veil||!sheet||!toastEl)return;
 
   if(addButton)addButton.hidden=true;
   const ui=safeParse(localStorage.getItem(UI_KEY),{})||{};
+  let authorizedThisLoad=false;
   const state={
     records:[],
     tab:ui.tab||'TODAY',
@@ -107,7 +108,6 @@
         const due=dueDate(item);
         if(isHold(item)||isCancelled(item))return false;
         if(isCompleted(item))return item.workDate===start;
-        if(item.type==='job')return Boolean(due)&&due<=end;
         return Boolean(due)&&due<=end;
       });
     }
@@ -193,7 +193,18 @@
   function cachePayload(payload){
     localStorage.setItem(CACHE_KEY,JSON.stringify({items:payload.items,dataVersion:payload.dataVersion,readAt:payload.readAt,warnings:payload.warnings||[]}));
   }
+  function clearLegacyState(){
+    const legacy=safeParse(localStorage.getItem(LEGACY_KEY),{})||{};
+    legacy.records=[];
+    legacy.live=false;
+    legacy.lastSync=null;
+    legacy.liveSheetVersion=null;
+    localStorage.setItem(LEGACY_KEY,JSON.stringify(legacy));
+    window.ARBORWISE_CURRENT_OPERATIONS=null;
+    window.dispatchEvent(new CustomEvent('arborwise:data-cleared'));
+  }
   function loadLastGood(){
+    if(!authorizedThisLoad)return false;
     const cached=safeParse(localStorage.getItem(CACHE_KEY),null);
     if(!cached||!Array.isArray(cached.items)||!cached.items.length)return false;
     state.records=cached.items;
@@ -249,6 +260,7 @@
     try{
       const payload=await request(`/api/board?ts=${Date.now()}`);
       if(!Array.isArray(payload.items))throw new Error('The Sheet feed returned an invalid response');
+      authorizedThisLoad=true;
       state.records=payload.items;
       state.dataVersion=payload.dataVersion||null;
       state.lastReadAt=payload.readAt||new Date().toISOString();
@@ -262,14 +274,20 @@
       return true;
     }catch(error){
       if(error.status===401){
-        if(!state.records.length)loadLastGood();
+        authorizedThisLoad=false;
+        state.records=[];
+        state.dataVersion=null;
+        state.lastReadAt=null;
+        state.warnings=[];
         state.stale=true;
         state.message='Login is required to read Google Sheets.';
+        clearLegacyState();
         render();
         login();
         return false;
       }
-      if(!state.records.length)loadLastGood();
+      if(error.status)authorizedThisLoad=true;
+      if(!state.records.length&&authorizedThisLoad)loadLastGood();
       state.stale=true;
       state.message=`Live Sheet read failed: ${error.message}`;
       render();
@@ -285,7 +303,7 @@
   refresh.onclick=()=>refreshBoard({manual:true});
   statusButton.onclick=()=>toast(state.stale?(state.lastReadAt?`Stale • last successful Sheet read ${new Date(state.lastReadAt).toLocaleString('en-US',{timeZone:TIME_ZONE})}`:'Login required before data can load'):`Live Google Sheet data • read ${new Date(state.lastReadAt).toLocaleString('en-US',{timeZone:TIME_ZONE})}`);
 
-  loadLastGood();
+  clearLegacyState();
   render();
   refreshBoard({manual:false});
   setInterval(()=>refreshBoard({manual:false}),5*60*1000);
