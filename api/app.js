@@ -1,3 +1,4 @@
+import board from './board.js';
 import connections from './connections.js';
 import data from './data.js';
 import health from './health.js';
@@ -7,7 +8,7 @@ import records from './records.js';
 import setup from './setup.js';
 import state from './state.js';
 
-const routes={connections,data,health,login,logout,records,setup,state};
+const routes={board,connections,data,health,login,logout,records,setup,state};
 
 export default async function handler(req,res){
   const route=String(req.query?.route||'').toLowerCase();
