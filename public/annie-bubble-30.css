@@ -3,7 +3,7 @@
   position:fixed;
   z-index:26;
   left:8px;
-  bottom:165px;
+  bottom:145px;
   width:min(220px,calc(100vw - 16px));
   aspect-ratio:220 / 122;
   min-width:0;
@@ -102,7 +102,7 @@
 @media(max-width:390px){
   #annieBubble.bubble{
     left:7px;
-    bottom:165px;
+    bottom:145px;
     width:min(208px,calc(100vw - 14px));
   }
   #annieBubble .annieCloudText{
