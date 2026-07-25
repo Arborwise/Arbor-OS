@@ -16,28 +16,14 @@
   <link rel="stylesheet" href="/app.css?board=56">
   <link rel="stylesheet" href="/annie-bubble-30.css?board=56">
   <style>
-    html,body{background:#f7f2e8}
-    body.booting{visibility:hidden}
-    header{min-height:302px;padding-top:10px}
-    header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 0}
-    .annie{left:8px;bottom:83px}
-    .connectionLinks{position:relative;z-index:20;display:flex;gap:9px;width:min(620px,92%);margin:10px auto 0}
-    .connectionLinks a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #fff;border-radius:999px;background:#f7f2e8;color:#17402b;text-decoration:none;font-size:13px;font-weight:950;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.25);touch-action:manipulation;pointer-events:auto;-webkit-user-select:none;user-select:none}
-    .connectionLinks a:active{transform:scale(.98)}
+    html,body{background:#f7f2e8}body.booting{visibility:hidden}header{min-height:302px;padding-top:10px}header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 0}.annie{left:8px;bottom:83px}
+    .connectionLinks{position:relative;z-index:20;display:flex;gap:9px;width:min(620px,92%);margin:10px auto 0}.connectionLinks a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #fff;border-radius:999px;background:#f7f2e8;color:#17402b;text-decoration:none;font-size:13px;font-weight:950;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.25);touch-action:manipulation;pointer-events:auto;-webkit-user-select:none;user-select:none}.connectionLinks a.connected{background:#dff0e4;color:#155b2d;border-color:#b7d6c0}.connectionLinks a:active{transform:scale(.98)}
     @media(max-width:390px){.connectionLinks{gap:7px;width:94%}.connectionLinks a{min-height:46px;font-size:11px;padding:0 6px}}
   </style>
   <link rel="stylesheet" href="/arborwise-personality-49.css?board=56">
   <noscript><style>body.booting{visibility:visible}</style></noscript>
   <script>
-    try {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register = function(){ return Promise.resolve(null); };
-        navigator.serviceWorker.getRegistrations().then(function(registrations){
-          return Promise.all(registrations.map(function(registration){ return registration.unregister(); }));
-        }).catch(function(){});
-      }
-      if ('caches' in window) caches.keys().then(function(keys){ return Promise.all(keys.map(function(key){ return caches.delete(key); })); }).catch(function(){});
-    } catch (error) {}
+    try{if('serviceWorker' in navigator){navigator.serviceWorker.register=function(){return Promise.resolve(null);};navigator.serviceWorker.getRegistrations().then(registrations=>Promise.all(registrations.map(registration=>registration.unregister()))).catch(()=>{});}if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key)))).catch(()=>{});}catch(error){}
   </script>
 </head>
 <body class="booting">
@@ -48,34 +34,27 @@
   <div class="brandTagline" aria-label="Arborwise motto">NURTURE YOUR NATURE</div>
   <div id="dateLine" class="dateLine"></div>
   <button id="statusButton" class="status" type="button">OPENING PROTECTED SHEET</button>
-  <div class="connectionLinks" aria-label="Arborwise connections">
-    <a id="connectGoogleDirect" href="/api/oauth/google/start">CONNECT GOOGLE</a>
-    <a id="connectQuickBooksDirect" href="/api/oauth/quickbooks/start">CONNECT QUICKBOOKS</a>
-  </div>
+  <div class="connectionLinks" aria-label="Arborwise connections"><a id="connectGoogleDirect" href="/api/oauth/google/start">CONNECT GOOGLE</a><a id="connectQuickBooksDirect" href="/api/oauth/quickbooks/start">CONNECT QUICKBOOKS</a></div>
   <div id="operationsVoice" class="operationsVoice" aria-live="polite">Reading the current Arborwise operation...</div>
 </header>
 <section id="filters" class="filters" aria-label="Crew filters"></section>
 <main id="main"><div class="title"><span>Opening current operations</span></div><div class="empty">Customer and financial data load only after authorized access.</div></main>
 <button id="addButton" class="add" type="button" hidden aria-hidden="true"></button>
-<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=56" alt="Annie"></button>
-<div id="annieBubble" class="bubble" hidden></div>
-<nav id="tabs" aria-label="Arborwise sections"></nav>
-<div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
-<div id="toast" class="toast" hidden></div>
-<script src="/board-live-54.js?board=56" defer></script>
-<script src="/annie-bubble-48.js?board=56" defer></script>
-<script src="/weather-chip-48.js?board=56" defer></script>
-<script src="/arborwise-personality-48.js?board=56" defer></script>
-<script src="/boot-reveal-42.js?board=56" defer></script>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=56" alt="Annie"></button><div id="annieBubble" class="bubble" hidden></div>
+<nav id="tabs" aria-label="Arborwise sections"></nav><div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div><div id="toast" class="toast" hidden></div>
+<script src="/board-live-54.js?board=56" defer></script><script src="/annie-bubble-48.js?board=56" defer></script><script src="/weather-chip-48.js?board=56" defer></script><script src="/arborwise-personality-48.js?board=56" defer></script><script src="/boot-reveal-42.js?board=56" defer></script>
 <script>
-  window.addEventListener('DOMContentLoaded',()=>{
-    const statusButton=document.getElementById('statusButton');const refreshButton=document.getElementById('syncButton');const veil=document.getElementById('veil');const sheet=document.getElementById('sheet');const toast=document.getElementById('toast');if(!statusButton||!veil||!sheet)return;
-    const showToast=message=>{if(!toast)return;toast.textContent=message;toast.hidden=false;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>{toast.hidden=true;},4200);};
-    const close=()=>{veil.hidden=true;sheet.innerHTML='';};
-    const connectionRow=(name,provider)=>{const state=provider.authorized?'CONNECTED':provider.configured?'APPROVAL NEEDED':'APP SETUP NEEDED';const detail=provider.authorized?(provider.email||provider.realmId||'Ready to synchronize'):provider.configured?`Tap Connect ${name} to approve Arborwise OS.`:`Missing ${Array.isArray(provider.missing)?provider.missing.join(' and '):'app credentials'}.`;const button=provider.connectUrl?`<button class="primary wideButton" data-connect="${provider.connectUrl}">CONNECT / RECONNECT ${name.toUpperCase()}</button>`:'';return `<div class="card"><h3>${name}</h3><strong>${state}</strong><p class="loginHelp">${detail}</p>${button}</div>`;};
-    const openConnections=async()=>{statusButton.disabled=true;try{const response=await fetch('/api/connections',{credentials:'same-origin',cache:'no-store'});let data={};try{data=await response.json();}catch{}if(response.status===401){showToast('Board login expired. Tap Refresh and enter the Arborwise OS PIN.');if(refreshButton)refreshButton.click();return;}if(!response.ok)throw new Error(data.error||`Connections check failed ${response.status}`);sheet.innerHTML=`<h2>Connections</h2>${connectionRow('Google',data.google||{})}${connectionRow('QuickBooks',data.quickbooks||{})}<div class="buttons"><button class="secondary" id="closeConnections">CLOSE</button></div>`;veil.hidden=false;document.getElementById('closeConnections').onclick=close;sheet.querySelectorAll('[data-connect]').forEach(button=>{button.onclick=()=>location.assign(button.dataset.connect);});}catch(error){showToast(error.message||'Could not open Connections.');}finally{statusButton.disabled=false;}};
-    statusButton.title='Tap to open Google and QuickBooks connections';statusButton.setAttribute('aria-label','Open Google and QuickBooks connections');statusButton.onclick=openConnections;
-  });
+window.addEventListener('DOMContentLoaded',()=>{
+  const statusButton=document.getElementById('statusButton'),refreshButton=document.getElementById('syncButton'),veil=document.getElementById('veil'),sheet=document.getElementById('sheet'),toast=document.getElementById('toast'),googleLink=document.getElementById('connectGoogleDirect'),quickBooksLink=document.getElementById('connectQuickBooksDirect');if(!statusButton||!veil||!sheet)return;
+  const showToast=message=>{if(!toast)return;toast.textContent=message;toast.hidden=false;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>{toast.hidden=true;},4200);};const close=()=>{veil.hidden=true;sheet.innerHTML='';};
+  const connectionRow=(name,provider)=>{const connectionState=provider.authorized?'CONNECTED':provider.configured?'APPROVAL NEEDED':'APP SETUP NEEDED';const detail=provider.authorized?(provider.email||provider.realmId||'Ready to synchronize'):provider.configured?`Tap Connect ${name} to approve Arborwise OS.`:`Missing ${Array.isArray(provider.missing)?provider.missing.join(' and '):'app credentials'}.`;const button=provider.connectUrl?`<button class="primary wideButton" data-connect="${provider.connectUrl}">${provider.authorized?'RECONNECT':'CONNECT'} ${name.toUpperCase()}</button>`:'';return `<div class="card"><h3>${name}</h3><strong>${connectionState}</strong><p class="loginHelp">${detail}</p>${button}</div>`;};
+  let latestConnections=null;
+  const applyLink=(link,name,provider)=>{if(!link)return;const authorized=Boolean(provider?.authorized);link.classList.toggle('connected',authorized);link.textContent=authorized?`${name.toUpperCase()} CONNECTED`:`CONNECT ${name.toUpperCase()}`;link.href=authorized?'#':(provider?.connectUrl||'#');link.onclick=authorized?event=>{event.preventDefault();openConnections();}:null;};
+  const readConnections=async()=>{const response=await fetch('/api/connections',{credentials:'same-origin',cache:'no-store'});if(response.status===401)return null;let data={};try{data=await response.json();}catch{}if(!response.ok)throw new Error(data.error||`Connections check failed ${response.status}`);latestConnections=data;applyLink(googleLink,'Google',data.google);applyLink(quickBooksLink,'QuickBooks',data.quickbooks);return data;};
+  const openConnections=async()=>{statusButton.disabled=true;try{const data=latestConnections||await readConnections();if(!data){showToast('Board login expired. Tap Refresh and enter the Arborwise OS PIN.');if(refreshButton)refreshButton.click();return;}sheet.innerHTML=`<h2>Connections</h2>${connectionRow('Google',data.google||{})}${connectionRow('QuickBooks',data.quickbooks||{})}<div class="buttons"><button class="secondary" id="closeConnections">CLOSE</button></div>`;veil.hidden=false;document.getElementById('closeConnections').onclick=close;sheet.querySelectorAll('[data-connect]').forEach(button=>{button.onclick=()=>location.assign(button.dataset.connect);});}catch(error){showToast(error.message||'Could not open Connections.');}finally{statusButton.disabled=false;}};
+  statusButton.title='Tap to open Google and QuickBooks connections';statusButton.setAttribute('aria-label','Open Google and QuickBooks connections');statusButton.onclick=openConnections;
+  readConnections().catch(()=>{});window.addEventListener('arborwise:data-ready',()=>readConnections().catch(()=>{}));
+});
 </script>
 </body>
 </html>
