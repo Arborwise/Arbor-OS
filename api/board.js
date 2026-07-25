@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {json,fail,method} from '../lib/http.js';
 import {requireSession} from '../lib/auth.js';
-import {sheetRows} from '../lib/google.js';
+import {sheetBatch} from '../lib/google.js';
 import {db,initDb} from '../lib/db.js';
 
 const TIME_ZONE='America/Chicago';
@@ -189,7 +189,9 @@ export default async function handler(req,res){
     requireSession(req);
     res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
 
-    const results=await Promise.allSettled(SHEETS.map(sheet=>sheetRows(sheet.name,sheet.range)));
+    let results;
+    try{results=await sheetBatch(SHEETS);}
+    catch(error){results=SHEETS.map(()=>({status:'rejected',reason:error}));}
     const warnings=[],available=[];
     let firstError=null;
     results.forEach((result,index)=>{
