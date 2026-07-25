@@ -8,6 +8,8 @@ import records from './records.js';
 import setup from './setup.js';
 import state from './state.js';
 
+export const maxDuration=60;
+
 const routes={board,connections,data,health,login,logout,records,setup,state};
 
 export default async function handler(req,res){
