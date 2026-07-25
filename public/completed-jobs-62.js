@@ -4,7 +4,13 @@
   const main=document.getElementById('main');
   if(!tabs||!main)return;
 
-  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const icons={
+    call:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.7 15.7 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.27.55 3.46.55A1.14 1.14 0 0 1 21 16.65V20a1.14 1.14 0 0 1-1.14 1.14A17 17 0 0 1 2.86 4.14 1.14 1.14 0 0 1 4 3h3.35A1.14 1.14 0 0 1 8.5 4.14c0 1.2.19 2.36.55 3.46a1 1 0 0 1-.25 1z"/></svg>',
+    text:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 5h10v2H7zm0 4h7v2H7z"/></svg>',
+    email:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm9 7 8-5H4z"/></svg>',
+    map:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11a2.5 2.5 0 0 0 0-5z"/></svg>'
+  };
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
   const money=value=>Number(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(value)):'';
   const completed=item=>{
     const status=String(item?.status||item?.rawStatus||'').toLowerCase();
@@ -15,7 +21,7 @@
     return item?.type==='job'&&/cancel|declin|reject/.test(status);
   };
   const dateValue=item=>String(item?.workDate||item?.followUp||'');
-  const action=(kind,href,label,extra='')=>`<a class="recordAction ${kind}" href="${href}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}><span class="completedActionText">${kind.toUpperCase()}</span></a>`;
+  const action=(kind,href,label,extra='')=>`<a class="recordAction ${kind}" href="${href}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}>${icons[kind]}<span>${kind.toUpperCase()}</span></a>`;
   const card=item=>{
     const phone=String(item.phone||'').replace(/[^0-9+]/g,'');
     const actions=[];
@@ -49,7 +55,6 @@
     .completedJob62{opacity:1!important;filter:none!important;background:linear-gradient(90deg,#eef6ed 0,#fff 38%)!important;border-color:#9fba9f!important}
     .completedJob62 .name{text-decoration:none!important}
     .completedJob62:before{background:#6f9974!important}
-    .completedActionText{position:static!important;width:auto!important;height:auto!important;margin:0!important;clip:auto!important;overflow:visible!important;font-size:11px;font-weight:950}
   `;
   document.head.appendChild(style);
 
