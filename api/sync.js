@@ -2,6 +2,8 @@ import {json,fail,method} from '../lib/http.js';
 import {requireCronOrSession} from '../lib/auth.js';
 import {runSync} from '../lib/sync.js';
 
+export const maxDuration=60;
+
 export default async function handler(req,res){
   try{
     method(req,['GET','POST']);
