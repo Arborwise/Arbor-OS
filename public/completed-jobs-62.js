@@ -90,6 +90,5 @@
   window.addEventListener('arborwise:data-ready',queue);
   const observer=new MutationObserver(()=>{if(active())queue();});
   observer.observe(tabs,{childList:true,subtree:true});
-  observer.observe(main,{childList:true});
   queue();
 })();
