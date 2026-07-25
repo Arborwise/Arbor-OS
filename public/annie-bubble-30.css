@@ -1,35 +1,38 @@
-/* Compact Annie speech bubble: only as large as the current message. */
+/* Small Annie speech bubble: only as large as the current message. */
 #annieBubble.bubble{
   position:fixed;
   z-index:26;
-  left:52px;
-  bottom:137px;
+  left:48px;
+  bottom:138px;
   width:max-content;
   min-width:0;
-  max-width:min(205px,calc(100vw - 64px));
+  max-width:min(175px,calc(100vw - 60px));
   height:auto;
   min-height:0;
   max-height:none;
+  aspect-ratio:auto;
   overflow:visible;
-  padding:9px 12px 10px;
+  padding:7px 10px 8px;
   background:#fff;
   border:2px solid #17402b;
-  border-radius:20px 22px 20px 17px;
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
+  border-radius:16px 18px 15px 17px;
+  box-shadow:0 3px 8px rgba(0,0,0,.17);
   color:#18231c;
   pointer-events:auto;
-  transform-origin:12px 100%;
+  filter:none;
+  transform-origin:11px 100%;
   animation:annieBubblePop .14s ease-out;
 }
 
-/* One short tail aimed directly at Annie's head. */
+/* One short curved tail aimed at Annie's head. */
 #annieBubble.bubble::before{
-  content:"";
+  content:""!important;
+  display:block!important;
   position:absolute;
-  left:10px;
-  bottom:-9px;
-  width:15px;
-  height:15px;
+  left:9px;
+  bottom:-8px;
+  width:12px;
+  height:12px;
   background:#fff;
   border-left:2px solid #17402b;
   border-bottom:2px solid #17402b;
@@ -38,10 +41,10 @@
 }
 
 #annieBubble.bubble::after{content:none!important;display:none!important}
-#annieBubble .annieCloudArt{display:none!important}
+#annieBubble .annieCloudArt,#annieBubble .annieCloudShape{display:none!important}
 
 #annieBubble .annieCloudText{
-  position:relative;
+  position:static;
   z-index:1;
   display:block;
   margin:0;
@@ -49,35 +52,36 @@
   background:transparent;
   border:0;
   color:#18231c;
-  font-size:12px;
+  font-size:11.5px;
   font-weight:800;
-  line-height:1.25;
+  line-height:1.22;
   letter-spacing:0;
   text-align:left;
   white-space:normal;
+  text-wrap:pretty;
   overflow-wrap:break-word;
   word-break:normal;
   hyphens:none;
 }
 
-#annieBubble .annieCloudText.isLong{font-size:11.5px;line-height:1.23}
-#annieBubble .annieCloudText.isExtraLong{font-size:11px;line-height:1.21}
+#annieBubble .annieCloudText.isLong{font-size:11px;line-height:1.2}
+#annieBubble .annieCloudText.isExtraLong{font-size:10.6px;line-height:1.18}
 
 @keyframes annieBubblePop{
-  from{opacity:0;transform:scale(.94) translateY(2px)}
+  from{opacity:0;transform:scale(.95) translateY(2px)}
   to{opacity:1;transform:scale(1) translateY(0)}
 }
 
 @media(max-width:390px){
   #annieBubble.bubble{
-    left:49px;
-    bottom:135px;
-    max-width:min(188px,calc(100vw - 58px));
-    padding:8px 11px 9px;
+    left:45px;
+    bottom:136px;
+    max-width:min(164px,calc(100vw - 55px));
+    padding:6px 9px 7px;
   }
-  #annieBubble .annieCloudText{font-size:11.5px}
-  #annieBubble .annieCloudText.isLong{font-size:11px}
-  #annieBubble .annieCloudText.isExtraLong{font-size:10.5px}
+  #annieBubble .annieCloudText{font-size:11px}
+  #annieBubble .annieCloudText.isLong{font-size:10.6px}
+  #annieBubble .annieCloudText.isExtraLong{font-size:10.2px}
 }
 
 @media(prefers-reduced-motion:reduce){#annieBubble.bubble{animation:none}}
