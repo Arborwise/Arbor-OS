@@ -4,12 +4,14 @@
     {"src": "api/app.js", "use": "@vercel/node"},
     {"src": "api/oauth.js", "use": "@vercel/node"},
     {"src": "api/sync.js", "use": "@vercel/node"},
+    {"src": "api/crew-board.js", "use": "@vercel/node"},
     {"src": "public/**", "use": "@vercel/static"}
   ],
   "headers": [
     {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/board-now.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/crew-board.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/board-live-54.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/boot-reveal-42.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/arborwise-personality-48.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
@@ -33,6 +35,7 @@
     {"source": "/api/state", "destination": "/api/app.js?route=state"},
     {"source": "/api/health", "destination": "/api/app.js?route=health"},
     {"source": "/api/sync", "destination": "/api/sync.js"},
+    {"source": "/api/crew-board", "destination": "/api/crew-board.js"},
     {"source": "/api/oauth/google/start", "destination": "/api/oauth.js?provider=google&action=start"},
     {"source": "/api/oauth/google/callback", "destination": "/api/oauth.js?provider=google&action=callback"},
     {"source": "/api/oauth/quickbooks/start", "destination": "/api/oauth.js?provider=quickbooks&action=start"},
