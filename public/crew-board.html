@@ -17,14 +17,14 @@
     .section.today{background:var(--green);border-color:var(--green);color:#fff}.section.coming{background:var(--blue);border-color:#6e9fcf;color:var(--blueInk)}.section.unscheduled{background:#eee9de;border-color:#a99d88;color:#51483b}.section.completed{background:#e5e8e5;border-color:#98a398;color:#465048}
     .card{position:relative;margin:0 0 11px;padding:14px 14px 13px 18px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 3px 9px rgba(30,45,35,.07);overflow:hidden}.card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:#4b83b8}.card.today{background:linear-gradient(90deg,#e8f5eb,#fff 40%);border-color:#70a67d}.card.today:before{background:#1f7042}.card.completed{opacity:.72;background:#f1f1ed}.card.completed:before{background:#7c8b7c}
     .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.id{font-size:11px;font-weight:900;color:#657067}.status{padding:5px 8px;border-radius:999px;background:#e8eef7;color:#244f7d;font-size:11px;font-weight:900}.name{font-size:19px;font-weight:950;margin-top:4px}.address{font-size:13px;font-weight:750;margin-top:2px}.service{margin-top:8px;font-size:14px;line-height:1.35}.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.pill{padding:6px 8px;border:1px solid #9da89f;border-radius:999px;font-size:11px;font-weight:850;background:#f6f8f6}.pill.date{background:#edf6ff;border-color:#8db4d9;color:#234f76}.pill.crew{background:#fff6df;border-color:#cfaa69;color:#754d16}
-    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.actions a{display:flex;align-items:center;justify-content:center;min-height:43px;border:1.5px solid var(--green);border-radius:11px;text-decoration:none;color:var(--green);font-size:12px;font-weight:950;background:#fff}
+    .actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:11px}.actions a{display:flex;align-items:center;justify-content:center;min-height:48px;border:1.5px solid var(--green);border-radius:12px;text-decoration:none;color:var(--green);background:#fff;position:relative;touch-action:manipulation}.actions a.text{border-color:#e4590c;color:#b8490a}.actions a.map{border-color:#d89a2b;color:#755000}.actions a svg{display:block;width:26px;height:26px;fill:currentColor}.actions a span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.actions a:active{transform:scale(.96)}
     .notesBox{margin-top:12px;padding-top:11px;border-top:1px solid #e1ddd4}.notesBox label{display:block;font-size:12px;font-weight:950;margin-bottom:5px}.notesBox textarea{width:100%;min-height:74px;resize:vertical;border:1.5px solid #9ea9a1;border-radius:11px;padding:9px 10px;font:inherit;font-size:13px;line-height:1.35;background:#fff}.notesRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px}.save{min-height:39px;padding:0 14px;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:950}.save:disabled{opacity:.55}.saved{font-size:11px;font-weight:800;color:#376244}
     .empty,.error{padding:16px;border-radius:13px;background:#fff;border:1px solid var(--line);font-weight:800}.error{background:#f8e6e3;border-color:#ca8279;color:#762f28}
   </style>
 </head>
 <body>
 <header>
-  <img src="/assets/arborwise-logo.png?crew=1" alt="Arborwise">
+  <img src="/assets/arborwise-logo.png?crew=2" alt="Arborwise">
   <h1>Crew Board</h1>
   <div class="sub">Schedule, job details, contact tools, and crew notes — no prices</div>
   <div id="status">Opening current jobs…</div>
@@ -37,15 +37,23 @@
   const main=document.getElementById('main');
   const status=document.getElementById('status');
   const endpoint=`/api/crew-board?access=${encodeURIComponent(access)}`;
+  const icons={
+    call:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.7 15.7 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.27.55 3.46.55A1.14 1.14 0 0 1 21 16.65V20a1.14 1.14 0 0 1-1.14 1.14A17 17 0 0 1 2.86 4.14 1.14 1.14 0 0 1 4 3h3.35A1.14 1.14 0 0 1 8.5 4.14c0 1.2.19 2.36.55 3.46a1 1 0 0 1-.25 1z"/></svg>',
+    text:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 5h10v2H7zm0 4h7v2H7z"/></svg>',
+    map:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11a2.5 2.5 0 0 0 0-5z"/></svg>'
+  };
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const todayIso=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const friendly=iso=>{if(!iso)return '';const [y,m,d]=iso.split('-').map(Number);return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'}).format(new Date(Date.UTC(y,m-1,d,12)));};
-  const active=item=>!['Completed','Cancelled'].includes(item.status);
+  const contactAction=(kind,href,label,extra='')=>`<a class="${kind}" href="${href}" aria-label="${esc(label)}" title="${esc(label)}" ${extra}>${icons[kind]}<span>${kind.toUpperCase()}</span></a>`;
   function card(item,today){
     const phone=String(item.phone||'').replace(/[^0-9+]/g,'');
     const actions=[];
-    if(phone){actions.push(`<a href="tel:${esc(phone)}">CALL</a>`,`<a href="sms:${esc(phone)}">TEXT</a>`);}
-    if(item.address)actions.push(`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}" target="_blank" rel="noopener">MAP</a>`);
+    if(phone){
+      actions.push(contactAction('call',`tel:${esc(phone)}`,`Call ${item.customer||'customer'}`));
+      actions.push(contactAction('text',`sms:${esc(phone)}`,`Text ${item.customer||'customer'}`));
+    }
+    if(item.address)actions.push(contactAction('map',`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}`,`Map ${item.customer||'customer'}`,'target="_blank" rel="noopener"'));
     return `<article class="card ${item.workDate===today?'today':''} ${item.status==='Completed'?'completed':''}" data-id="${esc(item.id)}">
       <div class="top"><span class="id">${esc(item.id)}</span><span class="status">${esc(item.status)}</span></div>
       <div class="name">${esc(item.customer)}</div>
