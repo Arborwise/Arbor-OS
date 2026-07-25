@@ -2,6 +2,7 @@
 (() => {
   const STORAGE_KEY='arborwise-live-board-v24';
   const TIME_ZONE='America/Chicago';
+  const SVG_NS='http://www.w3.org/2000/svg';
   const annie=document.getElementById('annieButton');
   const bubble=document.getElementById('annieBubble');
   if(!annie||!bubble)return;
@@ -50,7 +51,7 @@
 
   bubble.setAttribute('role','status');
   bubble.setAttribute('aria-live','polite');
-  bubble.dataset.cloudStyle='compact-59';
+  bubble.dataset.cloudStyle='three-soft-curves-60';
   annie.setAttribute('aria-controls','annieBubble');
   annie.setAttribute('aria-expanded','false');
 
@@ -61,12 +62,29 @@
   }
   function buildCloud(message){
     bubble.replaceChildren();
+
+    const shape=document.createElementNS(SVG_NS,'svg');
+    shape.classList.add('annieBubbleShape');
+    shape.setAttribute('viewBox','0 0 210 100');
+    shape.setAttribute('preserveAspectRatio','none');
+    shape.setAttribute('aria-hidden','true');
+    shape.setAttribute('focusable','false');
+    const path=document.createElementNS(SVG_NS,'path');
+    path.setAttribute('d','M12 32 C14 12 38 5 62 22 C78 2 112 2 128 22 C150 5 194 12 198 34 L198 77 Q198 92 182 92 H28 Q12 92 12 76 Z');
+    shape.append(path);
+
+    const trail=document.createElement('span');
+    trail.className='annieBubbleTrail';
+    trail.setAttribute('aria-hidden','true');
+    trail.append(document.createElement('i'),document.createElement('i'),document.createElement('i'));
+
     const text=document.createElement('span');
     text.className='annieCloudText';
     if(message.length>64)text.classList.add('isExtraLong');
     else if(message.length>52)text.classList.add('isLong');
     text.textContent=message;
-    bubble.append(text);
+
+    bubble.append(shape,trail,text);
   }
   function show(next=true){
     const messages=buildMessages();
@@ -80,9 +98,9 @@
     window.annieTimer=setTimeout(hide,8000);
   }
   function greet(){
-    if(greeted||sessionStorage.getItem('arborwise-annie-greeted-v59'))return;
+    if(greeted||sessionStorage.getItem('arborwise-annie-greeted-v60'))return;
     greeted=true;
-    sessionStorage.setItem('arborwise-annie-greeted-v59','1');
+    sessionStorage.setItem('arborwise-annie-greeted-v60','1');
     setTimeout(()=>show(false),250);
   }
 
@@ -104,5 +122,5 @@
 
   buildMessages();
   setTimeout(greet,2600);
-  window.ARBORWISE_ANNIE_VERSION='59';
+  window.ARBORWISE_ANNIE_VERSION='60';
 })();
