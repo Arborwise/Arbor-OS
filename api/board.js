@@ -105,14 +105,18 @@ function jobRecord(row,warnings,seen,source){
     closed:status==='Completed'||status==='Cancelled',completionType:completion,source
   };
 }
-function estimateRecord(row,jobKeys,source){
+function estimateIdentity(row){
   const id=clean(pick(row,['Estimate #','Estimate Number','Estimate ID','Record #','ID']));
   const name=clean(pick(row,['Customer Name','Customer','Name']));
+  return {id,name,recognized:Boolean(id&&name)};
+}
+function estimateRecord(row,jobKeys,source){
+  const {id,name}=estimateIdentity(row);
   if(!id||!name||jobKeys.has(normalizedId(id).toUpperCase()))return null;
   const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';
   const lower=rawStatus.toLowerCase();
   const accepted=/approved|accepted|scheduling/.test(lower);
-  const closed=/declin|reject|cancel|converted|closed/.test(lower);
+  const closed=/declin|reject|cancel|converted|closed|complete|paid/.test(lower);
   const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';
   const email=clean(pick(row,['Email','Customer Email']));
   const notes=[
@@ -209,23 +213,23 @@ export default async function handler(req,res){
     const jobKeys=new Set(jobItems.map(item=>normalizedId(item.id).toUpperCase()));
     const estimatesById=new Map();
     for(const currentSheet of available.filter(item=>item.kind==='est')){
-      let parsed=0;
+      let recognized=0;
       for(const row of currentSheet.rows){
+        if(estimateIdentity(row).recognized)recognized++;
         const record=estimateRecord(row,jobKeys,currentSheet.name);
         if(!record)continue;
-        parsed++;
         const key=normalizedId(record.id).toUpperCase();
         estimatesById.set(key,mergeRecord(estimatesById.get(key),record));
       }
-      if(currentSheet.rows.length&&parsed===0)warnings.push(`${currentSheet.name} returned ${currentSheet.rows.length} rows but none matched the expected estimate columns`);
+      if(currentSheet.rows.length&&!recognized)warnings.push(`${currentSheet.name} has data outside the expected estimate columns`);
     }
     if(jobsSheet?.rows.length&&!jobItems.length)warnings.push(`Jobs returned ${jobsSheet.rows.length} rows but none matched the expected job columns`);
 
     const directRecords=[...jobItems,...estimatesById.values()];
-    const currentKeys=new Set(directRecords.map(record=>normalizedId(record.id).toUpperCase()));
     const byId=new Map();
+    const liveSheetsComplete=available.length===SHEETS.length;
 
-    if(process.env.DATABASE_URL){
+    if(process.env.DATABASE_URL&&!liveSheetsComplete){
       try{
         await initDb();
         const stored=await db().query(
@@ -234,9 +238,6 @@ export default async function handler(req,res){
         for(const row of stored.rows){
           const key=normalizedId(row.id).toUpperCase();
           if(!key)continue;
-          const parts=sourceParts(row.source);
-          const onlyStoredSheet=parts.length>0&&parts.every(part=>part==='sheet');
-          if(available.length&&onlyStoredSheet&&!currentKeys.has(key))continue;
           const record=databaseRecord(row);
           byId.set(key,mergeRecord(byId.get(key),record));
         }
@@ -253,6 +254,7 @@ export default async function handler(req,res){
     const items=[...byId.values()];
     if(!items.length)throw firstError||new Error('No current Google Sheet or synchronized operations records were available');
     if(!available.length)warnings.unshift('Google Sheets are temporarily unavailable; showing the most recent synchronized operations data.');
+    else if(!liveSheetsComplete)warnings.unshift('One or more live Google Sheets were unavailable; stored operations were used only as fallback.');
 
     const sourceCounts={};
     for(const item of items){
@@ -261,14 +263,14 @@ export default async function handler(req,res){
 
     json(res,200,{
       ok:true,
-      source:available.length?'Google Sheets + synchronized QuickBooks and Calendar':'Synchronized QuickBooks, Calendar, and stored operations',
+      source:liveSheetsComplete?'Live Google Sheets':available.length?'Live Google Sheets with stored fallback':'Stored operations fallback',
       readAt:new Date().toISOString(),
       timeZone:TIME_ZONE,
       dataVersion:stableVersion(items),
       warnings,
       sourceCounts,
       rawCounts:Object.fromEntries(available.map(sheet=>[sheet.name,sheet.rows.length])),
-      staleSources:available.length?[]:['Google Sheets'],
+      staleSources:liveSheetsComplete?[]:SHEETS.filter(sheet=>!available.some(current=>current.name===sheet.name)).map(sheet=>sheet.name),
       items
     });
   }catch(error){
