@@ -5,23 +5,271 @@ import {sheetRows} from '../lib/google.js';
 import {db,initDb} from '../lib/db.js';
 
 const TIME_ZONE='America/Chicago';
-const SHEETS=[{name:'Jobs',range:'A:AZ',kind:'job'},{name:'Master Estimates',range:'A:AZ',kind:'est'},{name:"Today's Estimates",range:'A:AZ',kind:'est'}];
+const SHEETS=[
+  {name:'Jobs',range:'A:AZ',kind:'job'},
+  {name:'Master Estimates',range:'A:AZ',kind:'est'},
+  {name:"Today's Estimates",range:'A:AZ',kind:'est'}
+];
+
 function clean(value){return String(value??'').trim();}
 function money(value){const parsed=Number(clean(value).replace(/[$,]/g,''));return Number.isFinite(parsed)?parsed:0;}
 function normalizedKey(value){return clean(value).toLowerCase().replace(/[^a-z0-9]+/g,'');}
 function rowIndex(row){const index=new Map();for(const [key,value] of Object.entries(row||{}))index.set(normalizedKey(key),value);return index;}
-function pick(row,names){for(const name of names){if(Object.prototype.hasOwnProperty.call(row||{},name)&&clean(row[name])!=='')return row[name];}const index=rowIndex(row);for(const name of names){const value=index.get(normalizedKey(name));if(clean(value)!=='')return value;}return '';}
-function isoDate(value){const text=clean(value);if(!text)return '';const iso=text.match(/^(\d{4})-(\d{2})-(\d{2})/);if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;const us=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);if(!us)return '';const year=Number(us[3].length===2?`20${us[3]}`:us[3]);const month=Number(us[1]),day=Number(us[2]);const check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return '';return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
-function statusForJob(raw){const value=clean(raw);const lower=value.toLowerCase();if(/hold|paused|waiting verification|verify before/.test(lower))return 'Hold';if(/cancel|declin|reject/.test(lower))return 'Cancelled';if(/complete|paid|done/.test(lower))return 'Completed';if(/in progress|working|started/.test(lower))return 'In Progress';if(/scheduled|service/.test(lower))return 'Scheduled';if(/approved|accepted|scheduling/.test(lower))return 'Scheduling';return value||'Open';}
-function completionType(status,notes,crew){if(status!=='Completed')return null;const text=`${notes} ${crew}`.toLowerCase();if(text.includes('homeowner'))return 'homeowner';if(/kw landscaping|dallas crew|subcontract/.test(text))return 'subcontractor';return 'arborwise';}
-function categoryFor(name,crew,email,notes=''){const text=`${name} ${crew} ${email} ${notes}`.toLowerCase();if(text.includes('kw landscaping'))return 'KW';if(text.includes('sbbmanagement')||text.includes('sbb management')||text.includes('sicily laguna')||text.includes('venetian hoa'))return 'SBB';if(text.includes('goodwin'))return 'GOODWIN';if(text.includes('kanam'))return 'KANAM';return 'RESIDENTIAL';}
-function normalizedCategory(value,fallback='RESIDENTIAL'){const category=clean(value).toUpperCase();return category==='ARBORWISE'?fallback:(category||fallback);}
+function pick(row,names){
+  for(const name of names)if(Object.prototype.hasOwnProperty.call(row||{},name)&&clean(row[name])!=='')return row[name];
+  const index=rowIndex(row);
+  for(const name of names){const value=index.get(normalizedKey(name));if(clean(value)!=='')return value;}
+  return '';
+}
+function isoDate(value){
+  const text=clean(value);
+  if(!text)return '';
+  const iso=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const us=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+  if(!us)return '';
+  const year=Number(us[3].length===2?`20${us[3]}`:us[3]);
+  const month=Number(us[1]),day=Number(us[2]);
+  const check=new Date(Date.UTC(year,month-1,day));
+  if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return '';
+  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+function statusForJob(raw){
+  const value=clean(raw),lower=value.toLowerCase();
+  if(/hold|paused|waiting verification|verify before/.test(lower))return 'Hold';
+  if(/cancel|declin|reject/.test(lower))return 'Cancelled';
+  if(/complete|paid|done/.test(lower))return 'Completed';
+  if(/in progress|working|started/.test(lower))return 'In Progress';
+  if(/scheduled|service/.test(lower))return 'Scheduled';
+  if(/approved|accepted|scheduling/.test(lower))return 'Scheduling';
+  return value||'Open';
+}
+function completionType(status,notes,crew){
+  if(status!=='Completed')return null;
+  const text=`${notes} ${crew}`.toLowerCase();
+  if(text.includes('homeowner'))return 'homeowner';
+  if(/kw landscaping|dallas crew|subcontract/.test(text))return 'subcontractor';
+  return 'arborwise';
+}
+function categoryFor(name,crew,email,notes=''){
+  const text=`${name} ${crew} ${email} ${notes}`.toLowerCase();
+  if(text.includes('kw landscaping'))return 'KW';
+  if(/sbbmanagement|sbb management|sicily laguna|venetian hoa/.test(text))return 'SBB';
+  if(text.includes('goodwin'))return 'GOODWIN';
+  if(text.includes('kanam'))return 'KANAM';
+  return 'RESIDENTIAL';
+}
+function normalizedCategory(value,fallback='RESIDENTIAL'){
+  const category=clean(value).toUpperCase();
+  return category==='ARBORWISE'?fallback:(category||fallback);
+}
 function normalizedId(value){return clean(value).replace(/^WO-/i,'');}
-function addressFrom(row){const street=clean(pick(row,['Street Address','Address','Job Address','Service Address']));const city=clean(pick(row,['City']));const state=clean(pick(row,['State','Province']));const zip=clean(pick(row,['ZIP','Zip','Postal Code']));if(!street)return [city,state,zip].filter(Boolean).join(', ');const streetHasLocality=city&&street.toLowerCase().includes(city.toLowerCase());return streetHasLocality?[street,state,zip].filter(Boolean).join(', '):[street,[city,state,zip].filter(Boolean).join(', ')].filter(Boolean).join(', ');}
-function jobRecord(row,warnings,seen,source){const id=clean(pick(row,['Job ID','Job #','Job Number','Work Order','Work Order #','Record #','ID']));if(!id)return null;const key=`JOB-${normalizedId(id).toUpperCase()}`;if(seen.has(key)){warnings.push(`Duplicate Jobs ID: ${id}`);return null;}seen.add(key);const rawStatus=clean(pick(row,['Status','Job Status']));const status=statusForJob(rawStatus);const date=isoDate(pick(row,['Scheduled Date','Job Date','Work Date','Date']));const crew=clean(pick(row,['Crew Lead','Assigned To','Assigned','Crew']));const notes=clean(pick(row,['Notes','Internal Notes','Job Notes','Customer Description / Notes']));if((status==='Scheduled'||status==='In Progress')&&!date)warnings.push(`${id} is ${status} without a scheduled date`);if(status==='Hold'&&(date||crew))warnings.push(`${id} is on Hold but still has a date or crew assignment`);const completion=completionType(status,notes,crew);const name=clean(pick(row,['Customer','Customer Name','Name']));const email=clean(pick(row,['Email','Customer Email']));return {id,type:'job',name,address:addressFrom(row),city:clean(pick(row,['City'])),phone:clean(pick(row,['Phone','Phone Number','Customer Phone'])),email,service:clean(pick(row,['Service','Service Needed','Work To Do','Work Description','Description'])),equipment:clean(pick(row,['Equipment Needed','Equipment'])),amount:money(pick(row,['Actual Revenue','Estimate Amount','Amount','Total'])),laborCost:money(pick(row,['Labor Cost','Labor'])),otherCost:money(pick(row,['Other Cost','Material Cost','Materials'])),category:categoryFor(name,crew,email,notes),who:crew||'Unassigned',status,rawStatus,workDate:date,workTime:clean(pick(row,['Arrival Window','Appointment Time','Time','Time Window'])),followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date'])),notes,beforePhotos:clean(pick(row,['Before Photos','Before Photo'])),afterPhotos:clean(pick(row,['After Photos','After Photo','Photos'])),closed:status==='Completed'||status==='Cancelled',completionType:completion,source};}
-function estimateRecord(row,warnings,jobKeys,source){const id=clean(pick(row,['Estimate #','Estimate Number','Estimate ID','Record #','ID']));const name=clean(pick(row,['Customer Name','Customer','Name']));if(!id||!name)return null;if(jobKeys.has(normalizedId(id).toUpperCase()))return null;const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';const lower=rawStatus.toLowerCase();const accepted=/approved|accepted|scheduling/.test(lower);const closed=/declin|reject|cancel|converted|closed/.test(lower);const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';const email=clean(pick(row,['Email','Customer Email']));const notes=[clean(pick(row,['Customer Description / Notes','Customer Notes','Notes'])),clean(pick(row,['Estimator Notes','Internal Notes'])),clean(pick(row,['Follow-Up Reason','Follow Up Reason']))].filter(Boolean).join(' ');return {id,type:accepted?'job':'est',name,address:addressFrom(row),city:clean(pick(row,['City'])),phone:clean(pick(row,['Phone Number','Phone','Customer Phone'])),email,service:clean(pick(row,['Service Needed','Service','Work To Do','Work Description','Description'])),equipment:'',amount:money(pick(row,['Amount','Total','Estimate Total','Estimate Amount'])),laborCost:0,otherCost:0,category:categoryFor(name,assigned,email,notes),who:assigned,status:accepted?'Scheduling':rawStatus,rawStatus,workDate:isoDate(pick(row,['Appointment Date','Scheduled Date','Date'])),workTime:clean(pick(row,['Appointment Time','Arrival Window','Time'])),followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date','Follow Up Date'])),notes,beforePhotos:'',afterPhotos:clean(pick(row,['Photos','After Photos'])),closed,completionType:null,source};}
-function databaseRecord(row){const status=row.kind==='job'?statusForJob(row.status):clean(row.status)||'Open';const notes=clean(row.notes);const who=clean(row.assigned_to)||'Unassigned';return {id:clean(row.id),type:row.kind==='job'?'job':'est',name:clean(row.customer_name),address:clean(row.address),city:'',phone:clean(row.phone),email:clean(row.email),service:clean(row.service),equipment:'',amount:money(row.amount),laborCost:0,otherCost:0,category:normalizedCategory(row.category,categoryFor(row.customer_name,who,row.email,notes)),who,status,rawStatus:clean(row.status),workDate:row.work_date?String(row.work_date).slice(0,10):'',workTime:clean(row.work_time),followUp:row.follow_up_date?String(row.follow_up_date).slice(0,10):'',notes,beforePhotos:'',afterPhotos:'',closed:Boolean(row.closed)||status==='Completed'||status==='Cancelled',completionType:completionType(status,notes,who),source:row.source==='quickbooks'?'QuickBooks':'Arborwise OS'};}
-function mergeRecord(existing,incoming){if(!existing)return incoming;const merged={...existing};for(const [key,value] of Object.entries(incoming)){if(key==='source')continue;if(value===''||value===null||value===undefined)continue;if(['amount','laborCost','otherCost'].includes(key)&&Number(value)===0&&Number(existing[key]||0)!==0)continue;merged[key]=value;}const sources=[...new Set(`${existing.source||''} + ${incoming.source||''}`.split(' + ').map(clean).filter(Boolean))];merged.source=sources.join(' + ');return merged;}
-function stableVersion(items){const stable=items.map(item=>[item.id,item.type,item.status,item.workDate,item.workTime,item.who,item.phone,item.email,item.address,item.service,item.notes,item.amount,item.laborCost,item.otherCost,item.closed,item.completionType]);return createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0,20);}
+function addressFrom(row){
+  const street=clean(pick(row,['Street Address','Address','Job Address','Service Address']));
+  const city=clean(pick(row,['City']));
+  const state=clean(pick(row,['State','Province']));
+  const zip=clean(pick(row,['ZIP','Zip','Postal Code']));
+  if(!street)return [city,state,zip].filter(Boolean).join(', ');
+  const streetHasLocality=city&&street.toLowerCase().includes(city.toLowerCase());
+  return streetHasLocality?[street,state,zip].filter(Boolean).join(', '):[street,[city,state,zip].filter(Boolean).join(', ')].filter(Boolean).join(', ');
+}
+function jobRecord(row,warnings,seen,source){
+  const id=clean(pick(row,['Job ID','Job #','Job Number','Work Order','Work Order #','Record #','ID']));
+  if(!id)return null;
+  const key=`JOB-${normalizedId(id).toUpperCase()}`;
+  if(seen.has(key)){warnings.push(`Duplicate Jobs ID: ${id}`);return null;}
+  seen.add(key);
+  const rawStatus=clean(pick(row,['Status','Job Status']));
+  const status=statusForJob(rawStatus);
+  const date=isoDate(pick(row,['Scheduled Date','Job Date','Work Date','Date']));
+  const crew=clean(pick(row,['Crew Lead','Assigned To','Assigned','Crew']));
+  const notes=clean(pick(row,['Notes','Internal Notes','Job Notes','Customer Description / Notes']));
+  if((status==='Scheduled'||status==='In Progress')&&!date)warnings.push(`${id} is ${status} without a scheduled date`);
+  if(status==='Hold'&&(date||crew))warnings.push(`${id} is on Hold but still has a date or crew assignment`);
+  const completion=completionType(status,notes,crew);
+  const name=clean(pick(row,['Customer','Customer Name','Name']));
+  const email=clean(pick(row,['Email','Customer Email']));
+  return {
+    id,type:'job',name,address:addressFrom(row),city:clean(pick(row,['City'])),
+    phone:clean(pick(row,['Phone','Phone Number','Customer Phone'])),email,
+    service:clean(pick(row,['Service','Service Needed','Work To Do','Work Description','Description'])),
+    equipment:clean(pick(row,['Equipment Needed','Equipment'])),
+    amount:money(pick(row,['Actual Revenue','Estimate Amount','Amount','Total'])),
+    laborCost:money(pick(row,['Labor Cost','Labor'])),
+    otherCost:money(pick(row,['Other Cost','Material Cost','Materials'])),
+    category:categoryFor(name,crew,email,notes),who:crew||'Unassigned',status,rawStatus,
+    workDate:date,workTime:clean(pick(row,['Arrival Window','Appointment Time','Time','Time Window'])),
+    followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date'])),notes,
+    beforePhotos:clean(pick(row,['Before Photos','Before Photo'])),
+    afterPhotos:clean(pick(row,['After Photos','After Photo','Photos'])),
+    closed:status==='Completed'||status==='Cancelled',completionType:completion,source
+  };
+}
+function estimateRecord(row,jobKeys,source){
+  const id=clean(pick(row,['Estimate #','Estimate Number','Estimate ID','Record #','ID']));
+  const name=clean(pick(row,['Customer Name','Customer','Name']));
+  if(!id||!name||jobKeys.has(normalizedId(id).toUpperCase()))return null;
+  const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';
+  const lower=rawStatus.toLowerCase();
+  const accepted=/approved|accepted|scheduling/.test(lower);
+  const closed=/declin|reject|cancel|converted|closed/.test(lower);
+  const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';
+  const email=clean(pick(row,['Email','Customer Email']));
+  const notes=[
+    clean(pick(row,['Customer Description / Notes','Customer Notes','Notes'])),
+    clean(pick(row,['Estimator Notes','Internal Notes'])),
+    clean(pick(row,['Follow-Up Reason','Follow Up Reason']))
+  ].filter(Boolean).join(' ');
+  return {
+    id,type:accepted?'job':'est',name,address:addressFrom(row),city:clean(pick(row,['City'])),
+    phone:clean(pick(row,['Phone Number','Phone','Customer Phone'])),email,
+    service:clean(pick(row,['Service Needed','Service','Work To Do','Work Description','Description'])),
+    equipment:'',amount:money(pick(row,['Amount','Total','Estimate Total','Estimate Amount'])),
+    laborCost:0,otherCost:0,category:categoryFor(name,assigned,email,notes),who:assigned,
+    status:accepted?'Scheduling':rawStatus,rawStatus,
+    workDate:isoDate(pick(row,['Appointment Date','Scheduled Date','Date'])),
+    workTime:clean(pick(row,['Appointment Time','Arrival Window','Time'])),
+    followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date','Follow Up Date'])),
+    notes,beforePhotos:'',afterPhotos:clean(pick(row,['Photos','After Photos'])),
+    closed,completionType:null,source
+  };
+}
+function sourceParts(value){
+  return [...new Set(clean(value).split('+').map(part=>part.trim().toLowerCase()).filter(Boolean))];
+}
+function sourceLabel(value){
+  const labels={quickbooks:'QuickBooks',calendar:'Google Calendar',sheet:'Stored Google Sheets',app:'Arborwise OS'};
+  const parts=sourceParts(value).map(part=>labels[part]||part);
+  return parts.length?parts.join(' + '):'Arborwise OS';
+}
+function databaseRecord(row){
+  const status=row.kind==='job'?statusForJob(row.status):clean(row.status)||'Open';
+  const notes=clean(row.notes),who=clean(row.assigned_to)||'Unassigned';
+  return {
+    id:clean(row.id),type:row.kind==='job'?'job':'est',name:clean(row.customer_name),
+    address:clean(row.address),city:'',phone:clean(row.phone),email:clean(row.email),
+    service:clean(row.service),equipment:'',amount:money(row.amount),laborCost:0,otherCost:0,
+    category:normalizedCategory(row.category,categoryFor(row.customer_name,who,row.email,notes)),
+    who,status,rawStatus:clean(row.status),
+    workDate:row.work_date?String(row.work_date).slice(0,10):'',
+    workTime:clean(row.work_time),
+    followUp:row.follow_up_date?String(row.follow_up_date).slice(0,10):'',
+    notes,beforePhotos:'',afterPhotos:'',
+    closed:Boolean(row.closed)||status==='Completed'||status==='Cancelled',
+    completionType:completionType(status,notes,who),source:sourceLabel(row.source)
+  };
+}
+function mergeRecord(existing,incoming){
+  if(!existing)return incoming;
+  const merged={...existing};
+  const liveSheet=/^(Jobs|Master Estimates|Today's Estimates)$/.test(String(incoming.source||''));
+  const clearable=new Set(['workDate','workTime','followUp']);
+  for(const [key,value] of Object.entries(incoming)){
+    if(key==='source')continue;
+    if(liveSheet&&clearable.has(key)){merged[key]=value||'';continue;}
+    if(value===''||value===null||value===undefined)continue;
+    if(['amount','laborCost','otherCost'].includes(key)&&Number(value)===0&&Number(existing[key]||0)!==0)continue;
+    merged[key]=value;
+  }
+  const sources=[...new Set(`${existing.source||''} + ${incoming.source||''}`.split(' + ').map(clean).filter(Boolean))];
+  merged.source=sources.join(' + ');
+  return merged;
+}
+function stableVersion(items){
+  const stable=items.map(item=>[
+    item.id,item.type,item.status,item.workDate,item.workTime,item.who,item.phone,item.email,
+    item.address,item.service,item.notes,item.amount,item.laborCost,item.otherCost,item.closed,item.completionType
+  ]);
+  return createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0,20);
+}
 
-export default async function handler(req,res){try{method(req,['GET']);requireSession(req);res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');const results=await Promise.allSettled(SHEETS.map(sheet=>sheetRows(sheet.name,sheet.range)));const warnings=[];const available=[];let firstError=null;results.forEach((result,index)=>{const sheet=SHEETS[index];if(result.status==='fulfilled')available.push({...sheet,rows:result.value});else{firstError??=result.reason;warnings.push(`${sheet.name} could not be read: ${result.reason?.message||'unknown error'}`);}});if(!available.length)throw firstError||new Error('No Google Sheet tabs could be read');const seenJobs=new Set();const jobsSheet=available.find(sheet=>sheet.kind==='job');const jobItems=(jobsSheet?.rows||[]).map(row=>jobRecord(row,warnings,seenJobs,jobsSheet.name)).filter(Boolean);const jobKeys=new Set(jobItems.map(item=>normalizedId(item.id).toUpperCase()));const estimatesById=new Map();for(const sheet of available.filter(item=>item.kind==='est')){let parsed=0;for(const row of sheet.rows){const record=estimateRecord(row,warnings,jobKeys,sheet.name);if(!record)continue;parsed++;const key=normalizedId(record.id).toUpperCase();estimatesById.set(key,mergeRecord(estimatesById.get(key),record));}if(sheet.rows.length&&parsed===0)warnings.push(`${sheet.name} returned ${sheet.rows.length} rows but none matched the expected estimate columns`);}if(jobsSheet?.rows.length&&!jobItems.length)warnings.push(`Jobs returned ${jobsSheet.rows.length} rows but none matched the expected job columns`);const byId=new Map();if(process.env.DATABASE_URL){try{await initDb();const stored=await db().query("select * from records where source in ('quickbooks','app') order by updated_at desc");for(const row of stored.rows){const record=databaseRecord(row);if(record.id)byId.set(normalizedId(record.id).toUpperCase(),record);}}catch(error){warnings.push(`Stored QuickBooks records could not be read: ${error.message}`);}}for(const record of [...jobItems,...estimatesById.values()]){const key=normalizedId(record.id).toUpperCase();byId.set(key,mergeRecord(byId.get(key),record));}const items=[...byId.values()];const sourceCounts={};for(const item of items){for(const source of String(item.source||'Unknown').split(' + '))sourceCounts[source]=(sourceCounts[source]||0)+1;}json(res,200,{ok:true,source:'Google Sheets + synchronized QuickBooks',readAt:new Date().toISOString(),timeZone:TIME_ZONE,dataVersion:stableVersion(items),warnings,sourceCounts,rawCounts:Object.fromEntries(available.map(sheet=>[sheet.name,sheet.rows.length])),items});}catch(error){fail(res,error);}}
+export default async function handler(req,res){
+  try{
+    method(req,['GET']);
+    requireSession(req);
+    res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
+
+    const results=await Promise.allSettled(SHEETS.map(sheet=>sheetRows(sheet.name,sheet.range)));
+    const warnings=[],available=[];
+    let firstError=null;
+    results.forEach((result,index)=>{
+      const sheet=SHEETS[index];
+      if(result.status==='fulfilled')available.push({...sheet,rows:result.value});
+      else{
+        firstError??=result.reason;
+        warnings.push(`${sheet.name} could not be read: ${result.reason?.message||'unknown error'}`);
+      }
+    });
+
+    const seenJobs=new Set();
+    const jobsSheet=available.find(sheet=>sheet.kind==='job');
+    const jobItems=(jobsSheet?.rows||[]).map(row=>jobRecord(row,warnings,seenJobs,jobsSheet.name)).filter(Boolean);
+    const jobKeys=new Set(jobItems.map(item=>normalizedId(item.id).toUpperCase()));
+    const estimatesById=new Map();
+    for(const currentSheet of available.filter(item=>item.kind==='est')){
+      let parsed=0;
+      for(const row of currentSheet.rows){
+        const record=estimateRecord(row,jobKeys,currentSheet.name);
+        if(!record)continue;
+        parsed++;
+        const key=normalizedId(record.id).toUpperCase();
+        estimatesById.set(key,mergeRecord(estimatesById.get(key),record));
+      }
+      if(currentSheet.rows.length&&parsed===0)warnings.push(`${currentSheet.name} returned ${currentSheet.rows.length} rows but none matched the expected estimate columns`);
+    }
+    if(jobsSheet?.rows.length&&!jobItems.length)warnings.push(`Jobs returned ${jobsSheet.rows.length} rows but none matched the expected job columns`);
+
+    const directRecords=[...jobItems,...estimatesById.values()];
+    const currentKeys=new Set(directRecords.map(record=>normalizedId(record.id).toUpperCase()));
+    const byId=new Map();
+
+    if(process.env.DATABASE_URL){
+      try{
+        await initDb();
+        const stored=await db().query(
+          "select * from records where source not in ('seed','snapshot') and id not like 'TASK-%' order by updated_at desc"
+        );
+        for(const row of stored.rows){
+          const key=normalizedId(row.id).toUpperCase();
+          if(!key)continue;
+          const parts=sourceParts(row.source);
+          const onlyStoredSheet=parts.length>0&&parts.every(part=>part==='sheet');
+          if(available.length&&onlyStoredSheet&&!currentKeys.has(key))continue;
+          const record=databaseRecord(row);
+          byId.set(key,mergeRecord(byId.get(key),record));
+        }
+      }catch(error){
+        warnings.push(`Stored operations could not be read: ${error.message}`);
+      }
+    }
+
+    for(const record of directRecords){
+      const key=normalizedId(record.id).toUpperCase();
+      byId.set(key,mergeRecord(byId.get(key),record));
+    }
+
+    const items=[...byId.values()];
+    if(!items.length)throw firstError||new Error('No current Google Sheet or synchronized operations records were available');
+    if(!available.length)warnings.unshift('Google Sheets are temporarily unavailable; showing the most recent synchronized operations data.');
+
+    const sourceCounts={};
+    for(const item of items){
+      for(const source of String(item.source||'Unknown').split(' + '))sourceCounts[source]=(sourceCounts[source]||0)+1;
+    }
+
+    json(res,200,{
+      ok:true,
+      source:available.length?'Google Sheets + synchronized QuickBooks and Calendar':'Synchronized QuickBooks, Calendar, and stored operations',
+      readAt:new Date().toISOString(),
+      timeZone:TIME_ZONE,
+      dataVersion:stableVersion(items),
+      warnings,
+      sourceCounts,
+      rawCounts:Object.fromEntries(available.map(sheet=>[sheet.name,sheet.rows.length])),
+      staleSources:available.length?[]:['Google Sheets'],
+      items
+    });
+  }catch(error){
+    fail(res,error);
+  }
+}
