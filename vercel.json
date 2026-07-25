@@ -6,50 +6,22 @@
     {"src": "api/sync.js", "use": "@vercel/node"},
     {"src": "public/**", "use": "@vercel/static"}
   ],
+  "functions": {
+    "api/app.js": {"maxDuration": 60},
+    "api/oauth.js": {"maxDuration": 60},
+    "api/sync.js": {"maxDuration": 60}
+  },
   "headers": [
-    {
-      "source": "/",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    },
-    {
-      "source": "/index.html",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    },
-    {
-      "source": "/board-now.html",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    },
-    {
-      "source": "/board-live-54.js",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    },
-    {
-      "source": "/retired-board-data.js",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},
-        {"key": "Service-Worker-Allowed", "value": "/"}
-      ]
-    },
-    {
-      "source": "/boot-repair.js",
-      "headers": [
-        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}
-      ]
-    }
+    {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/board-now.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/board-live-54.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/boot-reveal-42.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/arborwise-personality-48.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/app.css", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/retired-board-data.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/sw.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},{"key": "Service-Worker-Allowed", "value": "/"}]},
+    {"source": "/boot-repair.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]}
   ],
   "rewrites": [
     {"source": "/board-live.js", "destination": "/public/retired-board-data.js"},
