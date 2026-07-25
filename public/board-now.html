@@ -10,17 +10,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Arborwise OS Board</title>
-  <link rel="manifest" href="/board-manifest.webmanifest?v=56">
+  <link rel="manifest" href="/board-manifest.webmanifest?v=57">
   <link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
   <link rel="apple-touch-icon" href="/assets/annie-launcher-v42.svg">
-  <link rel="stylesheet" href="/app.css?board=56">
-  <link rel="stylesheet" href="/annie-bubble-30.css?board=56">
+  <link rel="stylesheet" href="/app.css?board=57">
+  <link rel="stylesheet" href="/annie-bubble-30.css?board=57">
   <style>
     html,body{background:#f7f2e8}body.booting{visibility:hidden}header{min-height:302px;padding-top:10px}header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto 0}.annie{left:8px;bottom:83px}
     .connectionLinks{position:relative;z-index:20;display:flex;gap:9px;width:min(620px,92%);margin:10px auto 0}.connectionLinks a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #fff;border-radius:999px;background:#f7f2e8;color:#17402b;text-decoration:none;font-size:13px;font-weight:950;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.25);touch-action:manipulation;pointer-events:auto;-webkit-user-select:none;user-select:none}.connectionLinks a.connected{background:#dff0e4;color:#155b2d;border-color:#b7d6c0}.connectionLinks a:active{transform:scale(.98)}
     @media(max-width:390px){.connectionLinks{gap:7px;width:94%}.connectionLinks a{min-height:46px;font-size:11px;padding:0 6px}}
   </style>
-  <link rel="stylesheet" href="/arborwise-personality-49.css?board=56">
+  <link rel="stylesheet" href="/arborwise-personality-49.css?board=57">
   <noscript><style>body.booting{visibility:visible}</style></noscript>
   <script>
     try{if('serviceWorker' in navigator){navigator.serviceWorker.register=function(){return Promise.resolve(null);};navigator.serviceWorker.getRegistrations().then(registrations=>Promise.all(registrations.map(registration=>registration.unregister()))).catch(()=>{});}if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key)))).catch(()=>{});}catch(error){}
@@ -30,7 +30,7 @@
 <header>
   <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations from Google Sheets"><span class="syncIcon">↻</span><span>REFRESH</span></button>
   <div id="weatherChip" class="weatherChip" role="status" aria-live="polite" aria-label="Loading Van Alstyne weather">WX …</div>
-  <img class="logo" src="/assets/arborwise-logo.png?board=56" alt="Arborwise">
+  <img class="logo" src="/assets/arborwise-logo.png?board=57" alt="Arborwise">
   <div class="brandTagline" aria-label="Arborwise motto">NURTURE YOUR NATURE</div>
   <div id="dateLine" class="dateLine"></div>
   <button id="statusButton" class="status" type="button">OPENING PROTECTED SHEET</button>
@@ -40,9 +40,9 @@
 <section id="filters" class="filters" aria-label="Crew filters"></section>
 <main id="main"><div class="title"><span>Opening current operations</span></div><div class="empty">Customer and financial data load only after authorized access.</div></main>
 <button id="addButton" class="add" type="button" hidden aria-hidden="true"></button>
-<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=56" alt="Annie"></button><div id="annieBubble" class="bubble" hidden></div>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie"><img src="/assets/annie-main-icon.png?board=57" alt="Annie"></button><div id="annieBubble" class="bubble" hidden></div>
 <nav id="tabs" aria-label="Arborwise sections"></nav><div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div><div id="toast" class="toast" hidden></div>
-<script src="/board-live-54.js?board=56" defer></script><script src="/annie-bubble-48.js?board=56" defer></script><script src="/weather-chip-48.js?board=56" defer></script><script src="/arborwise-personality-48.js?board=56" defer></script><script src="/boot-reveal-42.js?board=56" defer></script>
+<script src="/board-live-54.js?board=57" defer></script><script src="/annie-bubble-48.js?board=57" defer></script><script src="/weather-chip-48.js?board=57" defer></script><script src="/arborwise-personality-48.js?board=57" defer></script><script src="/boot-reveal-42.js?board=57" defer></script>
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
   const statusButton=document.getElementById('statusButton'),refreshButton=document.getElementById('syncButton'),veil=document.getElementById('veil'),sheet=document.getElementById('sheet'),toast=document.getElementById('toast'),googleLink=document.getElementById('connectGoogleDirect'),quickBooksLink=document.getElementById('connectQuickBooksDirect');if(!statusButton||!veil||!sheet)return;
