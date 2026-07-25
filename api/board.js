@@ -4,167 +4,40 @@ import {requireSession} from '../lib/auth.js';
 import {sheetRows} from '../lib/google.js';
 
 const TIME_ZONE='America/Chicago';
+const SHEETS=[
+  {name:'Jobs',range:'A:AZ',kind:'job'},
+  {name:'Master Estimates',range:'A:AZ',kind:'est'},
+  {name:"Today's Estimates",range:'A:AZ',kind:'est'}
+];
 
 function clean(value){return String(value??'').trim();}
-function money(value){
-  const parsed=Number(clean(value).replace(/[$,]/g,''));
-  return Number.isFinite(parsed)?parsed:0;
-}
-function isoDate(value){
-  const text=clean(value);
-  if(!text)return '';
-  const iso=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;
-  const us=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if(!us)return '';
-  const month=Number(us[1]),day=Number(us[2]),year=Number(us[3]);
-  const check=new Date(Date.UTC(year,month-1,day));
-  if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return '';
-  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-}
-function statusForJob(raw){
-  const value=clean(raw);
-  const lower=value.toLowerCase();
-  if(/hold|paused|waiting verification/.test(lower))return 'Hold';
-  if(/cancel|declin|reject/.test(lower))return 'Cancelled';
-  if(/complete|paid|done/.test(lower))return 'Completed';
-  if(/in progress|working|started/.test(lower))return 'In Progress';
-  if(/scheduled|service/.test(lower))return 'Scheduled';
-  if(/approved|accepted|scheduling/.test(lower))return 'Scheduling';
-  return value||'Open';
-}
-function completionType(status,notes,crew){
-  if(status!=='Completed')return null;
-  const text=`${notes} ${crew}`.toLowerCase();
-  if(text.includes('homeowner'))return 'homeowner';
-  if(/kw landscaping|dallas crew|subcontract/.test(text))return 'subcontractor';
-  return 'arborwise';
-}
-function categoryFor(name,crew,email,notes=''){
-  const text=`${name} ${crew} ${email} ${notes}`.toLowerCase();
-  if(text.includes('kw landscaping'))return 'KW';
-  if(text.includes('sbbmanagement')||text.includes('sicily laguna')||text.includes('venetian hoa'))return 'SBB';
-  if(text.includes('goodwin'))return 'GOODWIN';
-  if(text.includes('kanam'))return 'KANAM';
-  return 'RESIDENTIAL';
-}
+function money(value){const parsed=Number(clean(value).replace(/[$,]/g,''));return Number.isFinite(parsed)?parsed:0;}
+function normalizedKey(value){return clean(value).toLowerCase().replace(/[^a-z0-9]+/g,'');}
+function rowIndex(row){const index=new Map();for(const [key,value] of Object.entries(row||{}))index.set(normalizedKey(key),value);return index;}
+function pick(row,names){for(const name of names){if(Object.prototype.hasOwnProperty.call(row||{},name)&&clean(row[name])!=='')return row[name];}const index=rowIndex(row);for(const name of names){const value=index.get(normalizedKey(name));if(clean(value)!=='')return value;}return '';}
+function isoDate(value){const text=clean(value);if(!text)return '';const iso=text.match(/^(\d{4})-(\d{2})-(\d{2})/);if(iso)return `${iso[1]}-${iso[2]}-${iso[3]}`;const us=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);if(!us)return '';const year=Number(us[3].length===2?`20${us[3]}`:us[3]);const month=Number(us[1]),day=Number(us[2]);const check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return '';return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+function statusForJob(raw){const value=clean(raw);const lower=value.toLowerCase();if(/hold|paused|waiting verification|verify before/.test(lower))return 'Hold';if(/cancel|declin|reject/.test(lower))return 'Cancelled';if(/complete|paid|done/.test(lower))return 'Completed';if(/in progress|working|started/.test(lower))return 'In Progress';if(/scheduled|service/.test(lower))return 'Scheduled';if(/approved|accepted|scheduling/.test(lower))return 'Scheduling';return value||'Open';}
+function completionType(status,notes,crew){if(status!=='Completed')return null;const text=`${notes} ${crew}`.toLowerCase();if(text.includes('homeowner'))return 'homeowner';if(/kw landscaping|dallas crew|subcontract/.test(text))return 'subcontractor';return 'arborwise';}
+function categoryFor(name,crew,email,notes=''){const text=`${name} ${crew} ${email} ${notes}`.toLowerCase();if(text.includes('kw landscaping'))return 'KW';if(text.includes('sbbmanagement')||text.includes('sbb management')||text.includes('sicily laguna')||text.includes('venetian hoa'))return 'SBB';if(text.includes('goodwin'))return 'GOODWIN';if(text.includes('kanam'))return 'KANAM';return 'RESIDENTIAL';}
 function normalizedId(value){return clean(value).replace(/^WO-/i,'');}
-function jobRecord(row,warnings,seen){
-  const id=clean(row['Job ID']);
-  if(!id)return null;
-  if(seen.has(id)){warnings.push(`Duplicate Jobs ID: ${id}`);return null;}
-  seen.add(id);
-  const rawStatus=clean(row.Status);
-  const status=statusForJob(rawStatus);
-  const date=isoDate(row['Scheduled Date']);
-  const crew=clean(row['Crew Lead']);
-  const notes=clean(row.Notes);
-  if((status==='Scheduled'||status==='In Progress')&&!date)warnings.push(`${id} is ${status} without a scheduled date`);
-  if(status==='Hold'&&(date||crew))warnings.push(`${id} is on Hold but still has a date or crew assignment`);
-  const completion=completionType(status,notes,crew);
-  if(status==='Completed'&&!completion)warnings.push(`${id} is completed without a completion type`);
-  return {
-    id,
-    type:'job',
-    name:clean(row.Customer),
-    address:clean(row.Address),
-    city:clean(row.City),
-    phone:clean(row.Phone),
-    email:'',
-    service:clean(row.Service),
-    equipment:clean(row['Equipment Needed']),
-    amount:money(row['Actual Revenue'])||money(row['Estimate Amount']),
-    laborCost:money(row['Labor Cost']),
-    otherCost:money(row['Other Cost']),
-    category:categoryFor(row.Customer,crew,'',notes),
-    who:crew||'Unassigned',
-    status,
-    rawStatus,
-    workDate:date,
-    workTime:clean(row['Arrival Window']),
-    followUp:'',
-    notes,
-    beforePhotos:clean(row['Before Photos']),
-    afterPhotos:clean(row['After Photos']),
-    closed:status==='Completed'||status==='Cancelled',
-    completionType:completion,
-    source:'Jobs'
-  };
-}
-function estimateRecord(row,warnings,jobKeys,seen){
-  const id=clean(row['Estimate #']);
-  if(!id||!clean(row['Customer Name']))return null;
-  if(jobKeys.has(normalizedId(id)))return null;
-  const key=`EST-${id}`;
-  if(seen.has(key)){warnings.push(`Duplicate estimate ID: ${id}`);return null;}
-  seen.add(key);
-  const street=clean(row['Street Address']);
-  const city=clean(row.City),state=clean(row.State),zip=clean(row.ZIP);
-  const locality=[city,state,zip].filter(Boolean).join(', ').replace(', ,',',');
-  const address=[street,locality].filter(Boolean).join(', ');
-  const rawStatus=clean(row.Status)||'Open';
-  const lower=rawStatus.toLowerCase();
-  const closed=/declin|reject|cancel|converted|closed/.test(lower);
-  const date=isoDate(row['Appointment Date']);
-  const followUp=isoDate(row['Next Follow-Up Date']);
-  const assigned=clean(row['Assigned To'])||'Unassigned';
-  const notes=[clean(row['Customer Description / Notes']),clean(row['Estimator Notes']),clean(row['Follow-Up Reason'])].filter(Boolean).join(' ');
-  return {
-    id,
-    type:'est',
-    name:clean(row['Customer Name']),
-    address,
-    city,
-    phone:clean(row['Phone Number']),
-    email:clean(row.Email),
-    service:clean(row['Service Needed']),
-    equipment:'',
-    amount:0,
-    laborCost:0,
-    otherCost:0,
-    category:categoryFor(row['Customer Name'],assigned,row.Email,notes),
-    who:assigned,
-    status:rawStatus,
-    rawStatus,
-    workDate:date,
-    workTime:clean(row['Appointment Time']),
-    followUp,
-    notes,
-    beforePhotos:'',
-    afterPhotos:clean(row.Photos),
-    closed,
-    completionType:null,
-    source:'Master Estimates'
-  };
-}
-function stableVersion(items){
-  const stable=items.map(item=>[item.id,item.type,item.status,item.workDate,item.workTime,item.who,item.notes,item.amount,item.laborCost,item.otherCost,item.closed,item.completionType]);
-  return createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0,20);
-}
+function addressFrom(row){const street=clean(pick(row,['Street Address','Address','Job Address','Service Address']));const city=clean(pick(row,['City']));const state=clean(pick(row,['State','Province']));const zip=clean(pick(row,['ZIP','Zip','Postal Code']));if(!street)return [city,state,zip].filter(Boolean).join(', ');const streetHasLocality=city&&street.toLowerCase().includes(city.toLowerCase());return streetHasLocality?[street,state,zip].filter(Boolean).join(', '):[street,[city,state,zip].filter(Boolean).join(', ')].filter(Boolean).join(', ');}
+function jobRecord(row,warnings,seen,source){const id=clean(pick(row,['Job ID','Job #','Job Number','Work Order','Work Order #','Record #','ID']));if(!id)return null;const key=`JOB-${normalizedId(id).toUpperCase()}`;if(seen.has(key)){warnings.push(`Duplicate Jobs ID: ${id}`);return null;}seen.add(key);const rawStatus=clean(pick(row,['Status','Job Status']));const status=statusForJob(rawStatus);const date=isoDate(pick(row,['Scheduled Date','Job Date','Work Date','Date']));const crew=clean(pick(row,['Crew Lead','Assigned To','Assigned','Crew']));const notes=clean(pick(row,['Notes','Internal Notes','Job Notes','Customer Description / Notes']));if((status==='Scheduled'||status==='In Progress')&&!date)warnings.push(`${id} is ${status} without a scheduled date`);if(status==='Hold'&&(date||crew))warnings.push(`${id} is on Hold but still has a date or crew assignment`);const completion=completionType(status,notes,crew);const name=clean(pick(row,['Customer','Customer Name','Name']));const email=clean(pick(row,['Email','Customer Email']));return {id,type:'job',name,address:addressFrom(row),city:clean(pick(row,['City'])),phone:clean(pick(row,['Phone','Phone Number','Customer Phone'])),email,service:clean(pick(row,['Service','Service Needed','Work To Do','Work Description','Description'])),equipment:clean(pick(row,['Equipment Needed','Equipment'])),amount:money(pick(row,['Actual Revenue','Estimate Amount','Amount','Total'])),laborCost:money(pick(row,['Labor Cost','Labor'])),otherCost:money(pick(row,['Other Cost','Material Cost','Materials'])),category:categoryFor(name,crew,email,notes),who:crew||'Unassigned',status,rawStatus,workDate:date,workTime:clean(pick(row,['Arrival Window','Appointment Time','Time','Time Window'])),followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date'])),notes,beforePhotos:clean(pick(row,['Before Photos','Before Photo'])),afterPhotos:clean(pick(row,['After Photos','After Photo','Photos'])),closed:status==='Completed'||status==='Cancelled',completionType:completion,source};}
+function estimateRecord(row,warnings,jobKeys,source){const id=clean(pick(row,['Estimate #','Estimate Number','Estimate ID','Record #','ID']));const name=clean(pick(row,['Customer Name','Customer','Name']));if(!id||!name)return null;if(jobKeys.has(normalizedId(id).toUpperCase()))return null;const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';const lower=rawStatus.toLowerCase();const closed=/declin|reject|cancel|converted|closed/.test(lower);const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';const email=clean(pick(row,['Email','Customer Email']));const notes=[clean(pick(row,['Customer Description / Notes','Customer Notes','Notes'])),clean(pick(row,['Estimator Notes','Internal Notes'])),clean(pick(row,['Follow-Up Reason','Follow Up Reason']))].filter(Boolean).join(' ');return {id,type:'est',name,address:addressFrom(row),city:clean(pick(row,['City'])),phone:clean(pick(row,['Phone Number','Phone','Customer Phone'])),email,service:clean(pick(row,['Service Needed','Service','Work To Do','Work Description','Description'])),equipment:'',amount:money(pick(row,['Amount','Total','Estimate Total','Estimate Amount'])),laborCost:0,otherCost:0,category:categoryFor(name,assigned,email,notes),who:assigned,status:rawStatus,rawStatus,workDate:isoDate(pick(row,['Appointment Date','Scheduled Date','Date'])),workTime:clean(pick(row,['Appointment Time','Arrival Window','Time'])),followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date','Follow Up Date'])),notes,beforePhotos:'',afterPhotos:clean(pick(row,['Photos','After Photos'])),closed,completionType:null,source};}
+function mergeRecord(existing,incoming){if(!existing)return incoming;const merged={...existing};for(const [key,value] of Object.entries(incoming)){if(value!==''&&value!==null&&value!==undefined)merged[key]=value;}merged.source=existing.source===incoming.source?existing.source:`${existing.source} + ${incoming.source}`;return merged;}
+function stableVersion(items){const stable=items.map(item=>[item.id,item.type,item.status,item.workDate,item.workTime,item.who,item.phone,item.email,item.address,item.service,item.notes,item.amount,item.laborCost,item.otherCost,item.closed,item.completionType]);return createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0,20);}
 
 export default async function handler(req,res){
   try{
-    method(req,['GET']);
-    requireSession(req);
-    res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
-    const [jobs,estimates]=await Promise.all([
-      sheetRows('Jobs','A:U'),
-      sheetRows('Master Estimates','A:AA')
-    ]);
-    const warnings=[];
-    const seen=new Set();
-    const jobItems=jobs.map(row=>jobRecord(row,warnings,seen)).filter(Boolean);
-    const jobKeys=new Set(jobItems.map(item=>normalizedId(item.id)));
-    const estimateItems=estimates.map(row=>estimateRecord(row,warnings,jobKeys,seen)).filter(Boolean);
-    const items=[...jobItems,...estimateItems];
-    json(res,200,{
-      ok:true,
-      source:'Google Sheets — Jobs + Master Estimates',
-      readAt:new Date().toISOString(),
-      timeZone:TIME_ZONE,
-      dataVersion:stableVersion(items),
-      warnings,
-      items
-    });
+    method(req,['GET']);requireSession(req);res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
+    const results=await Promise.allSettled(SHEETS.map(sheet=>sheetRows(sheet.name,sheet.range)));
+    const warnings=[];const available=[];let firstError=null;
+    results.forEach((result,index)=>{const sheet=SHEETS[index];if(result.status==='fulfilled')available.push({...sheet,rows:result.value});else{firstError??=result.reason;warnings.push(`${sheet.name} could not be read: ${result.reason?.message||'unknown error'}`);}});
+    if(!available.length)throw firstError||new Error('No Google Sheet tabs could be read');
+    const seenJobs=new Set();const jobsSheet=available.find(sheet=>sheet.kind==='job');const jobItems=(jobsSheet?.rows||[]).map(row=>jobRecord(row,warnings,seenJobs,jobsSheet.name)).filter(Boolean);const jobKeys=new Set(jobItems.map(item=>normalizedId(item.id).toUpperCase()));
+    const estimatesById=new Map();for(const sheet of available.filter(item=>item.kind==='est')){let parsed=0;for(const row of sheet.rows){const record=estimateRecord(row,warnings,jobKeys,sheet.name);if(!record)continue;parsed++;const key=normalizedId(record.id).toUpperCase();estimatesById.set(key,mergeRecord(estimatesById.get(key),record));}if(sheet.rows.length&&parsed===0)warnings.push(`${sheet.name} returned ${sheet.rows.length} rows but none matched the expected estimate columns`);}
+    if(jobsSheet?.rows.length&&!jobItems.length)warnings.push(`Jobs returned ${jobsSheet.rows.length} rows but none matched the expected job columns`);
+    const estimateItems=[...estimatesById.values()];const items=[...jobItems,...estimateItems];
+    const sourceCounts={};for(const item of items){for(const source of String(item.source||'Unknown').split(' + '))sourceCounts[source]=(sourceCounts[source]||0)+1;}
+    json(res,200,{ok:true,source:'Google Sheets — Jobs + Master Estimates + Today\'s Estimates',readAt:new Date().toISOString(),timeZone:TIME_ZONE,dataVersion:stableVersion(items),warnings,sourceCounts,rawCounts:Object.fromEntries(available.map(sheet=>[sheet.name,sheet.rows.length])),items});
   }catch(error){fail(res,error);}
 }
