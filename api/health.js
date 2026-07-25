@@ -21,7 +21,7 @@ export default async function handler(req,res){
   json(res,200,{
     ok:true,
     service:'Arborwise OS',
-    boardVersion:56,
+    boardVersion:57,
     databaseConfigured:Boolean(process.env.DATABASE_URL),
     sessionConfigured:Boolean(process.env.APP_PIN&&process.env.SESSION_SECRET),
     encryptionConfigured:Boolean(process.env.ENCRYPTION_KEY),
