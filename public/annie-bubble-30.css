@@ -1,62 +1,90 @@
-/* Small Annie speech bubble: only as large as the current message. */
+/* Annie's compact speech bubble: playful, soft, and only as large as her text. */
 #annieBubble.bubble{
   position:fixed;
   z-index:26;
-  left:48px;
-  bottom:138px;
+  left:50px;
+  bottom:143px;
   width:max-content;
-  min-width:0;
-  max-width:min(175px,calc(100vw - 60px));
+  min-width:96px;
+  max-width:min(176px,calc(100vw - 62px));
   height:auto;
-  min-height:0;
+  min-height:48px;
   max-height:none;
   aspect-ratio:auto;
   overflow:visible;
-  padding:7px 10px 8px;
-  background:#fff;
-  border:2px solid #17402b;
-  border-radius:16px 18px 15px 17px;
-  box-shadow:0 3px 8px rgba(0,0,0,.17);
+  padding:17px 13px 11px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
   color:#18231c;
   pointer-events:auto;
-  filter:none;
-  transform-origin:11px 100%;
-  animation:annieBubblePop .14s ease-out;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.18));
+  transform-origin:13px 100%;
+  animation:annieBubblePop .16s ease-out;
 }
 
-/* One short curved tail aimed at Annie's head. */
-#annieBubble.bubble::before{
-  content:""!important;
-  display:block!important;
+/* The outline is an SVG with exactly three gentle curves across the top. */
+#annieBubble .annieBubbleShape{
   position:absolute;
-  left:9px;
-  bottom:-8px;
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-left:2px solid #17402b;
-  border-bottom:2px solid #17402b;
-  border-radius:0 0 0 5px;
-  transform:rotate(-42deg);
+  z-index:0;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+}
+#annieBubble .annieBubbleShape path{
+  fill:#fff;
+  stroke:#17402b;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
 
+/* No sharp arrow. Three small bubbles trail naturally toward Annie. */
+#annieBubble .annieBubbleTrail{
+  position:absolute;
+  z-index:1;
+  left:4px;
+  bottom:-25px;
+  width:28px;
+  height:30px;
+  pointer-events:none;
+}
+#annieBubble .annieBubbleTrail i{
+  position:absolute;
+  display:block;
+  box-sizing:border-box;
+  border:2px solid #17402b;
+  border-radius:50%;
+  background:#fff;
+}
+#annieBubble .annieBubbleTrail i:nth-child(1){width:11px;height:11px;left:15px;top:0}
+#annieBubble .annieBubbleTrail i:nth-child(2){width:8px;height:8px;left:8px;top:12px}
+#annieBubble .annieBubbleTrail i:nth-child(3){width:5px;height:5px;left:3px;top:23px;border-width:1.5px}
+
+#annieBubble.bubble::before,
 #annieBubble.bubble::after{content:none!important;display:none!important}
 #annieBubble .annieCloudArt,#annieBubble .annieCloudShape{display:none!important}
 
 #annieBubble .annieCloudText{
-  position:static;
-  z-index:1;
+  position:relative;
+  z-index:2;
   display:block;
   margin:0;
   padding:0;
   background:transparent;
   border:0;
   color:#18231c;
-  font-size:11.5px;
-  font-weight:800;
-  line-height:1.22;
-  letter-spacing:0;
-  text-align:left;
+  font-family:"Comic Sans MS","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  font-size:12.4px;
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:.05px;
+  text-align:center;
   white-space:normal;
   text-wrap:pretty;
   overflow-wrap:break-word;
@@ -64,24 +92,25 @@
   hyphens:none;
 }
 
-#annieBubble .annieCloudText.isLong{font-size:11px;line-height:1.2}
-#annieBubble .annieCloudText.isExtraLong{font-size:10.6px;line-height:1.18}
+#annieBubble .annieCloudText.isLong{font-size:11.8px;line-height:1.19}
+#annieBubble .annieCloudText.isExtraLong{font-size:11.2px;line-height:1.17}
 
 @keyframes annieBubblePop{
-  from{opacity:0;transform:scale(.95) translateY(2px)}
+  from{opacity:0;transform:scale(.94) translateY(3px)}
   to{opacity:1;transform:scale(1) translateY(0)}
 }
 
 @media(max-width:390px){
   #annieBubble.bubble{
-    left:45px;
-    bottom:136px;
-    max-width:min(164px,calc(100vw - 55px));
-    padding:6px 9px 7px;
+    left:46px;
+    bottom:140px;
+    min-width:90px;
+    max-width:min(164px,calc(100vw - 56px));
+    padding:16px 11px 10px;
   }
-  #annieBubble .annieCloudText{font-size:11px}
-  #annieBubble .annieCloudText.isLong{font-size:10.6px}
-  #annieBubble .annieCloudText.isExtraLong{font-size:10.2px}
+  #annieBubble .annieCloudText{font-size:11.8px}
+  #annieBubble .annieCloudText.isLong{font-size:11.2px}
+  #annieBubble .annieCloudText.isExtraLong{font-size:10.7px}
 }
 
 @media(prefers-reduced-motion:reduce){#annieBubble.bubble{animation:none}}
