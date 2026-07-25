@@ -4,16 +4,46 @@ on:
   schedule:
     - cron: '7 * * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/hourly-sync.yml'
+      - 'api/sync.js'
+      - 'lib/auth.js'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: arborwise-hourly-sync
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - name: Sync Arborwise OS
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      - name: Get GitHub cloud identity
+        id: identity
+        shell: bash
         run: |
-          test -n "$CRON_SECRET" || { echo "CRON_SECRET repository secret is required"; exit 1; }
-          curl --fail-with-body --retry 2 \
-            -H "Authorization: Bearer $CRON_SECRET" \
+          set -euo pipefail
+          RESPONSE="$(curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=arborwise-os")"
+          TOKEN="$(printf '%s' "$RESPONSE" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          test -n "$TOKEN" || { echo "GitHub did not issue a cloud identity token"; exit 1; }
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Sync Arborwise OS
+        shell: bash
+        env:
+          ARBORWISE_ID_TOKEN: ${{ steps.identity.outputs.token }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 70 \
+            -H "Authorization: Bearer $ARBORWISE_ID_TOKEN" \
             "https://arborwise-os.vercel.app/api/sync?scheduled=hourly"
