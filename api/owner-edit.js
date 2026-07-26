@@ -43,7 +43,7 @@ async function findRecord(sheets,tabs,id){
       : ['Estimate #','Estimate Number','Estimate ID','Record #','ID']);
     if(idIndex<0)continue;
     const rowOffset=values.slice(1).findIndex(row=>recordKey(row[idIndex])===target);
-    if(rowOffset>=0)return {tab,headers,rowNumber:rowOffset+2};
+    if(rowOffset>=0)return {tab,headers,row:values[rowOffset+1]||[],rowNumber:rowOffset+2};
   }
   return null;
 }
@@ -67,7 +67,7 @@ export default async function handler(req,res){
     const found=await findRecord(sheets,orderedTabs(payload.source,payload.type),id);
     if(!found){const error=new Error(`${id} was not found in the live Arborwise sheets`);error.status=404;throw error;}
 
-    const {tab,headers,rowNumber}=found;
+    const {tab,headers,row,rowNumber}=found;
     const updates=[];
     const isJobs=tab==='Jobs';
     const has=key=>Object.prototype.hasOwnProperty.call(payload,key);
@@ -76,7 +76,19 @@ export default async function handler(req,res){
     if(has('date'))addUpdate(updates,tab,headers,rowNumber,clean(payload.date),isJobs?['Scheduled Date','Job Date','Work Date','Date']:['Appointment Date','Scheduled Date','Date']);
     if(has('time'))addUpdate(updates,tab,headers,rowNumber,clean(payload.time),isJobs?['Arrival Window','Appointment Time','Time','Time Window']:['Appointment Time','Arrival Window','Time']);
     if(has('who'))addUpdate(updates,tab,headers,rowNumber,clean(payload.who),isJobs?['Crew Lead','Assigned To','Assigned','Crew']:['Assigned To','Assigned','Estimator','Crew Lead']);
-    if(has('notes'))addUpdate(updates,tab,headers,rowNumber,clean(payload.notes),isJobs?['Notes','Internal Notes','Job Notes','Customer Description / Notes']:['Estimator Notes','Internal Notes','Notes']);
+    if(has('notes')){
+      if(isJobs){
+        addUpdate(updates,tab,headers,rowNumber,clean(payload.notes),['Notes','Internal Notes','Job Notes','Customer Description / Notes']);
+      }else{
+        const noteIndex=headerIndex(headers,['Estimator Notes','Internal Notes','Notes']);
+        const newNote=clean(payload.notes);
+        if(noteIndex>=0&&newNote){
+          const existing=clean(row[noteIndex]);
+          const value=payload.appendNotes?[existing,newNote].filter(Boolean).join(' | '):newNote;
+          updates.push({range:`${quoted(tab)}!${columnLetter(noteIndex)}${rowNumber}`,values:[[value]]});
+        }
+      }
+    }
 
     if(!updates.length){const error=new Error('No editable fields were supplied');error.status=400;throw error;}
 
