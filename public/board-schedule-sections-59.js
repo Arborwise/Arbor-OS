@@ -30,6 +30,7 @@
     }
     .scheduleSection small{font-size:11px;font-weight:900;letter-spacing:.025em;opacity:.9;text-align:right}
     .scheduleSection.today{background:#174b31;border-color:#174b31;color:#fff}
+    .scheduleSection.scheduled{background:#dcecff;border-color:#6e9fcf;color:#183f66}
     .scheduleSection.coming{background:#dcecff;border-color:#6e9fcf;color:#183f66}
     .scheduleSection.unscheduled{background:#eee9de;border-color:#a99d88;color:#51483b}
     .scheduleSection.review{background:#f7dfdb;border-color:#c6786f;color:#762f28}
@@ -43,13 +44,16 @@
     #main>.card.scheduleToday:before{background:#1f7042!important}
     #main>.card.scheduleToday .pill.date{background:#d9efde!important;border-color:#3c7e53!important;color:#174b31!important}
 
-    #main>.card.scheduleComing{
+    #main>.card.scheduleComing,
+    #main>.card.scheduleScheduled{
       background:linear-gradient(90deg,#edf6ff 0,#f8fbff 36%,#fff 100%)!important;
       border-color:#8db4d9!important;
       box-shadow:0 4px 12px rgba(48,94,137,.10)!important;
     }
-    #main>.card.scheduleComing:before{background:#4b83b8!important}
-    #main>.card.scheduleComing .pill.date{background:#dcecff!important;border-color:#6794bf!important;color:#234f76!important}
+    #main>.card.scheduleComing:before,
+    #main>.card.scheduleScheduled:before{background:#4b83b8!important}
+    #main>.card.scheduleComing .pill.date,
+    #main>.card.scheduleScheduled .pill.date{background:#dcecff!important;border-color:#6794bf!important;color:#234f76!important}
 
     #main>.card.scheduleUnscheduled{
       background:linear-gradient(90deg,#f5f1e9 0,#fff 38%)!important;
@@ -106,25 +110,40 @@
     return tabs.querySelector('button.on')?.textContent?.trim().toUpperCase()||'';
   }
 
+  function clearOrganization(){
+    main.querySelectorAll('[data-schedule-section],.scheduleEmpty').forEach(node=>node.remove());
+    main.querySelectorAll('.scheduleToday,.scheduleComing,.scheduleScheduled,.scheduleUnscheduled,.scheduleReview').forEach(card=>{
+      card.classList.remove('scheduleToday','scheduleComing','scheduleScheduled','scheduleUnscheduled','scheduleReview');
+    });
+  }
+
   let observer;
   function organize(){
-    if(activeTab()!=='TODAY'){
-      main.querySelectorAll('[data-schedule-section],.scheduleEmpty').forEach(node=>node.remove());
-      main.querySelectorAll('.scheduleToday,.scheduleComing,.scheduleUnscheduled,.scheduleReview').forEach(card=>{
-        card.classList.remove('scheduleToday','scheduleComing','scheduleUnscheduled','scheduleReview');
-      });
+    const tab=activeTab();
+    const title=(main.querySelector(':scope > .title span')?.textContent||'').trim().toUpperCase();
+    const shouldOrganizeToday=tab==='TODAY'&&title.startsWith('TODAY');
+    const shouldOrganizeJobs=tab==='JOBS'&&title==='JOBS';
+    if(!shouldOrganizeToday&&!shouldOrganizeJobs){
+      clearOrganization();
       return;
     }
 
     const cards=Array.from(main.children).filter(node=>node.classList?.contains('card'));
-    if(!cards.length)return;
+    if(!cards.length){
+      clearOrganization();
+      return;
+    }
 
     const today=centralIsoDate();
-    const groups={today:[],coming:[],unscheduled:[],review:[]};
+    const groups={today:[],scheduled:[],coming:[],unscheduled:[],review:[]};
     cards.forEach(card=>{
-      card.classList.remove('scheduleToday','scheduleComing','scheduleUnscheduled','scheduleReview');
+      card.classList.remove('scheduleToday','scheduleComing','scheduleScheduled','scheduleUnscheduled','scheduleReview');
       const due=cardDate(card);
       if(!due){card.classList.add('scheduleUnscheduled');groups.unscheduled.push(card);return;}
+      if(shouldOrganizeJobs){
+        if(due<today){card.classList.add('scheduleReview');groups.review.push(card);return;}
+        card.classList.add('scheduleScheduled');groups.scheduled.push(card);return;
+      }
       if(due===today){card.classList.add('scheduleToday');groups.today.push(card);return;}
       if(due>today){card.classList.add('scheduleComing');groups.coming.push(card);return;}
       card.classList.add('scheduleReview');groups.review.push(card);
@@ -135,26 +154,41 @@
     cards.forEach(card=>card.remove());
 
     const fragment=document.createDocumentFragment();
-    fragment.appendChild(heading('today','Today',friendlyDate(today),groups.today.length));
-    if(groups.today.length)groups.today.forEach(card=>fragment.appendChild(card));
-    else{
-      const empty=document.createElement('div');
-      empty.className='scheduleEmpty';
-      empty.textContent='No work is scheduled for today.';
-      fragment.appendChild(empty);
-    }
+    if(shouldOrganizeJobs){
+      if(groups.scheduled.length){
+        fragment.appendChild(heading('scheduled','Scheduled','Has a confirmed date',groups.scheduled.length));
+        groups.scheduled.forEach(card=>fragment.appendChild(card));
+      }
+      if(groups.unscheduled.length){
+        fragment.appendChild(heading('unscheduled','Needs a Date','Approved or awaiting reschedule',groups.unscheduled.length));
+        groups.unscheduled.forEach(card=>fragment.appendChild(card));
+      }
+      if(groups.review.length){
+        fragment.appendChild(heading('review','Needs Review','Older open dates',groups.review.length));
+        groups.review.forEach(card=>fragment.appendChild(card));
+      }
+    }else{
+      fragment.appendChild(heading('today','Today',friendlyDate(today),groups.today.length));
+      if(groups.today.length)groups.today.forEach(card=>fragment.appendChild(card));
+      else{
+        const empty=document.createElement('div');
+        empty.className='scheduleEmpty';
+        empty.textContent='No work is scheduled for today.';
+        fragment.appendChild(empty);
+      }
 
-    if(groups.coming.length){
-      fragment.appendChild(heading('coming','Coming Up','Tomorrow and later',groups.coming.length));
-      groups.coming.forEach(card=>fragment.appendChild(card));
-    }
-    if(groups.unscheduled.length){
-      fragment.appendChild(heading('unscheduled','Unscheduled','Needs a date',groups.unscheduled.length));
-      groups.unscheduled.forEach(card=>fragment.appendChild(card));
-    }
-    if(groups.review.length){
-      fragment.appendChild(heading('review','Needs Review','Older open dates',groups.review.length));
-      groups.review.forEach(card=>fragment.appendChild(card));
+      if(groups.coming.length){
+        fragment.appendChild(heading('coming','Coming Up','Tomorrow and later',groups.coming.length));
+        groups.coming.forEach(card=>fragment.appendChild(card));
+      }
+      if(groups.unscheduled.length){
+        fragment.appendChild(heading('unscheduled','Needs a Date','Approved or awaiting reschedule',groups.unscheduled.length));
+        groups.unscheduled.forEach(card=>fragment.appendChild(card));
+      }
+      if(groups.review.length){
+        fragment.appendChild(heading('review','Needs Review','Older open dates',groups.review.length));
+        groups.review.forEach(card=>fragment.appendChild(card));
+      }
     }
 
     main.appendChild(fragment);
