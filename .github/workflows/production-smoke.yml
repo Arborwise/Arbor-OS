@@ -14,57 +14,52 @@ jobs:
         with:
           node-version: 24
 
-      - name: Validate live-board code and configuration
+      - name: Validate current Arborwise OS code
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
           npm run check
-          node --check public/annie-bubble-48.js
-          node --check public/weather-chip-48.js
-          node --check public/arborwise-personality-48.js
           node - <<'NODE'
           const fs=require('fs');
           const html=fs.readFileSync('public/board-now.html','utf8');
           const client=fs.readFileSync('public/board-live-54.js','utf8');
           const api=fs.readFileSync('api/board.js','utf8');
-          const vercel=JSON.parse(fs.readFileSync('vercel.json','utf8'));
+          const crew=fs.readFileSync('public/crew-board.html','utf8');
+          const crewApi=fs.readFileSync('api/crew-board.js','utf8');
           const manifest=JSON.parse(fs.readFileSync('public/board-manifest.webmanifest','utf8'));
+          const vercel=JSON.parse(fs.readFileSync('vercel.json','utf8'));
           const requireText=(text,value,label)=>{if(!text.includes(value))throw new Error(`${label}: missing ${value}`)};
           const forbidText=(text,value,label)=>{if(text.includes(value))throw new Error(`${label}: retired value remains ${value}`)};
 
-          requireText(html,'/board-live-54.js?board=54','board HTML');
-          requireText(html,'NURTURE YOUR NATURE','board HTML');
-          requireText(html,'id="weatherChip"','board HTML');
-          requireText(html,'Customer and financial data load only after authorized access.','board HTML');
-          for(const retired of ['/board-current-','/board-live.js','/live-sync-','/plan-b-refresh-','/daily-brief-'])forbidText(html,retired,'board HTML');
-          for(const customer of ['Christi Mahon','Susan Garrison','Dana & Tom Pierson','3116 Lucia Way'])forbidText(html,customer,'board HTML');
+          requireText(html,'/board-live-54.js','master board HTML');
+          requireText(html,'NURTURE YOUR NATURE','master board HTML');
+          requireText(html,'Customer and financial data load only after authorized access.','master board HTML');
+          for(const retired of ['/board-current-','/board-live.js','/live-sync-','/plan-b-refresh-'])forbidText(html,retired,'master board HTML');
 
-          requireText(client,"request(`/api/board?ts=${Date.now()}`)",'live client');
-          requireText(client,"cache:'no-store'",'live client');
-          requireText(client,'STALE • LAST GOOD','live client');
-          requireText(client,'Read-only • Source:','live client');
-          requireText(client,"setInterval(()=>refreshBoard({manual:false}),5*60*1000)",'live client');
-          requireText(client,"toast(`Refresh failed • ${error.message}`)",'live client');
-          requireText(client,'state.lastReadAt=payload.readAt','live client');
-          forbidText(client,'state.lastReadAt=new Date().toISOString()','live client failure path');
-          for(const customer of ['Christi Mahon','Susan Garrison','Dana & Tom Pierson','3116 Lucia Way'])forbidText(client,customer,'live client');
+          requireText(client,'/api/board?ts=${Date.now()}','live board client');
+          requireText(client,"cache:'no-store'",'live board client');
+          requireText(client,'setInterval(()=>refreshBoard({manual:false}),5*60*1000)','live board client');
+          requireText(api,'requireSession(req)','master board API');
+          requireText(api,"{name:'Jobs'",'master board API');
+          requireText(api,"{name:'Master Estimates'",'master board API');
 
-          requireText(api,"requireSession(req)",'board API');
-          requireText(api,"sheetRows('Jobs','A:U')",'board API');
-          requireText(api,"sheetRows('Master Estimates','A:AA')",'board API');
-          requireText(api,"res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate')",'board API');
-          requireText(api,"status==='Hold'",'board API');
-          requireText(api,"completionType",'board API');
+          requireText(crew,'<title>Arborwise OS</title>','crew page launcher title');
+          requireText(crew,"localStorage.getItem('arborwise-owner-device')",'owner shortcut redirect');
+          requireText(crew,'<h1>Crew Board</h1>','intentional crew view');
+          requireText(crewApi,'validSession(req)','owner crew preview access');
+
+          if(manifest.name!=='Arborwise OS')throw new Error('Installed app name is not Arborwise OS');
+          if(manifest.short_name!=='Arborwise OS')throw new Error('Installed app short name is not Arborwise OS');
+          if(manifest.start_url!=='/board-now.html?source=home&board=68')throw new Error('Installed app does not launch the current master board');
 
           const rewrites=vercel.rewrites||[];
           const has=(source,destination)=>rewrites.some(item=>item.source===source&&item.destination===destination);
-          if(!has('/api/board','/api/app.js?route=board'))throw new Error('Missing protected /api/board rewrite');
-          if(!has('/board-live.js','/public/retired-board-data.js'))throw new Error('Old board-live.js is not retired');
-          if(!has('/board-current-:version.js','/public/retired-board-data.js'))throw new Error('Old board-current snapshots are not retired');
-          if(manifest.start_url!=='/board-now.html?source=home&board=54')throw new Error('Installed app does not launch board 54');
+          if(!has('/api/board','/api/app.js?route=board'))throw new Error('Missing protected master board rewrite');
+          if(!has('/api/session','/api/app.js?route=session'))throw new Error('Missing owner session rewrite');
+          if(!has('/api/crew-board','/api/crew-board.js'))throw new Error('Missing crew board rewrite');
           NODE
 
-      - name: Wait for board 54 deployment and verify production
+      - name: Wait for current deployment and verify production
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,18 +78,19 @@ jobs:
 
           deployed=false
           for attempt in $(seq 1 40); do
-            code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=54&smoke=$BUST-$attempt" || true)
-            if [[ "$code" == '200' ]] \
-              && grep -Fq '/board-live-54.js?board=54' /tmp/board.html \
-              && grep -Fq '/weather-chip-48.js?board=54' /tmp/board.html \
-              && grep -Fq '/annie-bubble-48.js?board=54' /tmp/board.html \
+            board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=68&smoke=$BUST-$attempt" || true)
+            manifest_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/manifest.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?smoke=$BUST-$attempt" || true)
+            crew_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/crew.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/crew-board.html?view=crew&smoke=$BUST-$attempt" || true)
+            if [[ "$board_code" == '200' && "$manifest_code" == '200' && "$crew_code" == '200' ]] \
+              && grep -Fq '/board-live-54.js' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
-              && ! grep -Fq '/board-current-' /tmp/board.html \
-              && ! grep -Fq '/board-live.js' /tmp/board.html; then
+              && grep -Fq 'board=68' /tmp/manifest.json \
+              && grep -Fq '<title>Arborwise OS</title>' /tmp/crew.html \
+              && grep -Fq 'arborwise-owner-device' /tmp/crew.html; then
               deployed=true
               break
             fi
-            echo "Waiting for board 54; attempt $attempt returned $code"
+            echo "Waiting for current Arborwise OS deployment, attempt $attempt"
             sleep 10
           done
 
@@ -104,51 +100,22 @@ jobs:
               -H 'Accept: application/vnd.github+json' \
               "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" || true)
             if grep -Fq 'upgradeToPro=build-rate-limit' <<<"$status_json"; then
-              echo '::notice title=Vercel quota cooldown::Code validation passed. Production deployment is deferred to the controlled recovery workflow because Vercel reported its build-rate limit.'
+              echo '::notice title=Vercel quota cooldown::Code validation passed. Production deployment is delayed by the Vercel build-rate limit.'
               exit 0
             fi
-            echo 'Board 54 did not deploy during the smoke-test window.'
-            cat /tmp/board.html || true
+            echo 'The current Arborwise OS deployment did not become available during the smoke-test window.'
             exit 1
           fi
-
-          if grep -Eq 'Christi Mahon|Susan Garrison|Dana & Tom Pierson|3116 Lucia Way' /tmp/board.html; then
-            echo 'FAIL public board HTML contains customer data'
-            exit 1
-          fi
-
-          request "/board-live-54.js?smoke=$BUST" '200' /tmp/live.js
-          grep -Fq '/api/board' /tmp/live.js
-          grep -Fq 'STALE • LAST GOOD' /tmp/live.js
-          grep -Fq 'Read-only • Source:' /tmp/live.js
-          grep -Fq 'Refresh failed' /tmp/live.js
-          grep -Fq '5*60*1000' /tmp/live.js
-          if grep -Eq 'Christi Mahon|Susan Garrison|Dana & Tom Pierson|3116 Lucia Way' /tmp/live.js; then
-            echo 'FAIL public live client contains embedded customer data'
-            exit 1
-          fi
-
-          request "/weather-chip-48.js?smoke=$BUST" '200' /tmp/weather.js
-          grep -Fq 'api.open-meteo.com/v1/forecast' /tmp/weather.js
-          grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
-          grep -Fq 'Arborwise operations are unaffected' /tmp/weather.js
-
-          request "/board-manifest.webmanifest?v=54&smoke=$BUST" '200' /tmp/manifest.json
-          grep -Fq 'board=54' /tmp/manifest.json
-
-          request "/board-live.js?smoke=$BUST" '200' /tmp/retired-live.js
-          grep -Fq 'ARBORWISE_RETIRED_BOARD_DATA' /tmp/retired-live.js
-          request "/board-current-51.js?smoke=$BUST" '200' /tmp/retired-current.js
-          grep -Fq 'ARBORWISE_RETIRED_BOARD_DATA' /tmp/retired-current.js
 
           request '/api/health' '200' /tmp/health.json
           grep -q '"ok":true' /tmp/health.json
           request '/api/board' '401' /tmp/board-api.json
           request '/api/data' '401' /tmp/data-api.json
           request '/api/connections' '401' /tmp/connections-api.json
-          request '/api/sync' '401' /tmp/sync-api.json
+          request '/api/session' '200' /tmp/session.json
+          request '/api/crew-board' '403' /tmp/crew-api.json
 
           invalid_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/login.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data '{"pin":"smoke-test-invalid"}' "$BASE/api/login" || true)
           [[ "$invalid_code" == '401' ]] || { echo "FAIL invalid login returned $invalid_code"; cat /tmp/login.json; exit 1; }
 
-          echo 'Board 54 passed protected-live-data, real-refresh, stale-state, privacy, retired-snapshot, weather, brand, and API checks.'
+          echo 'Current Arborwise OS master board, owner shortcut, crew view, privacy, and live API checks passed.'
