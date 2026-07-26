@@ -28,6 +28,7 @@
     .ownerEditButton:active{transform:scale(.98)}
     .ownerAccessNote{font-size:12px;color:#285f3d;margin-top:8px;font-weight:850}
     .ownerSource{font-size:12px;color:#687068;margin:0 0 12px;line-height:1.4}
+    .ownerCurrentNotes{margin:0 0 12px;padding:10px 11px;border-radius:10px;background:#ecebe3;color:#4d574f;font-size:12px;line-height:1.4}
     .ownerSaveStatus{min-height:20px;margin-top:8px;color:#17402b;font-size:13px;font-weight:850}
   `;
   if(!document.getElementById(style.id))document.head.appendChild(style);
@@ -56,6 +57,10 @@
   }
   function openEditor(record){
     const source=record.source||'Google Sheets';
+    const estimateSource=/estimates/i.test(source);
+    const notesBlock=estimateSource
+      ? `${record.notes?`<div class="ownerCurrentNotes"><strong>CURRENT RECORD NOTES</strong><br>${esc(record.notes)}</div>`:''}<div class="field"><label for="ownerNotes">Add internal note</label><textarea id="ownerNotes" placeholder="Add a new internal note without replacing the existing record"></textarea></div>`
+      : `<div class="field"><label for="ownerNotes">Notes</label><textarea id="ownerNotes">${esc(record.notes||'')}</textarea></div>`;
     sheet.innerHTML=`
       <h2>Edit ${record.type==='est'?'estimate':'job'}</h2>
       <p class="ownerSource"><strong>${esc(record.id)}</strong> • ${esc(record.name||'')}<br>Changes save directly to ${esc(source)}.</p>
@@ -65,7 +70,7 @@
         ${field('ownerTime','Arrival window',record.workTime||'')}
       </div>
       ${field('ownerCrew','Crew or assigned to',record.who==='Unassigned'?'':record.who||'')}
-      <div class="field"><label for="ownerNotes">Notes</label><textarea id="ownerNotes">${esc(record.notes||'')}</textarea></div>
+      ${notesBlock}
       <div id="ownerSaveStatus" class="ownerSaveStatus" aria-live="polite"></div>
       <div class="buttons"><button class="secondary" id="ownerCancel" type="button">CANCEL</button><button class="primary" id="ownerSave" type="button">SAVE TO ARBORWISE</button></div>`;
     veil.hidden=false;
@@ -89,7 +94,8 @@
             date:document.getElementById('ownerDate').value,
             time:document.getElementById('ownerTime').value.trim(),
             who:document.getElementById('ownerCrew').value.trim(),
-            notes:document.getElementById('ownerNotes').value.trim()
+            notes:document.getElementById('ownerNotes').value.trim(),
+            appendNotes:estimateSource
           })
         });
         const data=await response.json().catch(()=>({}));
