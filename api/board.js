@@ -115,8 +115,9 @@ function estimateRecord(row,jobKeys,source){
   if(!id||!name||jobKeys.has(normalizedId(id).toUpperCase()))return null;
   const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';
   const lower=rawStatus.toLowerCase();
-  const accepted=/approved|accepted|scheduling/.test(lower);
-  const closed=/declin|reject|cancel|converted|closed|complete|paid/.test(lower);
+  const operationalStatus=statusForJob(rawStatus);
+  const accepted=/approved|accepted|scheduling|scheduled|in progress|working|started|complete|paid|done/.test(lower);
+  const closed=/declin|reject|cancel|converted|closed|complete|paid|done/.test(lower);
   const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';
   const email=clean(pick(row,['Email','Customer Email']));
   const notes=[
@@ -130,12 +131,12 @@ function estimateRecord(row,jobKeys,source){
     service:clean(pick(row,['Service Needed','Service','Work To Do','Work Description','Description'])),
     equipment:'',amount:money(pick(row,['Amount','Total','Estimate Total','Estimate Amount'])),
     laborCost:0,otherCost:0,category:categoryFor(name,assigned,email,notes),who:assigned,
-    status:accepted?'Scheduling':rawStatus,rawStatus,
+    status:accepted?operationalStatus:rawStatus,rawStatus,
     workDate:isoDate(pick(row,['Appointment Date','Scheduled Date','Date'])),
     workTime:clean(pick(row,['Appointment Time','Arrival Window','Time'])),
     followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date','Follow Up Date'])),
     notes,beforePhotos:'',afterPhotos:clean(pick(row,['Photos','After Photos'])),
-    closed,completionType:null,source
+    closed,completionType:accepted?completionType(operationalStatus,notes,assigned):null,source
   };
 }
 function sourceParts(value){
