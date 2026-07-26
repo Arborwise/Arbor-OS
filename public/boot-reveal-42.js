@@ -2,6 +2,15 @@
 (() => {
   const reveal=()=>requestAnimationFrame(()=>document.body.classList.remove('booting'));
 
+  const loadContactIcons=()=>{
+    if(document.querySelector('script[data-arborwise-contact-icons]'))return;
+    const script=document.createElement('script');
+    script.src='/contact-icons-66.js?v=66';
+    script.defer=true;
+    script.dataset.arborwiseContactIcons='66';
+    document.head.appendChild(script);
+  };
+
   const installLiveRefresh=()=>{
     const button=document.getElementById('syncButton');
     if(!button||button.dataset.liveSyncInstalled==='true')return;
@@ -38,8 +47,8 @@
     }
   };
 
-  const ready=()=>{reveal();installLiveRefresh();};
+  const ready=()=>{loadContactIcons();reveal();installLiveRefresh();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
   else ready();
-  setTimeout(()=>{document.body.classList.remove('booting');installLiveRefresh();},1800);
+  setTimeout(()=>{loadContactIcons();document.body.classList.remove('booting');installLiveRefresh();},1800);
 })();
