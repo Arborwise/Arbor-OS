@@ -4,8 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#174b31">
+  <meta name="application-name" content="Arborwise OS">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Arborwise Crew Board</title>
+  <title>Arborwise OS</title>
+  <link rel="manifest" href="/board-manifest.webmanifest?v=68">
+  <link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
+  <link rel="apple-touch-icon" href="/assets/annie-launcher-v42.svg">
+  <script>
+  (()=>{
+    const params=new URLSearchParams(location.search);
+    if(params.get('view')==='crew'){
+      document.title='Arborwise Crew Board';
+      return;
+    }
+    const target='/board-now.html?source=home-icon&board=68';
+    let ownerDevice=false;
+    try{ownerDevice=localStorage.getItem('arborwise-owner-device')==='1';}catch{}
+    if(ownerDevice){location.replace(target);return;}
+    fetch('/api/session',{credentials:'same-origin',cache:'no-store'})
+      .then(response=>response.ok?response.json():null)
+      .then(data=>{if(data?.authenticated)location.replace(target);})
+      .catch(()=>{});
+  })();
+  </script>
   <style>
     :root{--green:#174b31;--paper:#f7f2e8;--ink:#203027;--line:#d9d1c3;--blue:#dcecff;--blueInk:#234f76}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:38px}
@@ -24,19 +46,19 @@
 </head>
 <body>
 <header>
-  <img src="/assets/arborwise-logo.png?crew=3" alt="Arborwise">
+  <img src="/assets/arborwise-logo.png?crew=68" alt="Arborwise">
   <h1>Crew Board</h1>
-  <div class="sub">Schedule, job details, contact tools, and crew notes — no prices</div>
-  <div id="status">Opening current jobs…</div>
+  <div class="sub">Schedule, job details, contact tools, and crew notes - no prices</div>
+  <div id="status">Opening current jobs...</div>
 </header>
-<main id="main"><div class="empty">Loading crew schedule…</div></main>
+<main id="main"><div class="empty">Loading crew schedule...</div></main>
 <script>
 'use strict';
 (() => {
   const access=new URLSearchParams(location.search).get('access')||'';
   const main=document.getElementById('main');
   const status=document.getElementById('status');
-  const endpoint=`/api/crew-board?access=${encodeURIComponent(access)}`;
+  const endpoint=`/api/crew-board${access?`?access=${encodeURIComponent(access)}`:''}`;
   const icons={
     call:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.7 15.7 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.27.55 3.46.55A1.14 1.14 0 0 1 21 16.65V20a1.14 1.14 0 0 1-1.14 1.14A17 17 0 0 1 2.86 4.14 1.14 1.14 0 0 1 4 3h3.35A1.14 1.14 0 0 1 8.5 4.14c0 1.2.19 2.36.55 3.46a1 1 0 0 1-.25 1z"/></svg>',
     text:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 5h10v2H7zm0 4h7v2H7z"/></svg>',
@@ -88,9 +110,9 @@
       const textarea=article.querySelector('textarea');
       const saved=article.querySelector('.saved');
       button.onclick=async()=>{
-        button.disabled=true;saved.textContent='Saving…';
+        button.disabled=true;saved.textContent='Saving...';
         try{
-          const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:article.dataset.id,notes:textarea.value})});
+          const response=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:article.dataset.id,notes:textarea.value})});
           const data=await response.json().catch(()=>({}));
           if(!response.ok)throw new Error(data.error||`Save failed ${response.status}`);
           saved.textContent='Saved to Jobs sheet';
@@ -100,9 +122,8 @@
     });
   }
   async function load(){
-    if(!access){main.innerHTML='<div class="error">This crew link is incomplete.</div>';status.textContent='LINK REQUIRED';return;}
     try{
-      const response=await fetch(endpoint,{cache:'no-store'});
+      const response=await fetch(endpoint,{credentials:'same-origin',cache:'no-store'});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.error||`Load failed ${response.status}`);
       render(Array.isArray(data.items)?data.items:[]);
@@ -113,6 +134,6 @@
   setInterval(load,5*60*1000);
 })();
 </script>
-<script src="/contact-icons-66.js?v=66"></script>
+<script src="/contact-icons-66.js?v=67"></script>
 </body>
 </html>
