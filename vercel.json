@@ -13,6 +13,8 @@
     {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/board-now.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/crew-board.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/contact-icons-66.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
+    {"source": "/owner-home-redirect-67.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/voice-estimate-61.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/sbb-kw-group-63.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
     {"source": "/completed-jobs-62.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
