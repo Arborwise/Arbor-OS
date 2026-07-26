@@ -1,6 +1,9 @@
 'use strict';
 (() => {
   const UI_KEY='arborwise-board-ui-v57';
+  let observer=null;
+  let groupBar=null;
+  let queued=false;
 
   function normalizeRecords(){
     const records=window.ARBORWISE_CURRENT_OPERATIONS?.records;
@@ -14,36 +17,35 @@
         record.managementGroup='SBB Management';
         record.subcontractor='KW Landscaping';
       }
-      if(category==='CONDOM'||String(record.managementGroup||'').toUpperCase()==='CONDOM'){
-        record.category='KANAM';
-        record.managementGroup='KANAM';
-      }
+      if(category==='KANAM')record.managementGroup='KANAM';
     });
   }
 
   function normalizeSavedGroup(){
     try{
       const saved=JSON.parse(localStorage.getItem(UI_KEY)||'{}');
-      const group=String(saved.group||'').toUpperCase();
-      if(group==='KW')saved.group='SBB';
-      if(group==='CONDOM')saved.group='KANAM';
-      localStorage.setItem(UI_KEY,JSON.stringify(saved));
+      if(String(saved.group||'').toUpperCase()==='KW'){
+        saved.group='SBB';
+        localStorage.setItem(UI_KEY,JSON.stringify(saved));
+      }
     }catch{}
   }
 
   function correctButtons(){
-    const groupBar=document.getElementById('groupFilters54');
+    groupBar=document.getElementById('groupFilters54');
     if(!groupBar)return;
+    observer?.disconnect();
     groupBar.querySelectorAll('button').forEach(button=>{
       const value=String(button.dataset.group||'').toUpperCase();
       const label=String(button.textContent||'').trim().toUpperCase();
-      if(value==='KW'||label==='KW')button.remove();
-      if(value==='CONDOM'||label==='CONDOM'){
-        button.dataset.group='KANAM';
-        button.textContent='KANAM';
+      if(value==='KW'||label==='KW'){
+        button.remove();
+        return;
       }
-      if(value==='SBB')button.textContent='SBB MANAGEMENT';
+      if(value==='SBB'&&button.textContent!=='SBB MANAGEMENT')button.textContent='SBB MANAGEMENT';
+      if(value==='KANAM'&&button.textContent!=='KANAM')button.textContent='KANAM';
     });
+    observer?.observe(groupBar,{childList:true,subtree:true});
   }
 
   function apply(){
@@ -52,13 +54,21 @@
     correctButtons();
   }
 
-  window.addEventListener('arborwise:data-ready',apply);
-  const observer=new MutationObserver(correctButtons);
+  function queueApply(){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{
+      queued=false;
+      apply();
+    });
+  }
+
   const start=()=>{
+    observer=new MutationObserver(queueApply);
     apply();
-    const groupBar=document.getElementById('groupFilters54');
-    if(groupBar)observer.observe(groupBar,{childList:true,subtree:true,characterData:true});
   };
+
+  window.addEventListener('arborwise:data-ready',queueApply);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
 })();
