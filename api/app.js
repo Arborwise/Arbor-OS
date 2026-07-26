@@ -4,6 +4,7 @@ import data from './data.js';
 import health from './health.js';
 import login from './login.js';
 import logout from './logout.js';
+import ownerEdit from './owner-edit.js';
 import records from './records.js';
 import session from './session.js';
 import setup from './setup.js';
@@ -11,7 +12,7 @@ import state from './state.js';
 
 export const maxDuration=60;
 
-const routes={board,connections,data,health,login,logout,records,session,setup,state};
+const routes={board,connections,data,health,login,logout,owneredit:ownerEdit,records,session,setup,state};
 
 export default async function handler(req,res){
   const route=String(req.query?.route||'').toLowerCase();
