@@ -35,6 +35,7 @@
     {"source": "/api/board", "destination": "/api/app.js?route=board"},
     {"source": "/api/data", "destination": "/api/app.js?route=data"},
     {"source": "/api/connections", "destination": "/api/app.js?route=connections"},
+    {"source": "/api/session", "destination": "/api/app.js?route=session"},
     {"source": "/api/setup", "destination": "/api/app.js?route=setup"},
     {"source": "/api/records", "destination": "/api/app.js?route=records"},
     {"source": "/api/state", "destination": "/api/app.js?route=state"},
