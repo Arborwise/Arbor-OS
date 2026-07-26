@@ -1,5 +1,6 @@
 import {google} from 'googleapis';
 import {body,json,fail,method} from '../lib/http.js';
+import {validSession} from '../lib/auth.js';
 import {googleClient} from '../lib/google.js';
 
 const ACCESS_KEY='QtOouTBmW_kEg4WcuG5HdR2k7JX8yy72';
@@ -13,6 +14,7 @@ function queryAccess(req){
   return clean(url.searchParams.get('access'));
 }
 function assertAccess(req){
+  if(validSession(req))return;
   if(queryAccess(req)!==ACCESS_KEY){
     const error=new Error('Crew link is invalid or expired');
     error.status=403;
