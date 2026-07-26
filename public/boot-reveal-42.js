@@ -1,13 +1,23 @@
 'use strict';
 (() => {
+  try{
+    localStorage.setItem('arborwise-owner-device','1');
+    if(localStorage.getItem('arborwise-cache-reset-v68')!=='1'){
+      localStorage.removeItem('arborwise-board-last-good-v57');
+      localStorage.removeItem('arborwise-board-last-good-v56');
+      localStorage.removeItem('arborwise-live-board-v24');
+      localStorage.setItem('arborwise-cache-reset-v68','1');
+    }
+  }catch{}
+
   const reveal=()=>requestAnimationFrame(()=>document.body.classList.remove('booting'));
 
   const loadContactIcons=()=>{
     if(document.querySelector('script[data-arborwise-contact-icons]'))return;
     const script=document.createElement('script');
-    script.src='/contact-icons-66.js?v=66';
+    script.src='/contact-icons-66.js?v=67';
     script.defer=true;
-    script.dataset.arborwiseContactIcons='66';
+    script.dataset.arborwiseContactIcons='67';
     document.head.appendChild(script);
   };
 
