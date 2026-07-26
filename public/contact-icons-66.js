@@ -1,6 +1,23 @@
 'use strict';
 (() => {
-  const VERSION='66';
+  const VERSION='67';
+  const params=new URLSearchParams(location.search);
+  const crewPreview=params.get('view')==='crew';
+  const standalone=window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
+
+  if(location.pathname.endsWith('/crew-board.html')&&!crewPreview){
+    if(standalone){
+      location.replace('/board-now.html?source=home-icon&board=67');
+      return;
+    }
+    fetch('/api/session',{credentials:'same-origin',cache:'no-store'})
+      .then(response=>response.ok?response.json():null)
+      .then(data=>{
+        if(data?.authenticated)location.replace('/board-now.html?source=home-icon&board=67');
+      })
+      .catch(()=>{});
+  }
+
   const icons={
     call:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.8a2 2 0 0 1-.45 2.11L8.09 9.88a16 16 0 0 0 6 6l1.25-1.25a2 2 0 0 1 2.11-.45c.9.32 1.84.55 2.8.68A2 2 0 0 1 22 16.92Z"/></svg>`,
     text:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3v-7a4 4 0 0 1-1-2.65V7a4 4 0 0 1 4-4h11a4 4 0 0 1 4 4Z"/><path d="M7 9h10M7 13h7"/></svg>`,
