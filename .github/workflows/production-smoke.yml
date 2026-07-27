@@ -23,7 +23,9 @@ jobs:
           const fs=require('fs');
           const html=fs.readFileSync('public/board-now.html','utf8');
           const client=fs.readFileSync('public/board-live-54.js','utf8');
+          const ownerEdit=fs.readFileSync('public/owner-edit-69.js','utf8');
           const api=fs.readFileSync('api/board.js','utf8');
+          const ownerApi=fs.readFileSync('api/owner-edit.js','utf8');
           const crew=fs.readFileSync('public/crew-board.html','utf8');
           const crewApi=fs.readFileSync('api/crew-board.js','utf8');
           const manifest=JSON.parse(fs.readFileSync('public/board-manifest.webmanifest','utf8'));
@@ -31,7 +33,8 @@ jobs:
           const requireText=(text,value,label)=>{if(!text.includes(value))throw new Error(`${label}: missing ${value}`)};
           const forbidText=(text,value,label)=>{if(text.includes(value))throw new Error(`${label}: retired value remains ${value}`)};
 
-          requireText(html,'/board-live-54.js','master board HTML');
+          requireText(html,'/board-live-54.js?board=69','master board HTML');
+          requireText(html,'/owner-edit-69.js?board=69','owner editing HTML');
           requireText(html,'NURTURE YOUR NATURE','master board HTML');
           requireText(html,'Customer and financial data load only after authorized access.','master board HTML');
           for(const retired of ['/board-current-','/board-live.js','/live-sync-','/plan-b-refresh-'])forbidText(html,retired,'master board HTML');
@@ -39,9 +42,13 @@ jobs:
           requireText(client,'/api/board?ts=${Date.now()}','live board client');
           requireText(client,"cache:'no-store'",'live board client');
           requireText(client,'setInterval(()=>refreshBoard({manual:false}),5*60*1000)','live board client');
+          requireText(ownerEdit,"fetch('/api/owner-edit'",'owner editor client');
+          requireText(ownerEdit,'OWNER ACCESS','owner editor client');
           requireText(api,'requireSession(req)','master board API');
           requireText(api,"{name:'Jobs'",'master board API');
           requireText(api,"{name:'Master Estimates'",'master board API');
+          requireText(ownerApi,'requireSession(req)','owner edit API');
+          requireText(ownerApi,'spreadsheets.values.batchUpdate','owner edit API');
 
           requireText(crew,'<title>Arborwise OS</title>','crew page launcher title');
           requireText(crew,"localStorage.getItem('arborwise-owner-device')",'owner shortcut redirect');
@@ -50,11 +57,12 @@ jobs:
 
           if(manifest.name!=='Arborwise OS')throw new Error('Installed app name is not Arborwise OS');
           if(manifest.short_name!=='Arborwise OS')throw new Error('Installed app short name is not Arborwise OS');
-          if(manifest.start_url!=='/board-now.html?source=home&board=68')throw new Error('Installed app does not launch the current master board');
+          if(manifest.start_url!=='/board-now.html?source=home&board=69')throw new Error('Installed app does not launch editable board 69');
 
           const rewrites=vercel.rewrites||[];
           const has=(source,destination)=>rewrites.some(item=>item.source===source&&item.destination===destination);
           if(!has('/api/board','/api/app.js?route=board'))throw new Error('Missing protected master board rewrite');
+          if(!has('/api/owner-edit','/api/app.js?route=owner-edit'))throw new Error('Missing protected owner edit rewrite');
           if(!has('/api/session','/api/app.js?route=session'))throw new Error('Missing owner session rewrite');
           if(!has('/api/crew-board','/api/crew-board.js'))throw new Error('Missing crew board rewrite');
           NODE
@@ -78,19 +86,23 @@ jobs:
 
           deployed=false
           for attempt in $(seq 1 40); do
-            board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=68&smoke=$BUST-$attempt" || true)
+            board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=69&smoke=$BUST-$attempt" || true)
             manifest_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/manifest.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?smoke=$BUST-$attempt" || true)
             crew_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/crew.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/crew-board.html?view=crew&smoke=$BUST-$attempt" || true)
-            if [[ "$board_code" == '200' && "$manifest_code" == '200' && "$crew_code" == '200' ]] \
-              && grep -Fq '/board-live-54.js' /tmp/board.html \
+            owner_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/owner-edit.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/owner-edit-69.js?smoke=$BUST-$attempt" || true)
+            if [[ "$board_code" == '200' && "$manifest_code" == '200' && "$crew_code" == '200' && "$owner_code" == '200' ]] \
+              && grep -Fq '/board-live-54.js?board=69' /tmp/board.html \
+              && grep -Fq '/owner-edit-69.js?board=69' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
-              && grep -Fq 'board=68' /tmp/manifest.json \
+              && grep -Fq 'board=69' /tmp/manifest.json \
+              && grep -Fq 'OWNER ACCESS' /tmp/owner-edit.js \
+              && grep -Fq '/api/owner-edit' /tmp/owner-edit.js \
               && grep -Fq '<title>Arborwise OS</title>' /tmp/crew.html \
               && grep -Fq 'arborwise-owner-device' /tmp/crew.html; then
               deployed=true
               break
             fi
-            echo "Waiting for current Arborwise OS deployment, attempt $attempt"
+            echo "Waiting for editable Arborwise OS deployment, attempt $attempt"
             sleep 10
           done
 
@@ -103,7 +115,7 @@ jobs:
               echo '::notice title=Vercel quota cooldown::Code validation passed. Production deployment is delayed by the Vercel build-rate limit.'
               exit 0
             fi
-            echo 'The current Arborwise OS deployment did not become available during the smoke-test window.'
+            echo 'The editable Arborwise OS deployment did not become available during the smoke-test window.'
             exit 1
           fi
 
@@ -115,7 +127,10 @@ jobs:
           request '/api/session' '200' /tmp/session.json
           request '/api/crew-board' '403' /tmp/crew-api.json
 
+          owner_edit_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/owner-api.json -w '%{http_code}' -X PATCH -H 'Content-Type: application/json' --data '{}' "$BASE/api/owner-edit" || true)
+          [[ "$owner_edit_code" == '401' ]] || { echo "FAIL unauthenticated owner edit returned $owner_edit_code"; cat /tmp/owner-api.json; exit 1; }
+
           invalid_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/login.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data '{"pin":"smoke-test-invalid"}' "$BASE/api/login" || true)
           [[ "$invalid_code" == '401' ]] || { echo "FAIL invalid login returned $invalid_code"; cat /tmp/login.json; exit 1; }
 
-          echo 'Current Arborwise OS master board, owner shortcut, crew view, privacy, and live API checks passed.'
+          echo 'Editable Arborwise OS master board, owner shortcut, crew view, privacy, and live API checks passed.'
