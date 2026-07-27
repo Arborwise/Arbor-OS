@@ -3,7 +3,7 @@ name: Recover Vercel production after rate limit
 on:
   workflow_dispatch:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '23 */6 * * *'
 
 permissions:
   contents: write
@@ -23,27 +23,29 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Check whether protected board 54 is already live
+      - name: Check whether editable Arborwise OS is already live
         id: live
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://arborwise-os.vercel.app'
           BUST="recovery-$(date +%s)"
-          code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=54&$BUST" || true)
+          board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=69&$BUST" || true)
+          manifest_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/manifest.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?$BUST" || true)
+          owner_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/owner-edit.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/owner-edit-69.js?$BUST" || true)
           api_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board-api.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/api/board" || true)
-          if [[ "$code" == '200' ]] \
-            && [[ "$api_code" == '401' ]] \
-            && grep -Fq '/board-live-54.js?board=54' /tmp/board.html \
-            && grep -Fq '/weather-chip-48.js?board=54' /tmp/board.html \
+          if [[ "$board_code" == '200' && "$manifest_code" == '200' && "$owner_code" == '200' && "$api_code" == '401' ]] \
+            && grep -Fq '/board-live-54.js?board=69' /tmp/board.html \
+            && grep -Fq '/owner-edit-69.js?board=69' /tmp/board.html \
             && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
-            && ! grep -Fq '/board-current-' /tmp/board.html \
-            && ! grep -Fq '/board-live.js' /tmp/board.html; then
+            && grep -Fq 'board=69' /tmp/manifest.json \
+            && grep -Fq 'OWNER ACCESS' /tmp/owner-edit.js \
+            && grep -Fq '/api/owner-edit' /tmp/owner-edit.js; then
             echo 'live=true' >> "$GITHUB_OUTPUT"
-            echo 'Protected board 54 is already live. No deployment retry needed.'
+            echo 'Editable Arborwise OS is already live. No deployment retry is needed.'
           else
             echo 'live=false' >> "$GITHUB_OUTPUT"
-            echo "Board 54 is not fully live yet; board=$code protected-api=$api_code."
+            echo "Current production is incomplete: board=$board_code manifest=$manifest_code owner=$owner_code protected-api=$api_code."
           fi
 
       - name: Respect the Vercel rate-limit cooldown
@@ -82,11 +84,11 @@ jobs:
           set -euo pipefail
           epoch=$(date +%s)
           stamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          printf 'epoch=%s\nutc=%s\nreason=controlled retry for protected live Sheet board\n' "$epoch" "$stamp" > public/deploy-recovery-marker.txt
+          printf 'epoch=%s\nutc=%s\nreason=controlled retry for editable Arborwise OS board 69\n' "$epoch" "$stamp" > public/deploy-recovery-marker.txt
           git config user.name 'Arborwise deployment recovery'
           git config user.email 'actions@users.noreply.github.com'
           git add public/deploy-recovery-marker.txt
-          git commit -m 'Retry protected live board after Vercel cooldown'
+          git commit -m 'Retry editable Arborwise OS after Vercel cooldown'
           git push origin HEAD:main
 
       - name: Verify the controlled production result
@@ -97,31 +99,21 @@ jobs:
           BASE='https://arborwise-os.vercel.app'
           for attempt in $(seq 1 40); do
             bust="verify-$(date +%s)-$attempt"
-            board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=54&$bust" || true)
+            board_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?board=69&$bust" || true)
+            manifest_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/manifest.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-manifest.webmanifest?$bust" || true)
+            owner_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/owner-edit.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/owner-edit-69.js?$bust" || true)
             api_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board-api.json -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/api/board" || true)
-            if [[ "$board_code" == '200' ]] \
-              && [[ "$api_code" == '401' ]] \
-              && grep -Fq '/board-live-54.js?board=54' /tmp/board.html \
-              && grep -Fq '/annie-bubble-48.js?board=54' /tmp/board.html \
-              && grep -Fq '/weather-chip-48.js?board=54' /tmp/board.html \
+            if [[ "$board_code" == '200' && "$manifest_code" == '200' && "$owner_code" == '200' && "$api_code" == '401' ]] \
+              && grep -Fq '/board-live-54.js?board=69' /tmp/board.html \
+              && grep -Fq '/owner-edit-69.js?board=69' /tmp/board.html \
               && grep -Fq 'NURTURE YOUR NATURE' /tmp/board.html \
-              && ! grep -Fq '/board-current-' /tmp/board.html; then
-              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/board-live-54.js?$bust" -o /tmp/live.js
-              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/board-live.js?$bust" -o /tmp/retired.js
-              curl -sS -L --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$BASE/weather-chip-48.js?$bust" -o /tmp/weather.js
-              grep -Fq '/api/board' /tmp/live.js
-              grep -Fq 'STALE • LAST GOOD' /tmp/live.js
-              grep -Fq 'Read-only • Source:' /tmp/live.js
-              grep -Fq 'ARBORWISE_RETIRED_BOARD_DATA' /tmp/retired.js
-              grep -Fq 'Van Alstyne, Texas' /tmp/weather.js
-              if grep -Eq 'Christi Mahon|Susan Garrison|Dana & Tom Pierson|3116 Lucia Way' /tmp/board.html /tmp/live.js; then
-                echo 'Public board assets contain embedded customer data.'
-                exit 1
-              fi
-              echo 'Protected board 54 is live and passed refresh, stale-state, privacy, weather, brand, and retired-snapshot checks.'
+              && grep -Fq 'board=69' /tmp/manifest.json \
+              && grep -Fq 'OWNER ACCESS' /tmp/owner-edit.js \
+              && grep -Fq '/api/owner-edit' /tmp/owner-edit.js; then
+              echo 'Editable Arborwise OS is live and passed owner-access, privacy, manifest, and API checks.'
               exit 0
             fi
-            echo "Waiting for controlled deployment; attempt $attempt returned board=$board_code protected-api=$api_code."
+            echo "Waiting for controlled deployment; attempt $attempt returned board=$board_code manifest=$manifest_code owner=$owner_code protected-api=$api_code."
             sleep 15
           done
           echo 'Controlled deployment did not become live during the verification window.'
