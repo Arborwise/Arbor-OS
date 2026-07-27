@@ -62,7 +62,7 @@ jobs:
           const rewrites=vercel.rewrites||[];
           const has=(source,destination)=>rewrites.some(item=>item.source===source&&item.destination===destination);
           if(!has('/api/board','/api/app.js?route=board'))throw new Error('Missing protected master board rewrite');
-          if(!has('/api/owner-edit','/api/app.js?route=owner-edit'))throw new Error('Missing protected owner edit rewrite');
+          if(!has('/api/owner-edit','/api/app.js?route=owneredit'))throw new Error('Missing protected owner edit rewrite');
           if(!has('/api/session','/api/app.js?route=session'))throw new Error('Missing owner session rewrite');
           if(!has('/api/crew-board','/api/crew-board.js'))throw new Error('Missing crew board rewrite');
           NODE
