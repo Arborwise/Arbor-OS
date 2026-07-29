@@ -5,17 +5,17 @@
   const heading = localSection.querySelector('h2');
   const copy = localSection.querySelector('p:last-child');
   if (heading) heading.textContent = 'Local Arborwise answers for the North Texas communities we serve.';
-  if (copy) copy.textContent = 'Each city page is being built from real Arborwise work, local concerns, photographs, reviews, and community ties. Farmersville and Anna are live first. The rest follow as we gather enough real evidence to make each page worth reading.';
+  if (copy) copy.textContent = 'Each page starts with the questions people in that community are likely to bring us, then connects them to the main Arborwise concern checker, services, team, and contact options. The first six city pages are now connected.';
 
   const cityCloud = localSection.querySelector('.city-cloud');
   if (cityCloud) {
     cityCloud.innerHTML = `
       <a href="/farmersville-tree-service/">Farmersville</a>
       <a href="/tree-service-anna-tx/">Anna</a>
-      <span>Van Alstyne</span>
-      <span>Celina</span>
-      <span>Howe</span>
-      <span>Princeton</span>
+      <a href="/van-alstyne-tree-service/">Van Alstyne</a>
+      <a href="/celina-tree-service/">Celina</a>
+      <a href="/howe-tree-service/">Howe</a>
+      <a href="/princeton-tree-service/">Princeton</a>
       <span>Melissa</span>
       <span>McKinney</span>`;
   }
