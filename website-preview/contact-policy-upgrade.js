@@ -39,6 +39,7 @@
       const business = data['@graph']?.find(item => item['@id'] === 'https://arborwisetreecare.com/#business');
       if (business) {
         business.email = PUBLIC_EMAIL;
+        business.slogan = 'Nurture Your Nature';
         business.description = 'Master-level tree pruning, expert tree removal, priority storm-damage response, tree risk assessment, and property-management tree services for Collin County, Grayson County, and nearby North Texas communities.';
       }
       structuredData.textContent = JSON.stringify(data);
@@ -46,4 +47,9 @@
       console.warn('Could not update Arborwise contact and storm-response data.', error);
     }
   }
+
+  const customerViewUpgrade = document.createElement('script');
+  customerViewUpgrade.src = 'customer-view-upgrade.js';
+  customerViewUpgrade.defer = true;
+  document.body.appendChild(customerViewUpgrade);
 })();
