@@ -50,6 +50,10 @@
 
   const customerViewUpgrade = document.createElement('script');
   customerViewUpgrade.src = 'customer-view-upgrade.js';
-  customerViewUpgrade.defer = true;
+  customerViewUpgrade.onload = () => {
+    const teamVoiceUpgrade = document.createElement('script');
+    teamVoiceUpgrade.src = 'team-voice-upgrade.js';
+    document.body.appendChild(teamVoiceUpgrade);
+  };
   document.body.appendChild(customerViewUpgrade);
 })();
