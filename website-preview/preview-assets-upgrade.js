@@ -89,4 +89,9 @@
     proofImages[1].src = ASSETS.hootA;
     proofImages[1].onerror = () => { proofImages[1].src = ASSETS.pruning; };
   }
+
+  const mobileCustomerView = document.createElement('script');
+  mobileCustomerView.src = 'mobile-customer-view-upgrade.js';
+  mobileCustomerView.defer = true;
+  document.body.appendChild(mobileCustomerView);
 })();
