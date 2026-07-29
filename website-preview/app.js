@@ -1,3 +1,75 @@
+const localRecognition = [
+  { mark: 'F', title: 'Farmersville Chamber of Commerce', detail: 'Member', kind: 'chamber' },
+  { mark: 'VA', title: 'Van Alstyne Chamber of Commerce', detail: 'Member', kind: 'chamber' },
+  { mark: 'N', title: 'Nextdoor Neighborhood Favorite', detail: '2024', kind: 'nextdoor' },
+  { mark: 'N', title: 'Nextdoor Neighborhood Favorite', detail: '2025', kind: 'nextdoor' }
+];
+
+(function addLocalRecognition() {
+  if (!document.querySelector('.local-trust')) {
+    const answerStrip = document.querySelector('.answer-strip');
+    const section = document.createElement('section');
+    section.className = 'local-trust';
+    section.setAttribute('aria-labelledby', 'local-trust-title');
+    section.innerHTML = `
+      <div class="local-trust-intro">
+        <p class="eyebrow">Trusted in the communities we serve</p>
+        <h2 id="local-trust-title">Local membership. Neighbor recognition. Real accountability.</h2>
+      </div>
+      <div class="recognition-grid" aria-label="Arborwise community memberships and awards">
+        ${localRecognition.map(item => `
+          <article class="recognition-card ${item.kind}-card">
+            <span class="recognition-mark" aria-hidden="true">${item.mark}</span>
+            <div><strong>${item.title}</strong><span>${item.detail}</span></div>
+          </article>
+        `).join('')}
+      </div>`;
+    answerStrip.insertAdjacentElement('afterend', section);
+  }
+
+  if (!document.getElementById('local-recognition-styles')) {
+    const style = document.createElement('style');
+    style.id = 'local-recognition-styles';
+    style.textContent = `
+      .local-trust{max-width:1376px;margin:0 auto;padding:34px 32px 10px;display:grid;grid-template-columns:.78fr 1.22fr;gap:34px;align-items:center}
+      .local-trust-intro h2{font-size:clamp(1.85rem,3.2vw,3rem);margin-bottom:0}
+      .recognition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      .recognition-card{min-height:104px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:16px 18px;display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(18,63,47,.05)}
+      .recognition-card strong{display:block;line-height:1.22;color:var(--forest)}
+      .recognition-card div>span{display:block;margin-top:4px;color:var(--muted);font-size:.82rem;font-weight:850;text-transform:uppercase;letter-spacing:.1em}
+      .recognition-mark{width:56px;height:56px;border-radius:17px;display:grid;place-items:center;background:#e8f1df;color:var(--forest);font-weight:950;font-size:1rem;border:1px solid #cfddc7}
+      .nextdoor-card .recognition-mark{background:#fff1cf;border-color:#ead59d;color:#6b4b0c}
+      @media (max-width:720px){
+        .local-trust{padding:46px 14px 8px;grid-template-columns:1fr;gap:20px}
+        .local-trust-intro h2{font-size:2.15rem}
+        .recognition-grid{grid-template-columns:1fr}
+        .recognition-card{min-height:92px}
+      }`;
+    document.head.appendChild(style);
+  }
+
+  const structuredData = document.querySelector('script[type="application/ld+json"]');
+  if (structuredData) {
+    try {
+      const data = JSON.parse(structuredData.textContent);
+      const business = data['@graph']?.find(item => item['@id'] === 'https://arborwisetreecare.com/#business');
+      if (business) {
+        business.memberOf = [
+          {'@type': 'Organization', name: 'Farmersville Chamber of Commerce'},
+          {'@type': 'Organization', name: 'Van Alstyne Chamber of Commerce'}
+        ];
+        business.award = [
+          'Nextdoor Neighborhood Favorite 2024',
+          'Nextdoor Neighborhood Favorite 2025'
+        ];
+        structuredData.textContent = JSON.stringify(data);
+      }
+    } catch (error) {
+      console.warn('Could not update local recognition structured data.', error);
+    }
+  }
+})();
+
 const concernData = {
   leaves: {
     eyebrow: 'Leaves and seasonal symptoms',
