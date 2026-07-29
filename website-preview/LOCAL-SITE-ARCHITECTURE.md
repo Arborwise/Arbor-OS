@@ -28,12 +28,14 @@ The main website links to all six pages. Every local page links back to the main
 
 ## Distinct page focus
 
-- Farmersville: hometown identity, community work, Town Square trees, condition questions, pruning, removal, and storm response
+- Farmersville: hometown identity, Farmersville Chamber membership, local accountability, community-service history, condition questions, pruning, removal, and storm response
 - Anna: established trees, new landscapes, property clearance, young-tree structure, and storm-exposed canopies
 - Van Alstyne: mature shade, property targets, controlled work, and Chamber accountability
 - Celina: planting depth, trunk flare, root zones, construction effects, young-tree structure, and mature-tree care
 - Howe: whole-property planning, acreage, outbuildings, access, mature trees, storm damage, and controlled removals
 - Princeton: soil, drainage, compaction, construction, root disturbance, canopy symptoms, and matching the solution to the cause
+
+Historical community projects must not be written as current or recurring programs unless Greg confirms they are still active.
 
 ## Quality requirements
 
