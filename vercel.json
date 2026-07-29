@@ -18,6 +18,14 @@
     {"source": "/farmersville-tree-service/", "destination": "/website-preview/farmersville-tree-service/index.html"},
     {"source": "/tree-service-anna-tx", "destination": "/website-preview/tree-service-anna-tx/index.html"},
     {"source": "/tree-service-anna-tx/", "destination": "/website-preview/tree-service-anna-tx/index.html"},
+    {"source": "/van-alstyne-tree-service", "destination": "/website-preview/van-alstyne-tree-service/index.html"},
+    {"source": "/van-alstyne-tree-service/", "destination": "/website-preview/van-alstyne-tree-service/index.html"},
+    {"source": "/celina-tree-service", "destination": "/website-preview/celina-tree-service/index.html"},
+    {"source": "/celina-tree-service/", "destination": "/website-preview/celina-tree-service/index.html"},
+    {"source": "/howe-tree-service", "destination": "/website-preview/howe-tree-service/index.html"},
+    {"source": "/howe-tree-service/", "destination": "/website-preview/howe-tree-service/index.html"},
+    {"source": "/princeton-tree-service", "destination": "/website-preview/princeton-tree-service/index.html"},
+    {"source": "/princeton-tree-service/", "destination": "/website-preview/princeton-tree-service/index.html"},
     {"source": "/((?!website-preview/).*)", "destination": "/website-preview/$1"}
   ]
 }
