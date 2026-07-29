@@ -158,3 +158,8 @@ document.getElementById('annieButton').addEventListener('click', () => {
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
+
+const badgeUpgrade = document.createElement('script');
+badgeUpgrade.src = 'badge-upgrade.js';
+badgeUpgrade.defer = true;
+document.body.appendChild(badgeUpgrade);
