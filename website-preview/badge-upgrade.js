@@ -78,6 +78,11 @@
   conversionUpgrade.onload = () => {
     const expertiseUpgrade = document.createElement('script');
     expertiseUpgrade.src = 'expertise-upgrade.js';
+    expertiseUpgrade.onload = () => {
+      const clientProofUpgrade = document.createElement('script');
+      clientProofUpgrade.src = 'client-proof-upgrade.js';
+      document.body.appendChild(clientProofUpgrade);
+    };
     document.body.appendChild(expertiseUpgrade);
   };
   document.body.appendChild(conversionUpgrade);
