@@ -84,6 +84,11 @@
       clientProofUpgrade.onload = () => {
         const contactPolicyUpgrade = document.createElement('script');
         contactPolicyUpgrade.src = 'contact-policy-upgrade.js';
+        contactPolicyUpgrade.onload = () => {
+          const previewAssetsUpgrade = document.createElement('script');
+          previewAssetsUpgrade.src = 'preview-assets-upgrade.js';
+          document.body.appendChild(previewAssetsUpgrade);
+        };
         document.body.appendChild(contactPolicyUpgrade);
       };
       document.body.appendChild(clientProofUpgrade);
