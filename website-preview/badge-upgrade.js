@@ -75,6 +75,10 @@
 
   const conversionUpgrade = document.createElement('script');
   conversionUpgrade.src = 'conversion-upgrade.js';
-  conversionUpgrade.defer = true;
+  conversionUpgrade.onload = () => {
+    const expertiseUpgrade = document.createElement('script');
+    expertiseUpgrade.src = 'expertise-upgrade.js';
+    document.body.appendChild(expertiseUpgrade);
+  };
   document.body.appendChild(conversionUpgrade);
 })();
