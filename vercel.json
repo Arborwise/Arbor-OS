@@ -14,6 +14,8 @@
   ],
   "rewrites": [
     {"source": "/", "destination": "/website-preview/index.html"},
+    {"source": "/service-areas", "destination": "/website-preview/service-areas/index.html"},
+    {"source": "/service-areas/", "destination": "/website-preview/service-areas/index.html"},
     {"source": "/farmersville-tree-service", "destination": "/website-preview/farmersville-tree-service/index.html"},
     {"source": "/farmersville-tree-service/", "destination": "/website-preview/farmersville-tree-service/index.html"},
     {"source": "/tree-service-anna-tx", "destination": "/website-preview/tree-service-anna-tx/index.html"},
