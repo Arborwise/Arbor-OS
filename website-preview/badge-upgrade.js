@@ -72,4 +72,9 @@
       .recognition-visual{width:112px;height:112px}
     }`;
   document.head.appendChild(style);
+
+  const conversionUpgrade = document.createElement('script');
+  conversionUpgrade.src = 'conversion-upgrade.js';
+  conversionUpgrade.defer = true;
+  document.body.appendChild(conversionUpgrade);
 })();
