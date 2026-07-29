@@ -17,7 +17,8 @@
       <a href="/howe-tree-service/">Howe</a>
       <a href="/princeton-tree-service/">Princeton</a>
       <span>Melissa</span>
-      <span>McKinney</span>`;
+      <span>McKinney</span>
+      <a class="all-areas-link" href="/service-areas/">View all local pages</a>`;
   }
 
   const style = document.createElement('style');
@@ -26,6 +27,7 @@
     .city-cloud a{display:inline-flex;align-items:center;text-decoration:none;background:var(--forest)!important;color:white!important;border-color:var(--forest)!important;transition:.2s ease}
     .city-cloud a:after{content:' →';margin-left:4px}
     .city-cloud a:hover,.city-cloud a:focus-visible{transform:translateY(-2px);background:var(--leaf)!important}
+    .city-cloud .all-areas-link{background:var(--lime)!important;color:var(--forest)!important;border-color:var(--lime)!important}
   `;
   document.head.appendChild(style);
 })();
