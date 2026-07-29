@@ -81,6 +81,11 @@
     expertiseUpgrade.onload = () => {
       const clientProofUpgrade = document.createElement('script');
       clientProofUpgrade.src = 'client-proof-upgrade.js';
+      clientProofUpgrade.onload = () => {
+        const contactPolicyUpgrade = document.createElement('script');
+        contactPolicyUpgrade.src = 'contact-policy-upgrade.js';
+        document.body.appendChild(contactPolicyUpgrade);
+      };
       document.body.appendChild(clientProofUpgrade);
     };
     document.body.appendChild(expertiseUpgrade);
