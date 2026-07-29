@@ -94,10 +94,13 @@
       </form>`;
     cta.insertAdjacentElement('beforebegin', section);
 
+    const form = section.querySelector('form');
+    decorateSms(section.querySelector('a[href^="sms:"]') || document.createElement('a'));
     section.querySelector('a[href^="tel:"]').addEventListener('click', () => pushEvent('call', 'fast estimate call'));
-    section.querySelector('form').addEventListener('submit', event => {
+
+    form.addEventListener('submit', event => {
       event.preventDefault();
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(form);
       const message = [
         `[${sourceLabel}]`,
         `Name: ${data.get('name')}`,
@@ -115,7 +118,8 @@
   style.textContent = `
     .growth-proof{max-width:1196px;margin:0 auto 72px;padding:26px 30px;border:1px solid #d5e2cf;background:#eff4e7;border-radius:25px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
     .growth-proof strong{font-family:var(--serif);font-size:2rem;color:var(--forest)}
-    .growth-proof p{margin:0;color:var(--muted)}.growth-proof a{font-weight:850;color:var(--forest)}
+    .growth-proof p{margin:0;color:var(--muted)}
+    .growth-proof a{font-weight:850;color:var(--forest)}
     .fast-estimate{max-width:1196px;margin:0 auto 72px;padding:48px;border-radius:35px;background:white;border:1px solid var(--line);box-shadow:0 16px 42px rgba(18,63,47,.08);display:grid;grid-template-columns:.85fr 1.15fr;gap:40px}
     .fast-estimate h2{font-family:var(--serif);font-size:clamp(2rem,4vw,3.35rem);line-height:1.04;margin:0 0 14px;color:var(--forest)}
     .fast-estimate-copy>p:last-child{color:var(--muted)}
@@ -123,8 +127,22 @@
     .fast-estimate-form label{display:grid;gap:6px;font-weight:850;color:var(--forest);font-size:.86rem}
     .fast-estimate-form label:nth-child(3),.fast-estimate-form label:nth-child(4),.fast-estimate-form .button,.fast-call{grid-column:1/-1}
     .fast-estimate-form input,.fast-estimate-form select,.fast-estimate-form textarea{width:100%;border:1px solid #cbd8c5;border-radius:13px;padding:12px 13px;background:#fffdf7;color:var(--ink);font:inherit}
-    .fast-estimate-form textarea{resize:vertical}.fast-estimate-form .button{border:0;cursor:pointer}.fast-call{text-align:center;font-weight:900;color:var(--forest)}
-    @media(max-width:750px){.growth-proof{margin:0 13px 55px;padding:22px;grid-template-columns:1fr;text-align:center}.fast-estimate{margin:0 13px 55px;padding:30px 20px;grid-template-columns:1fr;border-radius:27px}.fast-estimate-copy{text-align:center}.fast-estimate-form{grid-template-columns:1fr}.fast-estimate-form label,.fast-estimate-form label:nth-child(3),.fast-estimate-form label:nth-child(4),.fast-estimate-form .button,.fast-call{grid-column:1}}
-  `;
+    .fast-estimate-form textarea{resize:vertical}
+    .fast-estimate-form .button{border:0;cursor:pointer}
+    .fast-call{text-align:center;font-weight:900;color:var(--forest)}
+    @media(max-width:750px){
+      .growth-proof{margin:0 13px 55px;padding:22px;grid-template-columns:1fr;text-align:center}
+      .fast-estimate{margin:0 13px 55px;padding:30px 20px;grid-template-columns:1fr;border-radius:27px}
+      .fast-estimate-copy{text-align:center}
+      .fast-estimate-form{grid-template-columns:1fr}
+      .fast-estimate-form label,.fast-estimate-form label:nth-child(3),.fast-estimate-form label:nth-child(4),.fast-estimate-form .button,.fast-call{grid-column:1}
+    }`;
   document.head.appendChild(style);
+
+  if (!document.querySelector('script[src="/photo-field-guide.js"]')) {
+    const photoGuide = document.createElement('script');
+    photoGuide.src = '/photo-field-guide.js';
+    photoGuide.defer = true;
+    document.body.appendChild(photoGuide);
+  }
 })();
