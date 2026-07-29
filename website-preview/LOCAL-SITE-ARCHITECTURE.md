@@ -14,14 +14,16 @@ Primary authority and conversion site:
 
 ## Priority local pages
 
-Provisional first group:
+First group:
 
+- /farmersville-tree-service/
 - /anna-tree-service/
 - /van-alstyne-tree-service/
+- /celina-tree-service/
 - /howe-tree-service/
 - /princeton-tree-service/
 
-Confirm the fourth city before publication if “Princeton” was not the intended name.
+Confirm Princeton before publication if that was not the intended city name.
 
 ## What makes each local page genuinely useful
 
@@ -50,7 +52,8 @@ Do not create separate city profiles unless Arborwise has a legitimate staffed l
 
 1. Lock the main Arborwise design, voice, assets, mobile experience, and conversion flow.
 2. Build the local-page template around real evidence, not filler.
-3. Complete Anna and Van Alstyne first because Arborwise has the strongest current community recognition there.
-4. Complete Howe and Princeton after gathering local photos, jobs, reviews, and useful city-specific facts.
-5. Add optional redirect domains only after the corresponding local page is complete.
-6. Measure calls, texts, estimate starts, engagement, and search performance by local page.
+3. Complete Farmersville first because it is central to Arborwise's identity and community presence.
+4. Complete Van Alstyne, Anna, and Celina next using real jobs, reviews, photos, and local concerns.
+5. Complete Howe and Princeton after gathering enough local evidence to make each page genuinely useful.
+6. Add optional redirect domains only after the corresponding local page is complete.
+7. Measure calls, texts, estimate starts, engagement, and search performance by local page.
