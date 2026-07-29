@@ -17,7 +17,7 @@
   });
 
   const heroLead = document.querySelector('.hero-lead');
-  if (heroLead) heroLead.textContent = 'Greg, Brandon, and the whole Arborwise team help North Texas homeowners, businesses, HOAs, and property managers understand their trees and choose the right work—not simply the biggest job.';
+  if (heroLead) heroLead.textContent = 'Greg, Brandon, and the whole Arborwise team help North Texas homeowners, businesses, HOAs, and property managers understand their trees and choose the right work, not simply the biggest job.';
 
   const storyIntro = document.querySelector('.stories-intro > p:last-child');
   if (storyIntro) storyIntro.textContent = 'Real Arborwise work should teach you something: how we climbed it, why we pruned it, how we controlled it, what we protected, and what the customer needed to know next.';
@@ -29,4 +29,9 @@
     .team-signature strong{display:block;font-family:var(--serif);font-size:1.25rem;margin-bottom:4px}
   `;
   document.head.appendChild(style);
+
+  const localNetwork = document.createElement('script');
+  localNetwork.src = 'local-network-upgrade.js';
+  localNetwork.defer = true;
+  document.body.appendChild(localNetwork);
 })();
