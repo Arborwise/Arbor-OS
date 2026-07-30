@@ -2,12 +2,12 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v73')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v74')!=='1'){
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
       localStorage.removeItem('arborwise-sbb-work-filter-v73');
-      localStorage.setItem('arborwise-cache-reset-v73','1');
+      localStorage.setItem('arborwise-cache-reset-v74','1');
     }
   }catch{}
 
@@ -28,6 +28,15 @@
     script.src='/estimate-age-colors-70.js?v=71';
     script.defer=true;
     script.dataset.arborwiseWorkflowStatusBoard='71';
+    document.head.appendChild(script);
+  };
+
+  const loadManagementGroupsRepair=()=>{
+    if(document.querySelector('script[data-management-groups-repair]'))return;
+    const script=document.createElement('script');
+    script.src='/management-groups-repair-74.js?v=74';
+    script.defer=true;
+    script.dataset.managementGroupsRepair='74';
     document.head.appendChild(script);
   };
 
@@ -67,8 +76,8 @@
     }
   };
 
-  const ready=()=>{loadContactIcons();loadWorkflowStatusBoard();reveal();installLiveRefresh();};
+  const ready=()=>{loadContactIcons();loadWorkflowStatusBoard();loadManagementGroupsRepair();reveal();installLiveRefresh();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
   else ready();
-  setTimeout(()=>{loadContactIcons();loadWorkflowStatusBoard();document.body.classList.remove('booting');installLiveRefresh();},1800);
+  setTimeout(()=>{loadContactIcons();loadWorkflowStatusBoard();loadManagementGroupsRepair();document.body.classList.remove('booting');installLiveRefresh();},1800);
 })();
