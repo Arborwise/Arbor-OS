@@ -13,5 +13,6 @@
     .then(() => load('homepage-dark-v6.js?v=20260730-1504', 'arborwiseDarkV6'))
     .then(() => load('homepage-final-v10.js?v=20260730-1718', 'arborwiseFinalV10'))
     .then(() => load('homepage-final-v10b.js?v=20260730-1718', 'arborwiseFinalV10b'))
+    .then(() => load('homepage-final-v11.js?v=20260730-1728', 'arborwiseFinalV11'))
     .catch(console.error);
 })();
