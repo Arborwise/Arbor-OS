@@ -17,6 +17,15 @@
       const v7 = document.createElement('script');
       v7.src = 'homepage-greg-fix-v7.js?v=20260730-1640';
       v7.dataset.arborwiseGregV7 = 'true';
+
+      v7.addEventListener('load', () => {
+        if (document.querySelector('script[data-arborwise-annie-v8]')) return;
+        const v8 = document.createElement('script');
+        v8.src = 'homepage-annie-v8.js?v=20260730-1648';
+        v8.dataset.arborwiseAnnieV8 = 'true';
+        document.head.appendChild(v8);
+      });
+
       document.head.appendChild(v7);
     });
 
