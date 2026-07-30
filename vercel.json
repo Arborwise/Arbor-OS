@@ -6,6 +6,7 @@
     {"src": "api/sync.js", "use": "@vercel/node"},
     {"src": "api/crew-board.js", "use": "@vercel/node"},
     {"src": "api/estimate-draft.js", "use": "@vercel/node"},
+    {"src": "api/invoice-draft.js", "use": "@vercel/node"},
     {"src": "public/**", "use": "@vercel/static"}
   ],
   "headers": [
@@ -48,6 +49,7 @@
     {"source": "/api/sync", "destination": "/api/sync.js"},
     {"source": "/api/crew-board", "destination": "/api/crew-board.js"},
     {"source": "/api/estimate-draft", "destination": "/api/estimate-draft.js"},
+    {"source": "/api/invoice-draft", "destination": "/api/invoice-draft.js"},
     {"source": "/api/oauth/google/start", "destination": "/api/oauth.js?provider=google&action=start"},
     {"source": "/api/oauth/google/callback", "destination": "/api/oauth.js?provider=google&action=callback"},
     {"source": "/api/oauth/quickbooks/start", "destination": "/api/oauth.js?provider=quickbooks&action=start"},
