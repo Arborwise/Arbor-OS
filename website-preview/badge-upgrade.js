@@ -13,7 +13,7 @@
     {
       type: 'link',
       href: 'https://www.vanalstynechamber.org/',
-      visual: '<img class="recognition-logo van-alstyne-logo" src="https://lirp.cdn-website.com/d362b084/dms3rep/multi/opt/VA%2BChamber%2BLARGE%2BLOGO_transparent-180w.png" alt="Van Alstyne Chamber of Commerce logo" loading="lazy">',
+      visual: '<img class="recognition-logo van-alstyne-logo" src="assets/van-alstyne-chamber.svg" alt="Van Alstyne Chamber of Commerce logo" loading="lazy">',
       title: 'Van Alstyne Chamber of Commerce',
       detail: 'Member'
     },
