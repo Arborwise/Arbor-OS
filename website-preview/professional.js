@@ -20,7 +20,7 @@
         </a>
 
         <a class="brand" href="#top" aria-label="Arborwise home">
-          <img src="assets/logo.webp" data-brand-logo alt="Arborwise. Nurture Your Nature. A tree held in two hands above a wooden Arborwise plaque.">
+          <img data-brand-logo alt="Arborwise. Nurture Your Nature. Tree held in two hands above the wooden Arborwise plaque with its green TM.">
         </a>
 
         <a class="header-contact header-contact-right" href="sms:+19724308330?body=Hi%20Arborwise%2C%20I%20have%20photos%20of%20a%20tree%20concern." aria-label="Text photos to Arborwise">
@@ -69,10 +69,15 @@
     const logoMark = document.createElement('img');
     logoMark.className = 'photo-logo-mark';
     logoMark.dataset.brandLogo = '';
-    logoMark.src = 'assets/logo.webp';
     logoMark.alt = '';
     logoMark.setAttribute('aria-hidden', 'true');
     card.appendChild(logoMark);
+  };
+
+  const moveAnnieForward = () => {
+    const annie = document.querySelector('.annie-callout');
+    const trust = document.querySelector('.trust-band');
+    if (annie && trust) trust.insertAdjacentElement('afterend', annie);
   };
 
   const installStyles = () => {
@@ -123,6 +128,8 @@
       .after-photo-card{position:relative}
       .after-photo-card>img:first-child{object-position:center 48%}
       .photo-logo-mark{position:absolute;z-index:3;top:12px;right:12px;width:132px!important;height:78px!important;object-fit:contain!important;padding:5px;background:rgba(255,253,248,.92);border:1px solid rgba(11,63,47,.22);border-radius:12px;box-shadow:0 7px 16px rgba(6,40,31,.14)}
+      .annie-callout{margin-top:18px}
+      .annie-callout [data-annie]{object-fit:contain;filter:drop-shadow(0 18px 18px rgba(6,40,31,.18))}
       .mobile-bar a{gap:3px}
 
       @media(max-width:1100px){
@@ -172,22 +179,37 @@
   };
 
   const loadBrandAssets = async () => {
-    const setAsset = async (selector, encodedPath, fallbackPath, mimeType) => {
+    const setAsset = async (selector, encodedPath, fallbackPath, mimeType, hideUntilLoaded = false) => {
       const images = [...document.querySelectorAll(selector)];
-      images.forEach(img => { img.src = fallbackPath; });
+      if (hideUntilLoaded) {
+        images.forEach(img => {
+          img.removeAttribute('src');
+          img.style.visibility = 'hidden';
+        });
+      } else {
+        images.forEach(img => { img.src = fallbackPath; });
+      }
+
       try {
         const response = await fetch(encodedPath, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Could not load ${encodedPath}`);
         const encoded = (await response.text()).trim();
-        images.forEach(img => { img.src = `data:${mimeType};base64,${encoded}`; });
+        images.forEach(img => {
+          img.onload = () => { img.style.visibility = 'visible'; };
+          img.src = `data:${mimeType};base64,${encoded}`;
+        });
       } catch (error) {
+        images.forEach(img => {
+          img.style.visibility = 'visible';
+          img.src = fallbackPath;
+        });
         console.error(`Could not load ${encodedPath}; using the local asset instead.`, error);
       }
     };
 
     await Promise.allSettled([
-      setAsset('[data-brand-logo]', 'assets/logo-correct.b64', 'assets/logo.webp', 'image/avif'),
-      setAsset('[data-annie]', 'assets/annie-correct.b64', 'assets/annie.webp', 'image/avif'),
+      setAsset('[data-brand-logo]', 'assets/logo-correct.b64', 'assets/logo.webp', 'image/webp', true),
+      setAsset('[data-annie]', 'assets/annie-correct.b64', 'assets/annie.webp', 'image/webp', true),
       setAsset('[data-after-photo]', 'assets/anacapri-after.b64', 'assets/healthy-tree.webp', 'image/webp')
     ]);
   };
@@ -203,6 +225,7 @@
   installHeader();
   installPageCopy();
   installAfterPhoto();
+  moveAnnieForward();
   installStyles();
   installMobileIcons();
   loadBrandAssets();
