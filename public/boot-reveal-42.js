@@ -2,12 +2,13 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v74')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v75')!=='1'){
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
       localStorage.removeItem('arborwise-sbb-work-filter-v73');
-      localStorage.setItem('arborwise-cache-reset-v74','1');
+      localStorage.removeItem('arborwise-pmg-sbb-v75');
+      localStorage.setItem('arborwise-cache-reset-v75','1');
     }
   }catch{}
 
@@ -16,27 +17,18 @@
   const loadContactIcons=()=>{
     if(document.querySelector('script[data-arborwise-contact-icons]'))return;
     const script=document.createElement('script');
-    script.src='/contact-icons-66.js?v=67';
+    script.src='/contact-icons-66.js?v=75';
     script.defer=true;
-    script.dataset.arborwiseContactIcons='67';
+    script.dataset.arborwiseContactIcons='75';
     document.head.appendChild(script);
   };
 
   const loadWorkflowStatusBoard=()=>{
     if(document.querySelector('script[data-arborwise-workflow-status-board]'))return;
     const script=document.createElement('script');
-    script.src='/estimate-age-colors-70.js?v=71';
+    script.src='/estimate-age-colors-70.js?v=75';
     script.defer=true;
-    script.dataset.arborwiseWorkflowStatusBoard='71';
-    document.head.appendChild(script);
-  };
-
-  const loadManagementGroupsRepair=()=>{
-    if(document.querySelector('script[data-management-groups-repair]'))return;
-    const script=document.createElement('script');
-    script.src='/management-groups-repair-74.js?v=74';
-    script.defer=true;
-    script.dataset.managementGroupsRepair='74';
+    script.dataset.arborwiseWorkflowStatusBoard='75';
     document.head.appendChild(script);
   };
 
@@ -76,8 +68,8 @@
     }
   };
 
-  const ready=()=>{loadContactIcons();loadWorkflowStatusBoard();loadManagementGroupsRepair();reveal();installLiveRefresh();};
+  const ready=()=>{loadContactIcons();loadWorkflowStatusBoard();reveal();installLiveRefresh();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
   else ready();
-  setTimeout(()=>{loadContactIcons();loadWorkflowStatusBoard();loadManagementGroupsRepair();document.body.classList.remove('booting');installLiveRefresh();},1800);
+  setTimeout(()=>{loadContactIcons();loadWorkflowStatusBoard();document.body.classList.remove('booting');installLiveRefresh();},1800);
 })();
