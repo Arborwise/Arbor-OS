@@ -3,7 +3,7 @@
   "name": "Arborwise OS",
   "short_name": "Arborwise OS",
   "description": "Protected Arborwise Tree Care operations board with live Google Sheets, Calendar, and QuickBooks data.",
-  "start_url": "/board-now.html?source=home&board=74",
+  "start_url": "/board-now.html?source=home&board=75",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
