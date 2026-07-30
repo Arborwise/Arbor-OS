@@ -3,7 +3,7 @@
   "name": "Arborwise OS",
   "short_name": "Arborwise OS",
   "description": "Protected Arborwise Tree Care operations board with live Google Sheets, Calendar, and QuickBooks data.",
-  "start_url": "/board-safe.html?source=home&board=79",
+  "start_url": "/board-safe.html?source=home&board=80",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -13,9 +13,6 @@
   "prefer_related_applications": false,
   "categories": ["business", "productivity"],
   "icons": [
-    {"src":"/assets/annie-launcher-v42.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"},
-    {"src":"/assets/annie-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"/assets/annie-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"/assets/annie-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {"src":"/api/annie-icon?v=80","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
   ]
 }
