@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260730-1748';
+  const VERSION = '20260730-1755';
   const STYLE_ID = 'arborwise-customer-review-v12';
 
   const conditionPhotos = [
@@ -83,7 +83,7 @@
   const keepAnnieWorking = () => {
     const button = document.getElementById('annieButton');
     const tip = document.getElementById('annieTip');
-    if (!button || !tip) return;
+    if (!button || !tip || button.dataset.v12Bound === 'true') return;
 
     const tips = [
       'Show us what changed, where it changed, and how quickly. The pattern tells us where to look next.',
@@ -94,10 +94,12 @@
     ];
 
     const fresh = button.cloneNode(true);
+    fresh.dataset.v12Bound = 'true';
     button.replaceWith(fresh);
     let index = Math.max(0, tips.indexOf(tip.textContent.trim()));
     fresh.addEventListener('click', event => {
       event.preventDefault();
+      event.stopPropagation();
       index = (index + 1) % tips.length;
       tip.textContent = tips[index];
     });
@@ -128,15 +130,24 @@
       .recognition-copy{text-align:center!important}
       .area-links{justify-content:center!important}
 
+      .trust-band>div{padding:14px 18px!important;min-height:0!important}
+      .trust-band strong{font-size:1rem!important;line-height:1.18!important}
+      .trust-band span{font-size:.8rem!important;line-height:1.32!important}
+
       .concern-card>img{width:100%!important;height:270px!important;object-fit:cover!important;object-position:center!important;background:#e4eadf!important}
       .concern-photo-label-v12{display:block!important;padding:11px 14px!important;background:#0b4b38!important;color:#f2f8df!important;font-size:.78rem!important;font-weight:900!important;line-height:1.32!important;text-align:center!important}
       .concern-body strong{font-size:1.28rem!important;line-height:1.25!important}
 
       @media(max-width:760px){
+        body{padding-bottom:90px!important}
+        .section{padding-top:52px!important;padding-bottom:52px!important}
         .climber-circle-v12 ellipse{stroke-width:11!important}
         .section-title-v12{margin-bottom:18px!important;font-size:1.17rem!important;border-bottom-width:3px!important}
         .intro-grid h2,.section-head h2,.split-head h2,.way-intro h2,.recognition-copy h2,.estimate-card h2,.annie-copy-v10 h2,.annie-copy-v11 h2,.annie-copy-v12 h2{font-size:clamp(1.75rem,8vw,2.45rem)!important;max-width:16ch!important}
         .concern-card>img{height:255px!important}
+        .mobile-bar{left:12px!important;right:12px!important;bottom:max(8px,env(safe-area-inset-bottom,8px))!important;border-radius:18px!important;max-height:72px!important}
+        .mobile-bar a{min-height:68px!important;padding:6px 3px!important;font-size:.74rem!important;line-height:1.05!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important}
+        .mobile-bar a svg{width:25px!important;height:25px!important;max-height:25px!important}
       }
     `;
     document.head.appendChild(style);
