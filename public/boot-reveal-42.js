@@ -2,11 +2,12 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v71')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v73')!=='1'){
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
-      localStorage.setItem('arborwise-cache-reset-v71','1');
+      localStorage.removeItem('arborwise-sbb-work-filter-v73');
+      localStorage.setItem('arborwise-cache-reset-v73','1');
     }
   }catch{}
 
