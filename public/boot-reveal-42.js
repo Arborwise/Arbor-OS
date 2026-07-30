@@ -2,11 +2,11 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v68')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v70')!=='1'){
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
-      localStorage.setItem('arborwise-cache-reset-v68','1');
+      localStorage.setItem('arborwise-cache-reset-v70','1');
     }
   }catch{}
 
@@ -18,6 +18,15 @@
     script.src='/contact-icons-66.js?v=67';
     script.defer=true;
     script.dataset.arborwiseContactIcons='67';
+    document.head.appendChild(script);
+  };
+
+  const loadEstimateAgeColors=()=>{
+    if(document.querySelector('script[data-arborwise-estimate-age-colors]'))return;
+    const script=document.createElement('script');
+    script.src='/estimate-age-colors-70.js?v=70';
+    script.defer=true;
+    script.dataset.arborwiseEstimateAgeColors='70';
     document.head.appendChild(script);
   };
 
@@ -57,8 +66,8 @@
     }
   };
 
-  const ready=()=>{loadContactIcons();reveal();installLiveRefresh();};
+  const ready=()=>{loadContactIcons();loadEstimateAgeColors();reveal();installLiveRefresh();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
   else ready();
-  setTimeout(()=>{loadContactIcons();document.body.classList.remove('booting');installLiveRefresh();},1800);
+  setTimeout(()=>{loadContactIcons();loadEstimateAgeColors();document.body.classList.remove('booting');installLiveRefresh();},1800);
 })();
