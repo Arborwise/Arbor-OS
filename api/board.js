@@ -100,6 +100,7 @@ function jobRecord(row,warnings,seen,source){
     category:categoryFor(name,crew,email,notes),who:crew||'Unassigned',status,rawStatus,
     workDate:date,workTime:clean(pick(row,['Arrival Window','Appointment Time','Time','Time Window'])),
     followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date'])),notes,
+    dateAdded:isoDate(pick(row,['Date Added','Created Date','Lead Date'])),
     beforePhotos:clean(pick(row,['Before Photos','Before Photo'])),
     afterPhotos:clean(pick(row,['After Photos','After Photo','Photos'])),
     closed:status==='Completed'||status==='Cancelled',completionType:completion,source
@@ -116,7 +117,7 @@ function estimateRecord(row,jobKeys,source){
   const rawStatus=clean(pick(row,['Status','Estimate Status']))||'Open';
   const lower=rawStatus.toLowerCase();
   const operationalStatus=statusForJob(rawStatus);
-  const accepted=/approved|accepted|scheduling|scheduled|in progress|working|started|complete|paid|done/.test(lower);
+  const accepted=/approved|accepted|scheduling|in progress|working|started|complete|paid|done/.test(lower);
   const closed=/declin|reject|cancel|converted|closed|complete|paid|done/.test(lower);
   const assigned=clean(pick(row,['Assigned To','Assigned','Estimator','Crew Lead']))||'Unassigned';
   const email=clean(pick(row,['Email','Customer Email']));
@@ -135,6 +136,7 @@ function estimateRecord(row,jobKeys,source){
     workDate:isoDate(pick(row,['Appointment Date','Scheduled Date','Date'])),
     workTime:clean(pick(row,['Appointment Time','Arrival Window','Time'])),
     followUp:isoDate(pick(row,['Next Follow-Up Date','Follow-Up Date','Follow Up Date'])),
+    dateAdded:isoDate(pick(row,['Date Added','Created Date','Lead Date'])),
     notes,beforePhotos:'',afterPhotos:clean(pick(row,['Photos','After Photos'])),
     closed,completionType:accepted?completionType(operationalStatus,notes,assigned):null,source
   };
@@ -150,6 +152,7 @@ function sourceLabel(value){
 function databaseRecord(row){
   const status=row.kind==='job'?statusForJob(row.status):clean(row.status)||'Open';
   const notes=clean(row.notes),who=clean(row.assigned_to)||'Unassigned';
+  const raw=row.raw&&typeof row.raw==='object'?row.raw:{};
   return {
     id:clean(row.id),type:row.kind==='job'?'job':'est',name:clean(row.customer_name),
     address:clean(row.address),city:'',phone:clean(row.phone),email:clean(row.email),
@@ -159,6 +162,7 @@ function databaseRecord(row){
     workDate:row.work_date?String(row.work_date).slice(0,10):'',
     workTime:clean(row.work_time),
     followUp:row.follow_up_date?String(row.follow_up_date).slice(0,10):'',
+    dateAdded:isoDate(raw['Date Added']||raw.dateAdded||row.updated_at),
     notes,beforePhotos:'',afterPhotos:'',
     closed:Boolean(row.closed)||status==='Completed'||status==='Cancelled',
     completionType:completionType(status,notes,who),source:sourceLabel(row.source)
@@ -182,7 +186,7 @@ function mergeRecord(existing,incoming){
 }
 function stableVersion(items){
   const stable=items.map(item=>[
-    item.id,item.type,item.status,item.workDate,item.workTime,item.who,item.phone,item.email,
+    item.id,item.type,item.status,item.workDate,item.workTime,item.followUp,item.dateAdded,item.who,item.phone,item.email,
     item.address,item.service,item.notes,item.amount,item.laborCost,item.otherCost,item.closed,item.completionType
   ]);
   return createHash('sha256').update(JSON.stringify(stable)).digest('hex').slice(0,20);
@@ -230,7 +234,7 @@ export default async function handler(req,res){
     const byId=new Map();
     const liveSheetsComplete=available.length===SHEETS.length;
 
-    if(process.env.DATABASE_URL&&!liveSheetsComplete){
+    if(process.env.DATABASE_URL){
       try{
         await initDb();
         const stored=await db().query(
