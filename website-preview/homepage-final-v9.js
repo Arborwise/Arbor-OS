@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260730-1712';
+  const VERSION = '20260730-1722';
   const STYLE_ID = 'arborwise-final-v9-styles';
   const ANNIE_CLASS = 'annie-final-v9';
   let annieDataUrl = '';
@@ -34,16 +34,25 @@
         pointer-events:none!important;
       }
 
-      .hero-annie>[data-annie],
-      .hero-annie>.annie-mascot-art,
-      .hero-annie>.annie-v5-art,
-      .hero-annie>.greg-annie-v7-art,
-      .hero-annie>.annie-exact-v8,
-      .annie-callout>[data-annie],
-      .annie-callout>.annie-v5-art,
-      .annie-callout>.greg-annie-v7-art,
-      .annie-callout>.annie-exact-v8{
+      .hero-copy h1 sup{
+        display:inline-block!important;
+        font-family:Arial,sans-serif!important;
+        font-size:.43em!important;
+        font-weight:900!important;
+        line-height:1!important;
+        margin-left:.1em!important;
+        vertical-align:super!important;
+      }
+
+      .hero-annie>img:not(.${ANNIE_CLASS}),
+      .hero-annie>[data-annie]:not(.${ANNIE_CLASS}),
+      .hero-annie>[class*="annie"]:not(.${ANNIE_CLASS}),
+      .annie-callout>img:not(.${ANNIE_CLASS}),
+      .annie-callout>[data-annie]:not(.${ANNIE_CLASS}),
+      .annie-callout>[class*="annie"]:not(.${ANNIE_CLASS}){
         display:none!important;
+        visibility:hidden!important;
+        opacity:0!important;
       }
 
       .${ANNIE_CLASS}{
@@ -67,6 +76,11 @@
         height:116px!important;
         margin:0 auto!important;
       }
+      .hero-annie>p{
+        min-width:0!important;
+        margin:0!important;
+        text-align:left!important;
+      }
       .annie-callout{
         display:grid!important;
         grid-template-columns:220px minmax(0,1fr)!important;
@@ -81,45 +95,19 @@
       }
 
       @media(max-width:760px){
-        .hero-image-stage>.climber-highlight{
-          border-width:5px!important;
-        }
-        .hero-annie{
-          grid-template-columns:104px minmax(0,1fr)!important;
-          gap:12px!important;
-        }
-        .hero-annie>.${ANNIE_CLASS}{
-          width:104px!important;
-          height:104px!important;
-        }
-        .annie-callout{
-          grid-template-columns:132px minmax(0,1fr)!important;
-          gap:15px!important;
-          padding:22px 16px!important;
-        }
-        .annie-callout>.${ANNIE_CLASS}{
-          width:132px!important;
-          height:145px!important;
-        }
+        .hero-image-stage>.climber-highlight{border-width:5px!important}
+        .hero-annie{grid-template-columns:104px minmax(0,1fr)!important;gap:12px!important}
+        .hero-annie>.${ANNIE_CLASS}{width:104px!important;height:104px!important}
+        .annie-callout{grid-template-columns:132px minmax(0,1fr)!important;gap:15px!important;padding:22px 16px!important}
+        .annie-callout>.${ANNIE_CLASS}{width:132px!important;height:145px!important}
       }
 
       @media(max-width:430px){
-        .hero-annie{
-          grid-template-columns:94px minmax(0,1fr)!important;
-        }
-        .hero-annie>.${ANNIE_CLASS}{
-          width:94px!important;
-          height:94px!important;
-        }
-        .annie-callout{
-          grid-template-columns:112px minmax(0,1fr)!important;
-          gap:12px!important;
-          padding:20px 13px!important;
-        }
-        .annie-callout>.${ANNIE_CLASS}{
-          width:112px!important;
-          height:126px!important;
-        }
+        .hero-copy h1 sup{font-size:.46em!important}
+        .hero-annie{grid-template-columns:96px minmax(0,1fr)!important;gap:12px!important}
+        .hero-annie>.${ANNIE_CLASS}{width:96px!important;height:96px!important}
+        .annie-callout{grid-template-columns:112px minmax(0,1fr)!important;gap:12px!important;padding:20px 13px!important}
+        .annie-callout>.${ANNIE_CLASS}{width:112px!important;height:126px!important}
       }
     `;
     document.head.appendChild(style);
@@ -165,7 +153,7 @@
       })),
       Promise.reject(new Error('Start Annie fallback chain'))
     ).then(encoded => {
-      annieDataUrl = `data:image/avif;base64,${encoded.replace(/\s+/g, '')}`;
+      annieDataUrl = `data:image/webp;base64,${encoded.replace(/\s+/g, '')}`;
       return annieDataUrl;
     }).catch(error => {
       console.error('Annie could not be loaded.', error);
@@ -184,20 +172,23 @@
     return image;
   };
 
-  const placeAnnie = () => {
-    const hero = document.querySelector('.hero-annie');
-    if (hero && !hero.querySelector(`:scope>.${ANNIE_CLASS}`)) {
-      hero.prepend(makeAnnie('hero'));
-    }
+  const ensureOneAnnie = (container, location) => {
+    if (!container) return null;
+    const matches = [...container.querySelectorAll(`:scope>.${ANNIE_CLASS}`)];
+    matches.slice(1).forEach(node => node.remove());
+    if (matches[0]) return matches[0];
+    const image = makeAnnie(location);
+    container.prepend(image);
+    return image;
+  };
 
-    const callout = document.querySelector('.annie-callout');
-    if (callout && !callout.querySelector(`:scope>.${ANNIE_CLASS}`)) {
-      callout.prepend(makeAnnie('callout'));
-    }
+  const placeAnnie = () => {
+    const heroImage = ensureOneAnnie(document.querySelector('.hero-annie'), 'hero');
+    const calloutImage = ensureOneAnnie(document.querySelector('.annie-callout'), 'callout');
 
     loadAnnie().then(source => {
       if (!source) return;
-      document.querySelectorAll(`.${ANNIE_CLASS}`).forEach(image => {
+      [heroImage, calloutImage].filter(Boolean).forEach(image => {
         if (image.getAttribute('src') !== source) image.setAttribute('src', source);
         image.style.setProperty('display', 'block', 'important');
         image.style.setProperty('visibility', 'visible', 'important');
@@ -221,6 +212,7 @@
   const observer = new MutationObserver(() => {
     clearTimeout(observer.timer);
     observer.timer = setTimeout(() => {
+      installStyles();
       ensureClimberCircle();
       placeAnnie();
     }, 70);
