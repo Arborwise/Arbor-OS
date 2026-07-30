@@ -10,11 +10,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Arborwise OS Board</title>
-  <link rel="manifest" href="/board-manifest.webmanifest?v=69">
+  <link rel="manifest" href="/board-manifest.webmanifest?v=75">
   <link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
   <link rel="apple-touch-icon" href="/assets/annie-launcher-v42.svg">
-  <link rel="stylesheet" href="/app.css?board=69">
-  <link rel="stylesheet" href="/annie-bubble-30.css?board=69">
+  <link rel="stylesheet" href="/app.css?board=75">
+  <link rel="stylesheet" href="/annie-bubble-30.css?board=75">
   <style>
     html,body{background:#f7f2e8}
     body.booting{visibility:hidden}
@@ -25,12 +25,31 @@
     .connectionLinks a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #fff;border-radius:999px;background:#f7f2e8;color:#17402b;text-decoration:none;font-size:13px;font-weight:950;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.25);touch-action:manipulation;pointer-events:auto;-webkit-user-select:none;user-select:none}
     .connectionLinks a.connected{background:#dff0e4;color:#155b2d;border-color:#b7d6c0}
     .connectionLinks a:active{transform:scale(.98)}
+
+    /* The core board still owns these hidden buttons. The permanent visible control below clicks them. */
+    #groupFilters54{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;padding:0!important;border:0!important;margin:-1px!important}
+    #filters button[data-filter="KW"]{display:none!important}
+    #propertyManagementGroups75{display:grid;gap:8px;position:relative;z-index:70;padding:9px 10px;background:#ebe9df;border-bottom:1px solid #d9d6ca;overflow:visible}
+    .pmgLevel75{position:relative;width:100%}
+    .pmgLevel75[hidden]{display:none!important}
+    .pmgTrigger75{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;width:100%;min-height:52px;padding:9px 13px;border:2px solid #17402b;border-radius:13px;background:#fff;color:#17402b;text-align:left;font:inherit;font-weight:950;touch-action:manipulation}
+    .pmgTrigger75 span{letter-spacing:.025em}
+    .pmgTrigger75 small{font-size:11px;color:#5d675f;text-align:right;letter-spacing:.02em}
+    .pmgTrigger75 b{font-size:18px}
+    #pmgSbbTrigger75{background:#e4efe6;border-color:#2b6441}
+    .pmgMenu75{position:absolute;z-index:140;left:0;right:0;top:57px;padding:7px;border:2px solid #17402b;border-radius:13px;background:#f7f2e8;box-shadow:0 8px 20px rgba(15,46,30,.25)}
+    .pmgMenu75 button{display:block;width:100%;min-height:47px;margin:3px 0;padding:10px 12px;border:0;border-radius:9px;background:#fff;color:#17402b;text-align:left;font:inherit;font-weight:900;touch-action:manipulation}
+    .pmgMenu75 button[aria-checked="true"]{background:#17402b;color:#fff}
+    #pmgSbbMenu75 button[aria-checked="true"]{background:#2b6441}
     @media(max-width:390px){
       .connectionLinks{gap:7px;width:94%}
       .connectionLinks a{min-height:46px;font-size:11px;padding:0 6px}
+      .pmgTrigger75{grid-template-columns:1fr auto;min-height:50px}
+      .pmgTrigger75 small{grid-column:1 / -1;text-align:left;margin-top:-4px}
+      .pmgTrigger75 b{position:absolute;right:14px;top:14px}
     }
   </style>
-  <link rel="stylesheet" href="/arborwise-personality-49.css?board=69">
+  <link rel="stylesheet" href="/arborwise-personality-49.css?board=75">
   <noscript><style>body.booting{visibility:visible}</style></noscript>
   <script>
     try{
@@ -52,7 +71,7 @@
     <span class="syncIcon">↻</span><span>REFRESH</span>
   </button>
   <div id="weatherChip" class="weatherChip" role="status" aria-live="polite" aria-label="Loading Van Alstyne weather">WX …</div>
-  <img class="logo" src="/assets/arborwise-logo.png?board=69" alt="Arborwise">
+  <img class="logo" src="/assets/arborwise-logo.png?board=75" alt="Arborwise">
   <div class="brandTagline" aria-label="Arborwise motto">NURTURE YOUR NATURE</div>
   <div id="dateLine" class="dateLine"></div>
   <button id="statusButton" class="status" type="button">OPENING LIVE OPERATIONS</button>
@@ -63,29 +82,134 @@
   <div id="operationsVoice" class="operationsVoice" aria-live="polite">Reading the current Arborwise operation...</div>
 </header>
 <section id="filters" class="filters" aria-label="Crew filters"></section>
+<section id="propertyManagementGroups75" aria-label="Property management group filters">
+  <div class="pmgLevel75">
+    <button id="pmgMainTrigger75" class="pmgTrigger75" type="button" aria-haspopup="true" aria-expanded="false">
+      <span>PROPERTY MANAGEMENT GROUPS</span><small id="pmgMainLabel75">ALL CUSTOMERS</small><b aria-hidden="true">▾</b>
+    </button>
+    <div id="pmgMainMenu75" class="pmgMenu75" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-pmg-main="ALL">ALL CUSTOMERS</button>
+      <button type="button" role="menuitemradio" data-pmg-main="RESIDENTIAL">RESIDENTIAL / HOMEOWNERS</button>
+      <button type="button" role="menuitemradio" data-pmg-main="SBB">SBB MANAGEMENT</button>
+      <button type="button" role="menuitemradio" data-pmg-main="GOODWIN">GOODWIN</button>
+      <button type="button" role="menuitemradio" data-pmg-main="KANAM">KANAM</button>
+    </div>
+  </div>
+  <div id="pmgSbbLevel75" class="pmgLevel75" hidden>
+    <button id="pmgSbbTrigger75" class="pmgTrigger75" type="button" aria-haspopup="true" aria-expanded="false">
+      <span>SBB MANAGEMENT WORK</span><small id="pmgSbbLabel75">ALL SBB WORK</small><b aria-hidden="true">▾</b>
+    </button>
+    <div id="pmgSbbMenu75" class="pmgMenu75" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-pmg-sbb="ALL">ALL SBB WORK</button>
+      <button type="button" role="menuitemradio" data-pmg-sbb="ARBORWISE">ARBORWISE TREE WORK</button>
+      <button type="button" role="menuitemradio" data-pmg-sbb="KW">KW LANDSCAPING LAWNS</button>
+    </div>
+  </div>
+</section>
 <main id="main">
   <div class="title"><span>Opening current operations</span></div>
   <div class="empty">Customer and financial data load only after authorized access.</div>
 </main>
 <button id="addButton" class="add" type="button" hidden aria-hidden="true"></button>
 <button id="annieButton" class="annie" type="button" aria-label="Ask Annie">
-  <img src="/assets/annie-main-icon.png?board=69" alt="Annie">
+  <img src="/assets/annie-main-icon.png?board=75" alt="Annie">
 </button>
 <div id="annieBubble" class="bubble" hidden></div>
 <nav id="tabs" aria-label="Arborwise sections"></nav>
 <div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
 <div id="toast" class="toast" hidden></div>
 
-<script src="/board-schedule-sections-59.js?board=69" defer></script>
-<script src="/board-live-54.js?board=69" defer></script>
-<script src="/owner-edit-69.js?board=69" defer></script>
-<script src="/sbb-kw-group-63.js?board=69" defer></script>
-<script src="/completed-jobs-62.js?board=69" defer></script>
-<script src="/voice-estimate-61.js?board=69" defer></script>
-<script src="/annie-bubble-48.js?board=69" defer></script>
-<script src="/weather-chip-48.js?board=69" defer></script>
-<script src="/arborwise-personality-48.js?board=69" defer></script>
-<script src="/boot-reveal-42.js?board=69" defer></script>
+<script src="/board-schedule-sections-59.js?board=75" defer></script>
+<script src="/board-live-54.js?board=75" defer></script>
+<script src="/owner-edit-69.js?board=75" defer></script>
+<script src="/completed-jobs-62.js?board=75" defer></script>
+<script src="/voice-estimate-61.js?board=75" defer></script>
+<script src="/annie-bubble-48.js?board=75" defer></script>
+<script src="/weather-chip-48.js?board=75" defer></script>
+<script src="/arborwise-personality-48.js?board=75" defer></script>
+<script src="/boot-reveal-42.js?board=75" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{
+  const UI_KEY='arborwise-board-ui-v57';
+  const SUB_KEY='arborwise-pmg-sbb-v75';
+  const mainLabels={ALL:'ALL CUSTOMERS',RESIDENTIAL:'RESIDENTIAL / HOMEOWNERS',SBB:'SBB MANAGEMENT',GOODWIN:'GOODWIN',KANAM:'KANAM'};
+  const subLabels={ALL:'ALL SBB WORK',ARBORWISE:'ARBORWISE TREE WORK',KW:'KW LANDSCAPING LAWNS'};
+  const mainTrigger=document.getElementById('pmgMainTrigger75');
+  const mainMenu=document.getElementById('pmgMainMenu75');
+  const mainLabel=document.getElementById('pmgMainLabel75');
+  const sbbLevel=document.getElementById('pmgSbbLevel75');
+  const sbbTrigger=document.getElementById('pmgSbbTrigger75');
+  const sbbMenu=document.getElementById('pmgSbbMenu75');
+  const sbbLabel=document.getElementById('pmgSbbLabel75');
+  if(!mainTrigger||!mainMenu||!mainLabel||!sbbLevel||!sbbTrigger||!sbbMenu||!sbbLabel)return;
+
+  const readUi=()=>{try{return JSON.parse(localStorage.getItem(UI_KEY)||'{}')||{};}catch{return {};}};
+  const readSub=()=>{try{const value=String(localStorage.getItem(SUB_KEY)||'ALL').toUpperCase();return subLabels[value]?value:'ALL';}catch{return 'ALL';}};
+  const saveSub=value=>{try{localStorage.setItem(SUB_KEY,value);}catch{}};
+  const activeMain=()=>{
+    const active=document.querySelector('#groupFilters54 > button[data-group].on');
+    const value=String(active?.dataset.group||readUi().group||'ALL').toUpperCase();
+    return mainLabels[value]?value:'ALL';
+  };
+  const closeMenus=()=>{
+    mainMenu.hidden=true;sbbMenu.hidden=true;
+    mainTrigger.setAttribute('aria-expanded','false');
+    sbbTrigger.setAttribute('aria-expanded','false');
+  };
+  const clickFresh=selector=>{
+    const button=document.querySelector(selector);
+    if(button){button.click();return true;}
+    return false;
+  };
+  const applyCrewForSub=sub=>{
+    const crew=sub==='KW'?'KW':sub==='ARBORWISE'?'ARBORWISE':'ALL';
+    if(!clickFresh(`#filters button[data-filter="${crew}"]`))setTimeout(()=>clickFresh(`#filters button[data-filter="${crew}"]`),60);
+  };
+  const updateControl=()=>{
+    const main=activeMain();
+    const sub=main==='SBB'?readSub():'ALL';
+    mainLabel.textContent=mainLabels[main];
+    sbbLabel.textContent=subLabels[sub];
+    sbbLevel.hidden=main!=='SBB';
+    mainMenu.querySelectorAll('[data-pmg-main]').forEach(button=>button.setAttribute('aria-checked',String(button.dataset.pmgMain===main)));
+    sbbMenu.querySelectorAll('[data-pmg-sbb]').forEach(button=>button.setAttribute('aria-checked',String(button.dataset.pmgSbb===sub)));
+  };
+  const chooseMain=value=>{
+    closeMenus();
+    if(value!=='SBB')saveSub('ALL');
+    const target=()=>clickFresh(`#groupFilters54 > button[data-group="${value}"]`);
+    if(!target())setTimeout(target,60);
+    setTimeout(()=>applyCrewForSub(value==='SBB'?readSub():'ALL'),80);
+    setTimeout(updateControl,130);
+  };
+  const chooseSub=value=>{
+    saveSub(value);
+    closeMenus();
+    const selectSbb=()=>clickFresh('#groupFilters54 > button[data-group="SBB"]');
+    if(!selectSbb())setTimeout(selectSbb,60);
+    setTimeout(()=>applyCrewForSub(value),80);
+    setTimeout(updateControl,130);
+  };
+
+  mainTrigger.onclick=event=>{
+    event.preventDefault();event.stopPropagation();
+    const opening=mainMenu.hidden;closeMenus();mainMenu.hidden=!opening;mainTrigger.setAttribute('aria-expanded',String(opening));
+  };
+  sbbTrigger.onclick=event=>{
+    event.preventDefault();event.stopPropagation();
+    const opening=sbbMenu.hidden;closeMenus();sbbMenu.hidden=!opening;sbbTrigger.setAttribute('aria-expanded',String(opening));
+  };
+  mainMenu.querySelectorAll('[data-pmg-main]').forEach(button=>button.onclick=event=>{event.preventDefault();event.stopPropagation();chooseMain(button.dataset.pmgMain);});
+  sbbMenu.querySelectorAll('[data-pmg-sbb]').forEach(button=>button.onclick=event=>{event.preventDefault();event.stopPropagation();chooseSub(button.dataset.pmgSbb);});
+  document.addEventListener('click',event=>{if(!event.target.closest('#propertyManagementGroups75'))closeMenus();});
+  window.addEventListener('arborwise:data-ready',()=>setTimeout(updateControl,0));
+  const observer=new MutationObserver(()=>updateControl());
+  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  updateControl();
+  setTimeout(updateControl,250);
+  setTimeout(updateControl,1200);
+});
+</script>
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
   const statusButton=document.getElementById('statusButton');
