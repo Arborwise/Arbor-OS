@@ -27,7 +27,7 @@
         v8.addEventListener('load', () => {
           if (document.querySelector('script[data-arborwise-final-v9]')) return;
           const v9 = document.createElement('script');
-          v9.src = 'homepage-final-v9.js?v=20260730-1705';
+          v9.src = 'homepage-final-v9.js?v=20260730-1712';
           v9.dataset.arborwiseFinalV9 = 'true';
           document.head.appendChild(v9);
         });
