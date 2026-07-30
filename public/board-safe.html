@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1d4b34">
+  <meta name="application-name" content="Arborwise OS">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Arborwise OS Board</title>
+  <link rel="manifest" href="/board-manifest.webmanifest?v=79">
+  <link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
+  <link rel="apple-touch-icon" href="/assets/annie-launcher-v42.svg">
+  <link rel="stylesheet" href="/app.css?board=79">
+  <link rel="stylesheet" href="/annie-bubble-30.css?board=79">
+  <link rel="stylesheet" href="/arborwise-personality-49.css?board=79">
+  <style>
+    html,body{background:#f7f2e8;visibility:visible!important;opacity:1!important}
+    header{min-height:302px;padding-top:10px}
+    header .logo{display:block;width:min(300px,68vw);height:90px;object-fit:contain;margin:0 auto}
+    .annie{left:8px;bottom:83px}
+    .connectionLinks{position:relative;z-index:20;display:flex;gap:9px;width:min(620px,92%);margin:10px auto 0}
+    .connectionLinks a{flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #fff;border-radius:999px;background:#f7f2e8;color:#17402b;text-decoration:none;font-size:13px;font-weight:950;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+    .connectionLinks a.connected{background:#dff0e4;color:#155b2d;border-color:#b7d6c0}
+    #groupFilters54{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;padding:0!important;border:0!important;margin:-1px!important}
+    #propertyManagementGroups75{display:none!important}
+  </style>
+  <script>
+    try{
+      document.documentElement.style.visibility='visible';
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(items=>Promise.all(items.map(item=>item.unregister()))).catch(()=>{});
+      }
+      if('caches' in window){caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key)))).catch(()=>{});}
+    }catch(error){}
+  </script>
+</head>
+<body>
+<header>
+  <button id="syncButton" class="sync" type="button" aria-label="Refresh Arborwise operations from Google Sheets, Calendar, and QuickBooks">
+    <span class="syncIcon">↻</span><span>REFRESH</span>
+  </button>
+  <div id="weatherChip" class="weatherChip" role="status" aria-live="polite" aria-label="Loading Van Alstyne weather">WX …</div>
+  <img class="logo" src="/assets/arborwise-logo.png?board=79" alt="Arborwise">
+  <div class="brandTagline" aria-label="Arborwise motto">NURTURE YOUR NATURE</div>
+  <div id="dateLine" class="dateLine"></div>
+  <button id="statusButton" class="status" type="button">OPENING LIVE OPERATIONS</button>
+  <div class="connectionLinks" aria-label="Arborwise connections">
+    <a id="connectGoogleDirect" href="#">CONNECT GOOGLE</a>
+    <a id="connectQuickBooksDirect" href="#">CONNECT QUICKBOOKS</a>
+  </div>
+  <div id="operationsVoice" class="operationsVoice" aria-live="polite">Reading the current Arborwise operation...</div>
+</header>
+<section id="filters" class="filters" aria-label="Crew filters"></section>
+<section id="propertyManagementGroups75" hidden aria-hidden="true"></section>
+<main id="main">
+  <div class="title"><span>Opening current operations</span></div>
+  <div class="empty">Connecting to the live Arborwise records…</div>
+</main>
+<button id="addButton" class="add" type="button" hidden aria-hidden="true"></button>
+<button id="annieButton" class="annie" type="button" aria-label="Ask Annie">
+  <img src="/assets/annie-main-icon.png?board=79" alt="Annie">
+</button>
+<div id="annieBubble" class="bubble" hidden></div>
+<nav id="tabs" aria-label="Arborwise sections"></nav>
+<div id="veil" class="veil" hidden><section id="sheet" class="sheet" role="dialog" aria-modal="true"></section></div>
+<div id="toast" class="toast" hidden></div>
+<script src="/board-schedule-sections-59.js?board=79" defer></script>
+<script src="/board-live-54.js?board=79" defer></script>
+<script src="/owner-edit-69.js?board=79" defer></script>
+<script src="/completed-jobs-62.js?board=79" defer></script>
+<script src="/voice-estimate-61.js?board=79" defer></script>
+<script src="/annie-bubble-48.js?board=79" defer></script>
+<script src="/weather-chip-48.js?board=79" defer></script>
+<script src="/arborwise-personality-48.js?board=79" defer></script>
+<script src="/boot-reveal-42.js?board=79" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{
+  document.body.style.visibility='visible';
+  const toast=document.getElementById('toast');
+  const showToast=message=>{
+    if(!toast)return;
+    toast.textContent=message;
+    toast.hidden=false;
+    clearTimeout(showToast.timer);
+    showToast.timer=setTimeout(()=>{toast.hidden=true;},5000);
+  };
+  const openConnection=async providerName=>{
+    try{
+      const response=await fetch('/api/connections',{credentials:'same-origin',cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'Could not read connections.');
+      const provider=providerName==='google'?data.google:data.quickbooks;
+      if(provider?.connectUrl)location.assign(provider.connectUrl);
+      else showToast(`${providerName==='google'?'Google':'QuickBooks'} connection is not available yet.`);
+    }catch(error){showToast(error.message||'Could not open connection.');}
+  };
+  document.getElementById('connectGoogleDirect')?.addEventListener('click',event=>{event.preventDefault();openConnection('google');});
+  document.getElementById('connectQuickBooksDirect')?.addEventListener('click',event=>{event.preventDefault();openConnection('quickbooks');});
+});
+</script>
+</body>
+</html>
