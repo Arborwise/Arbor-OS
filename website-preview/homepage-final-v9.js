@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '20260730-1705';
+  const VERSION = '20260730-1712';
   const STYLE_ID = 'arborwise-final-v9-styles';
   const ANNIE_CLASS = 'annie-final-v9';
   let annieDataUrl = '';
@@ -139,11 +139,14 @@
     }
     if (!stage) return;
 
-    stage.querySelectorAll('.climber-highlight').forEach(node => node.remove());
-    const circle = document.createElement('span');
-    circle.className = 'climber-highlight';
-    circle.setAttribute('aria-hidden', 'true');
-    stage.appendChild(circle);
+    const circles = [...stage.querySelectorAll(':scope>.climber-highlight')];
+    circles.slice(1).forEach(node => node.remove());
+    if (!circles.length) {
+      const circle = document.createElement('span');
+      circle.className = 'climber-highlight';
+      circle.setAttribute('aria-hidden', 'true');
+      stage.appendChild(circle);
+    }
   };
 
   const loadAnnie = () => {
@@ -195,7 +198,7 @@
     loadAnnie().then(source => {
       if (!source) return;
       document.querySelectorAll(`.${ANNIE_CLASS}`).forEach(image => {
-        if (image.src !== source) image.src = source;
+        if (image.getAttribute('src') !== source) image.setAttribute('src', source);
         image.style.setProperty('display', 'block', 'important');
         image.style.setProperty('visibility', 'visible', 'important');
         image.style.setProperty('opacity', '1', 'important');
