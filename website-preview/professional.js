@@ -12,122 +12,183 @@
 
     wrap.classList.add('brand-layout');
     wrap.innerHTML = `
-      <div class="header-side header-side-left" aria-label="Contact Arborwise">
-        <a class="header-contact-card" href="tel:+19724308330" aria-label="Call Arborwise at 972-430-8330">
+      <div class="brand-main">
+        <a class="header-contact header-contact-left" href="tel:+19724308330" aria-label="Call Arborwise at 972-430-8330">
           ${icons.phone}
-          <span><small>Call Arborwise</small><strong>972-430-8330</strong></span>
+          <span class="desktop-contact"><small>Call Arborwise</small><strong>972-430-8330</strong></span>
+          <span class="mobile-contact">Call</span>
         </a>
-        <a class="header-contact-card" href="sms:+19724308330?body=Hi%20Arborwise%2C%20I%20have%20photos%20of%20a%20tree%20concern." aria-label="Text photos to Arborwise">
+
+        <a class="brand" href="#top" aria-label="Arborwise home">
+          <img src="assets/logo.webp" data-brand-logo alt="Arborwise. Nurture Your Nature. A tree held in two hands above a wooden Arborwise plaque.">
+        </a>
+
+        <a class="header-contact header-contact-right" href="sms:+19724308330?body=Hi%20Arborwise%2C%20I%20have%20photos%20of%20a%20tree%20concern." aria-label="Text photos to Arborwise">
           ${icons.message}
-          <span><small>Send a Message</small><strong>Text Photos</strong></span>
+          <span class="desktop-contact"><small>Send a Message</small><strong>Text Photos</strong></span>
+          <span class="mobile-contact">Text</span>
         </a>
       </div>
-
-      <a class="brand" href="#top" aria-label="Arborwise home">
-        <img src="assets/logo.webp" data-brand-logo alt="Arborwise. Nurture Your Nature. A tree held in two hands above a wooden Arborwise plaque with bushes at both sides.">
-      </a>
-
-      <div class="header-side header-side-right">
-        <div class="header-credential">${icons.check}<strong>ISA Certified Arborist on Staff</strong></div>
-        <div class="header-service-area">Serving Collin, Grayson &amp; Many North Texas Counties</div>
+      <div class="brand-proof">
+        <span class="header-credential">${icons.check}<strong>ISA Certified Arborist on Staff</strong></span>
+        <span class="header-service-area">Serving Collin, Grayson &amp; Many North Texas Counties</span>
         <a class="header-estimate-button" href="#estimate">${icons.estimate}<span>Free Estimate</span></a>
       </div>`;
 
     document.querySelector('.header-actions')?.remove();
   };
 
-  const installHeaderStyles = () => {
+  const installPageCopy = () => {
+    const kicker = document.querySelector('.hero-copy .kicker');
+    const title = document.getElementById('hero-title');
+    const lead = document.querySelector('.hero-lead');
+    const actions = document.querySelector('.hero-actions');
+    const promise = document.querySelector('.hero-promise');
+
+    if (kicker) kicker.textContent = 'Professional North Texas Tree Care';
+    if (title) title.innerHTML = 'Skilled tree work.<br><em>Clear answers.</em>';
+    if (lead) lead.textContent = 'Professional pruning, controlled removals, and practical tree-risk guidance for homes, businesses, HOAs, and managed properties.';
+    if (actions) {
+      actions.innerHTML = `
+        <a class="button" href="#estimate">Get a Free Estimate</a>
+        <a class="button ghost" href="sms:+19724308330?body=Hi%20Arborwise%2C%20I%20have%20photos%20of%20a%20tree%20concern.">Text Photos</a>`;
+    }
+    promise?.remove();
+  };
+
+  const installAfterPhoto = () => {
+    const card = document.querySelector('.service-grid .service-card:nth-child(3)');
+    const image = card?.querySelector(':scope > img');
+    if (!card || !image) return;
+
+    card.classList.add('after-photo-card');
+    image.dataset.afterPhoto = '';
+    image.src = 'assets/healthy-tree.webp';
+    image.alt = 'Completed Arborwise tree and landscape work at an AnaCapri property';
+
+    const logoMark = document.createElement('img');
+    logoMark.className = 'photo-logo-mark';
+    logoMark.dataset.brandLogo = '';
+    logoMark.src = 'assets/logo.webp';
+    logoMark.alt = '';
+    logoMark.setAttribute('aria-hidden', 'true');
+    card.appendChild(logoMark);
+  };
+
+  const installStyles = () => {
+    const existing = document.getElementById('arborwise-polish-fix');
+    if (existing) existing.remove();
+
     const style = document.createElement('style');
-    style.id = 'arborwise-header-fix';
+    style.id = 'arborwise-polish-fix';
     style.textContent = `
       .ui-icon{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-      .brand-wrap.brand-layout{max-width:var(--max);margin:auto;padding:10px 24px 8px;display:grid;grid-template-columns:minmax(270px,1fr) auto minmax(300px,1fr);gap:22px;align-items:center}
-      .brand-layout .brand{width:190px;justify-self:center}
-      .brand-layout .brand img{width:100%;height:150px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(11,63,47,.1))}
-      .header-side{min-width:0}
-      .header-side-left{display:flex;justify-content:flex-start;gap:10px}
-      .header-contact-card{min-width:0;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:#fff;color:var(--forest);text-decoration:none;box-shadow:var(--shadow-soft)}
-      .header-contact-card:hover,.header-contact-card:focus-visible{border-color:#9fbd9c;transform:translateY(-1px)}
-      .header-contact-card span{display:flex;flex-direction:column;line-height:1.15}
-      .header-contact-card small{font-size:.69rem;color:var(--muted);font-weight:800}
-      .header-contact-card strong{font-size:.82rem;white-space:nowrap}
-      .header-side-right{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:center}
-      .header-credential{display:flex;align-items:center;gap:7px;color:var(--forest);font-size:.82rem;line-height:1.2}
-      .header-credential .ui-icon{width:21px;height:21px;color:var(--leaf)}
-      .header-service-area{font-size:.78rem;line-height:1.25;color:var(--muted);font-weight:850}
-      .header-estimate-button{grid-column:2;grid-row:1/3;align-self:stretch;min-width:126px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:10px 12px;border-radius:16px;background:var(--lime);color:var(--forest-dark);text-decoration:none;font-size:.78rem;font-weight:950;box-shadow:0 10px 24px rgba(6,40,31,.15)}
-      .header-estimate-button:hover,.header-estimate-button:focus-visible{transform:translateY(-1px);box-shadow:0 13px 28px rgba(6,40,31,.2)}
-      .header-estimate-button .ui-icon{width:25px;height:25px}
-      .nav-row{justify-content:center}
+      .site-header{background:rgba(251,248,239,.98);border-bottom:1px solid #bdc9ae;box-shadow:0 7px 20px rgba(6,40,31,.06)}
+      .brand-wrap.brand-layout{max-width:var(--max);margin:auto;padding:7px 24px 5px;display:block}
+      .brand-main{max-width:1120px;margin:auto;display:grid;grid-template-columns:1fr minmax(220px,310px) 1fr;gap:28px;align-items:center}
+      .brand-main .brand{width:100%;max-width:310px;justify-self:center}
+      .brand-main .brand img{width:100%;height:112px;object-fit:contain;filter:drop-shadow(0 7px 10px rgba(11,63,47,.11))}
+      .header-contact{display:flex;align-items:center;gap:10px;color:var(--forest);text-decoration:none;padding:8px 4px 9px;border-bottom:2px solid var(--gold);max-width:220px}
+      .header-contact-left{justify-self:end}
+      .header-contact-right{justify-self:start}
+      .header-contact:hover,.header-contact:focus-visible{color:var(--leaf);border-bottom-color:var(--leaf)}
+      .header-contact .ui-icon{width:27px;height:27px}
+      .desktop-contact{display:flex;flex-direction:column;line-height:1.08}
+      .desktop-contact small{font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+      .desktop-contact strong{font-size:.92rem;white-space:nowrap}
+      .mobile-contact{display:none;font-size:.7rem;font-weight:950;text-transform:uppercase;letter-spacing:.04em}
+      .brand-proof{max-width:980px;margin:1px auto 0;padding:5px 12px;border-top:1px solid #d9dfcf;border-bottom:1px solid #d9dfcf;display:flex;justify-content:center;align-items:center;gap:16px;color:var(--forest);font-size:.76rem;line-height:1.15}
+      .header-credential{display:flex;align-items:center;gap:6px;white-space:nowrap}
+      .header-credential .ui-icon{width:17px;height:17px;color:var(--leaf)}
+      .header-service-area{font-weight:900;text-align:center}
+      .header-estimate-button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--forest);color:#fff;text-decoration:none;font-weight:950;white-space:nowrap}
+      .header-estimate-button .ui-icon{width:17px;height:17px}
+      .header-estimate-button:hover,.header-estimate-button:focus-visible{background:var(--leaf)}
+      .nav-row{justify-content:center;padding-bottom:8px}
       .main-nav{justify-content:center}
-      .section-label{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;background:#e7f1e2;color:var(--forest);font-size:.9rem;line-height:1}
+
+      body{background:linear-gradient(180deg,#fbf8ef 0,#f7f3e7 48%,#fbf8ef 100%)}
+      .hero{padding-top:20px;gap:18px}
+      .hero-copy{background:#fffdf8;color:var(--forest-dark);border:1px solid #aab99b;box-shadow:0 14px 34px rgba(6,40,31,.10);padding:clamp(34px,4.4vw,62px)}
+      .hero-copy .kicker{align-self:flex-start;background:transparent;color:var(--forest);padding:0 0 8px;border-radius:0;border-bottom:2px solid var(--gold);font-size:.82rem;letter-spacing:.11em}
+      .hero-copy h1{font-size:clamp(2.8rem,4.7vw,4.7rem);line-height:1.01;max-width:12ch;color:var(--forest-dark);margin-bottom:18px}
+      .hero-copy h1 em{color:var(--leaf)}
+      .hero-lead{font-size:clamp(1rem,1.2vw,1.16rem);line-height:1.56;color:#40574d;max-width:54ch}
+      .hero-copy .button.ghost{background:#fff;color:var(--forest-dark);border:1px solid #9aac8d;box-shadow:none}
+      .hero-copy .button.ghost:hover,.hero-copy .button.ghost:focus-visible{background:#f0f5e9}
+      .hero-media{min-height:580px;box-shadow:0 14px 34px rgba(6,40,31,.10)}
+      h2{color:var(--forest-dark)}
+      .section-label{display:inline-block;padding:0 0 9px;border-radius:0;border-bottom:2px solid var(--gold);background:transparent;color:var(--forest);font-size:1rem;line-height:1.1;letter-spacing:.11em;margin-bottom:22px}
+      .service-card,.concern-card,.process li,.recognition-section,.faq-list details{background:#fffdf8;border-color:#b8c6aa;box-shadow:0 10px 24px rgba(6,40,31,.07)}
+      .after-photo-card{position:relative}
+      .after-photo-card>img:first-child{object-position:center 48%}
+      .photo-logo-mark{position:absolute;z-index:3;top:12px;right:12px;width:132px!important;height:78px!important;object-fit:contain!important;padding:5px;background:rgba(255,253,248,.92);border:1px solid rgba(11,63,47,.22);border-radius:12px;box-shadow:0 7px 16px rgba(6,40,31,.14)}
+      .mobile-bar a{gap:3px}
+
       @media(max-width:1100px){
-        .brand-wrap.brand-layout{grid-template-columns:1fr 170px 1fr;gap:14px;padding-left:16px;padding-right:16px}
-        .brand-layout .brand{width:170px}
-        .brand-layout .brand img{height:138px}
-        .header-contact-card{padding:9px}
-        .header-contact-card small{display:none}
-        .header-contact-card strong{font-size:.73rem}
-        .header-side-right{gap:5px 8px}
-        .header-credential{font-size:.73rem}
-        .header-service-area{font-size:.69rem}
-        .header-estimate-button{min-width:105px;font-size:.7rem}
+        .brand-main{grid-template-columns:1fr minmax(190px,260px) 1fr;gap:18px}
+        .brand-main .brand{max-width:260px}
+        .brand-main .brand img{height:104px}
+        .desktop-contact strong{font-size:.82rem}
+        .brand-proof{font-size:.7rem;gap:11px}
       }
       @media(max-width:760px){
         body{padding-bottom:98px}
-        .brand-wrap.brand-layout{padding:7px 8px 6px;grid-template-columns:70px minmax(132px,1fr) 104px;gap:6px;align-items:center}
-        .brand-layout .brand{width:min(150px,100%)}
-        .brand-layout .brand img{height:116px}
-        .header-side-left{display:grid;grid-template-columns:1fr;gap:5px}
-        .header-contact-card{min-height:50px;padding:5px 3px;gap:2px;justify-content:center;flex-direction:column;border-radius:13px;text-align:center}
-        .header-contact-card .ui-icon{width:22px;height:22px}
-        .header-contact-card span{display:block}
-        .header-contact-card small{display:none}
-        .header-contact-card strong{display:block;font-size:.61rem;line-height:1.05;white-space:normal}
-        .header-side-right{display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:center}
-        .header-credential{display:flex;justify-content:center;gap:3px;font-size:.6rem;line-height:1.08}
-        .header-credential .ui-icon{width:16px;height:16px}
-        .header-service-area{font-size:.61rem;line-height:1.12;font-weight:900;color:#40574d}
-        .header-estimate-button{width:100%;min-width:0;min-height:34px;padding:5px 3px;border-radius:11px;flex-direction:row;gap:3px;font-size:.61rem;line-height:1}
-        .header-estimate-button .ui-icon{width:17px;height:17px}
-        .hero-copy{padding:28px 18px}
-        .hero-copy .kicker{font-size:.7rem;padding:8px 11px}
-        h1{font-size:clamp(2rem,9.2vw,2.7rem);line-height:1.01;max-width:11ch;margin-bottom:18px}
+        .site-header{position:relative}
+        .brand-wrap.brand-layout{padding:5px 7px 4px}
+        .brand-main{grid-template-columns:54px minmax(145px,1fr) 54px;gap:5px}
+        .brand-main .brand{max-width:190px}
+        .brand-main .brand img{height:91px}
+        .header-contact{justify-self:center;max-width:none;padding:5px 1px;border:0;display:flex;flex-direction:column;gap:2px;text-align:center}
+        .header-contact .ui-icon{width:25px;height:25px}
+        .desktop-contact{display:none}
+        .mobile-contact{display:block}
+        .brand-proof{margin-top:0;padding:4px 5px;border-bottom:0;gap:0;font-size:.62rem;line-height:1.18}
+        .header-credential,.header-estimate-button{display:none}
+        .header-service-area{display:block;max-width:330px}
+        .hero{padding:12px 12px 16px;gap:12px}
+        .hero-copy{padding:28px 20px;text-align:left;align-items:flex-start}
+        .hero-copy .kicker{align-self:flex-start;text-align:left;font-size:.71rem;padding-bottom:7px}
+        .hero-copy h1{font-size:clamp(2.2rem,10.5vw,3rem);line-height:1.02;max-width:12ch;margin-bottom:15px}
         .hero-lead{font-size:.98rem;line-height:1.5}
-        .section-label{font-size:.84rem;margin-bottom:18px}
-        .mobile-bar a{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:66px;padding:6px 3px;line-height:1.05}
+        .hero-actions{width:100%;display:grid}
+        .hero-actions .button{width:100%;min-height:50px}
+        .hero-media{min-height:390px}
+        .hero-media img{min-height:390px}
+        .section-label{font-size:.9rem;margin-bottom:19px}
+        .photo-logo-mark{width:108px!important;height:66px!important;top:10px;right:10px}
+        .mobile-bar a{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:66px;padding:6px 3px;line-height:1.05}
         .mobile-bar .ui-icon{width:24px;height:24px}
         .mobile-bar a span{display:block}
       }
       @media(max-width:430px){
-        .brand-wrap.brand-layout{grid-template-columns:64px minmax(124px,1fr) 96px;gap:5px}
-        .brand-layout .brand img{height:108px}
-        .header-contact-card{min-height:47px}
-        .header-service-area{font-size:.58rem}
-        .header-credential{font-size:.57rem}
-        .header-estimate-button{font-size:.58rem}
+        .brand-main{grid-template-columns:50px minmax(132px,1fr) 50px}
+        .brand-main .brand img{height:84px}
+        .brand-proof{font-size:.59rem}
+        .hero-copy h1{font-size:2.18rem}
       }
     `;
     document.head.appendChild(style);
   };
 
   const loadBrandAssets = async () => {
-    const setAsset = async (selector, encodedPath, fallbackPath) => {
+    const setAsset = async (selector, encodedPath, fallbackPath, mimeType) => {
       const images = [...document.querySelectorAll(selector)];
       images.forEach(img => { img.src = fallbackPath; });
       try {
         const response = await fetch(encodedPath, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Could not load ${encodedPath}`);
         const encoded = (await response.text()).trim();
-        images.forEach(img => { img.src = `data:image/avif;base64,${encoded}`; });
+        images.forEach(img => { img.src = `data:${mimeType};base64,${encoded}`; });
       } catch (error) {
         console.error(`Could not load ${encodedPath}; using the local asset instead.`, error);
       }
     };
 
     await Promise.allSettled([
-      setAsset('[data-brand-logo]', 'assets/logo-correct.b64', 'assets/logo.webp'),
-      setAsset('[data-annie]', 'assets/annie-correct.b64', 'assets/annie.webp')
+      setAsset('[data-brand-logo]', 'assets/logo-correct.b64', 'assets/logo.webp', 'image/avif'),
+      setAsset('[data-annie]', 'assets/annie-correct.b64', 'assets/annie.webp', 'image/avif'),
+      setAsset('[data-after-photo]', 'assets/anacapri-after.b64', 'assets/healthy-tree.webp', 'image/webp')
     ]);
   };
 
@@ -140,7 +201,9 @@
   };
 
   installHeader();
-  installHeaderStyles();
+  installPageCopy();
+  installAfterPhoto();
+  installStyles();
   installMobileIcons();
   loadBrandAssets();
 
