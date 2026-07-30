@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 190" role="img" aria-labelledby="title desc">
+  <title id="title">Van Alstyne Chamber of Commerce</title>
+  <desc id="desc">Scalable Arborwise website member badge for the Van Alstyne Chamber of Commerce.</desc>
+  <rect width="420" height="190" rx="24" fill="#fff"/>
+  <circle cx="86" cy="95" r="58" fill="#123f2f"/>
+  <circle cx="86" cy="95" r="48" fill="none" stroke="#b8d867" stroke-width="4"/>
+  <text x="86" y="108" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="45" font-weight="700" fill="#fff">VA</text>
+  <text x="165" y="66" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="800" fill="#123f2f">VAN ALSTYNE</text>
+  <text x="165" y="103" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700" letter-spacing="1.2" fill="#3e7d48">CHAMBER OF</text>
+  <text x="165" y="135" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700" letter-spacing="1.2" fill="#3e7d48">COMMERCE</text>
+  <text x="165" y="162" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="800" letter-spacing="2" fill="#6b766f">MEMBER</text>
+</svg>

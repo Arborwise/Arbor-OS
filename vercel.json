@@ -1,58 +1,35 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "builds": [
-    {"src": "api/app.js", "use": "@vercel/node"},
-    {"src": "api/oauth.js", "use": "@vercel/node"},
-    {"src": "api/sync.js", "use": "@vercel/node"},
-    {"src": "api/crew-board.js", "use": "@vercel/node"},
-    {"src": "api/estimate-draft.js", "use": "@vercel/node"},
-    {"src": "public/**", "use": "@vercel/static"}
+    {"src": "website-preview/**", "use": "@vercel/static"}
   ],
   "headers": [
-    {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/board-now.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/board-manifest.webmanifest", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/crew-board.html", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/owner-edit-69.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/contact-icons-66.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/owner-home-redirect-67.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/voice-estimate-61.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/sbb-kw-group-63.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/completed-jobs-62.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/board-schedule-sections-59.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/board-live-54.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/boot-reveal-42.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/arborwise-personality-48.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/app.css", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/retired-board-data.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]},
-    {"source": "/sw.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},{"key": "Service-Worker-Allowed", "value": "/"}]},
-    {"source": "/boot-repair.js", "headers": [{"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"}]}
+    {
+      "source": "/(.*)",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, no-cache, must-revalidate"},
+        {"key": "X-Robots-Tag", "value": "noindex, nofollow"}
+      ]
+    }
   ],
   "rewrites": [
-    {"source": "/board-live.js", "destination": "/public/retired-board-data.js"},
-    {"source": "/board-current-:version.js", "destination": "/public/retired-board-data.js"},
-    {"source": "/board-correction-:version.js", "destination": "/public/retired-board-data.js"},
-    {"source": "/board-holds-:version.js", "destination": "/public/retired-board-data.js"},
-    {"source": "/api/login", "destination": "/api/app.js?route=login"},
-    {"source": "/api/logout", "destination": "/api/app.js?route=logout"},
-    {"source": "/api/board", "destination": "/api/app.js?route=board"},
-    {"source": "/api/data", "destination": "/api/app.js?route=data"},
-    {"source": "/api/connections", "destination": "/api/app.js?route=connections"},
-    {"source": "/api/session", "destination": "/api/app.js?route=session"},
-    {"source": "/api/setup", "destination": "/api/app.js?route=setup"},
-    {"source": "/api/records", "destination": "/api/app.js?route=records"},
-    {"source": "/api/owner-edit", "destination": "/api/app.js?route=owneredit"},
-    {"source": "/api/state", "destination": "/api/app.js?route=state"},
-    {"source": "/api/health", "destination": "/api/app.js?route=health"},
-    {"source": "/api/sync", "destination": "/api/sync.js"},
-    {"source": "/api/crew-board", "destination": "/api/crew-board.js"},
-    {"source": "/api/estimate-draft", "destination": "/api/estimate-draft.js"},
-    {"source": "/api/oauth/google/start", "destination": "/api/oauth.js?provider=google&action=start"},
-    {"source": "/api/oauth/google/callback", "destination": "/api/oauth.js?provider=google&action=callback"},
-    {"source": "/api/oauth/quickbooks/start", "destination": "/api/oauth.js?provider=quickbooks&action=start"},
-    {"source": "/api/oauth/quickbooks/callback", "destination": "/api/oauth.js?provider=quickbooks&action=callback"},
-    {"source": "/", "destination": "/public/board-now.html"},
-    {"source": "/((?!api/).*)", "destination": "/public/$1"}
+    {"source": "/", "destination": "/website-preview/index.html"},
+    {"source": "/service-areas", "destination": "/website-preview/service-areas/index.html"},
+    {"source": "/service-areas/", "destination": "/website-preview/service-areas/index.html"},
+    {"source": "/farmersville-tree-service", "destination": "/website-preview/farmersville-tree-service/index.html"},
+    {"source": "/farmersville-tree-service/", "destination": "/website-preview/farmersville-tree-service/index.html"},
+    {"source": "/tree-service-anna-tx", "destination": "/website-preview/tree-service-anna-tx/index.html"},
+    {"source": "/tree-service-anna-tx/", "destination": "/website-preview/tree-service-anna-tx/index.html"},
+    {"source": "/melissa-tree-service", "destination": "/website-preview/melissa-tree-service/index.html"},
+    {"source": "/melissa-tree-service/", "destination": "/website-preview/melissa-tree-service/index.html"},
+    {"source": "/van-alstyne-tree-service", "destination": "/website-preview/van-alstyne-tree-service/index.html"},
+    {"source": "/van-alstyne-tree-service/", "destination": "/website-preview/van-alstyne-tree-service/index.html"},
+    {"source": "/celina-tree-service", "destination": "/website-preview/celina-tree-service/index.html"},
+    {"source": "/celina-tree-service/", "destination": "/website-preview/celina-tree-service/index.html"},
+    {"source": "/howe-tree-service", "destination": "/website-preview/howe-tree-service/index.html"},
+    {"source": "/howe-tree-service/", "destination": "/website-preview/howe-tree-service/index.html"},
+    {"source": "/princeton-tree-service", "destination": "/website-preview/princeton-tree-service/index.html"},
+    {"source": "/princeton-tree-service/", "destination": "/website-preview/princeton-tree-service/index.html"},
+    {"source": "/((?!website-preview/).*)", "destination": "/website-preview/$1"}
   ]
 }
