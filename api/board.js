@@ -150,7 +150,8 @@ function sourceLabel(value){
   return parts.length?parts.join(' + '):'Arborwise OS';
 }
 function databaseRecord(row){
-  const status=row.kind==='job'?statusForJob(row.status):clean(row.status)||'Open';
+  const derivedStatus=row.kind==='job'?statusForJob(row.status):clean(row.status)||'Open';
+  const status=Boolean(row.closed)&&derivedStatus!=='Cancelled'?'Completed':derivedStatus;
   const notes=clean(row.notes),who=clean(row.assigned_to)||'Unassigned';
   const raw=row.raw&&typeof row.raw==='object'?row.raw:{};
   return {
