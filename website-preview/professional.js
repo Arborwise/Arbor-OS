@@ -11,13 +11,26 @@
         if (!response.ok) throw new Error(`Unable to load ${path}`);
         return (await response.text()).replace(/\s+/g, '');
       }));
+
       const source = `data:${mime};base64,${parts.join('')}`;
-      images.forEach(image => { image.src = source; });
+      images.forEach(image => {
+        image.onerror = () => {
+          image.onerror = null;
+          image.src = fallback;
+        };
+        image.src = source;
+      });
     } catch (error) {
-      images.forEach(image => { image.src = fallback; });
+      images.forEach(image => {
+        image.onerror = null;
+        image.src = fallback;
+      });
       console.error('Arborwise asset fallback used.', error);
     }
   };
+
+  const whyLabel = document.querySelector('.intro-section .section-label');
+  if (whyLabel) whyLabel.textContent = 'Why Arborwise?';
 
   const concerns = {
     leaves: {
@@ -76,6 +89,7 @@
   const tip = document.getElementById('annieTip');
   const tipButton = document.getElementById('annieButton');
   let tipIndex = 0;
+
   tipButton?.addEventListener('click', () => {
     tipIndex = (tipIndex + 1) % tips.length;
     if (tip) tip.textContent = tips[tipIndex];
@@ -87,8 +101,22 @@
   loadBase64Asset(
     '[data-brand-logo]',
     Array.from({ length: 8 }, (_, index) => `assets/logo-final-${String(index).padStart(2, '0')}.b64`),
-    'assets/logo.webp'
+    'assets/logo.webp',
+    'image/webp'
   );
-  loadBase64Asset('[data-annie]', ['assets/annie-correct.b64'], 'assets/annie.webp');
-  loadBase64Asset('[data-after-photo]', ['assets/anacapri-after.b64'], 'assets/healthy-tree.webp');
+
+  // Annie is AVIF data. Using the correct MIME type prevents the broken-image icon on mobile.
+  loadBase64Asset(
+    '[data-annie]',
+    ['assets/annie-correct.b64'],
+    'assets/annie.webp',
+    'image/avif'
+  );
+
+  loadBase64Asset(
+    '[data-after-photo]',
+    ['assets/anacapri-after.b64'],
+    'assets/healthy-tree.webp',
+    'image/webp'
+  );
 })();
