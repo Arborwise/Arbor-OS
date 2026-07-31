@@ -1,0 +1,132 @@
+name: Recover Arborwise website preview after Vercel rate limit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/website-preview-rate-limit-recovery.yml'
+  schedule:
+    - cron: '7,17,27,37,47,57 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arborwise-website-preview-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.repository == 'Arborwise/Arbor-OS'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch website branch
+        run: git fetch origin website-handoff-cleanup
+
+      - name: Check whether corrected website is already live
+        id: live
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os-git-website-handoff-cleanup-greg-7527s-projects.vercel.app'
+          BUST="website-check-$(date +%s)"
+          html_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/site.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/?$BUST" || true)
+          loader_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/loader.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/professional.js?$BUST" || true)
+          base_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/base.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/professional-base.js?$BUST" || true)
+          image_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/leaves.webp -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/assets/concern-leaves.webp?$BUST" || true)
+          if [[ "$html_code" == '200' ]] \
+            && [[ "$loader_code" == '200' ]] \
+            && [[ "$base_code" == '200' ]] \
+            && [[ "$image_code" == '200' ]] \
+            && ! grep -Fq 'class="brand-tagline"' /tmp/site.html \
+            && grep -Fq 'brand-domain' /tmp/loader.js \
+            && grep -Fq 'professional-base.js' /tmp/loader.js \
+            && grep -Fq 'assets/concern-leaves.webp' /tmp/base.js; then
+            echo 'live=true' >> "$GITHUB_OUTPUT"
+            echo 'Corrected header, slogan treatment, mobile layout, and uploaded leaf photo are live.'
+          else
+            echo 'live=false' >> "$GITHUB_OUTPUT"
+            echo "Website correction is not live yet: html=$html_code loader=$loader_code base=$base_code image=$image_code"
+          fi
+
+      - name: Respect Vercel build-rate cooldown
+        id: cooldown
+        if: steps.live.outputs.live != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          now=$(date +%s)
+          branch='origin/website-handoff-cleanup'
+          marker='website-preview/deploy-recovery-marker.txt'
+          latest_commit=$(git log -1 "$branch" --format=%ct)
+          if git cat-file -e "$branch:$marker" 2>/dev/null; then
+            last_attempt=$(git show "$branch:$marker" | sed -n 's/^epoch=//p' | head -n 1)
+            last_attempt=${last_attempt:-0}
+            minimum_wait=21600
+            reason='six-hour retry spacing after a controlled retry'
+          else
+            last_attempt=$latest_commit
+            minimum_wait=3900
+            reason='initial Vercel one-hour reset window'
+          fi
+          age=$((now-last_attempt))
+          if (( age >= minimum_wait )); then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+            echo "Cooldown complete: $reason."
+          else
+            remaining=$((minimum_wait-age))
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+            echo "Cooldown remains active for about $remaining seconds."
+          fi
+
+      - name: Trigger one controlled website redeployment
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B website-handoff-cleanup origin/website-handoff-cleanup
+          epoch=$(date +%s)
+          stamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          printf 'epoch=%s\nutc=%s\nreason=controlled website-preview retry after Vercel build-rate limit\n' "$epoch" "$stamp" > website-preview/deploy-recovery-marker.txt
+          git config user.name 'Arborwise website deployment recovery'
+          git config user.email 'actions@users.noreply.github.com'
+          git add website-preview/deploy-recovery-marker.txt
+          git commit -m 'Retry website preview after Vercel rate-limit cooldown'
+          git push origin HEAD:website-handoff-cleanup
+
+      - name: Verify corrected website after retry
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os-git-website-handoff-cleanup-greg-7527s-projects.vercel.app'
+          for attempt in $(seq 1 40); do
+            BUST="website-verify-$(date +%s)-$attempt"
+            html_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/site.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/?$BUST" || true)
+            loader_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/loader.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/professional.js?$BUST" || true)
+            base_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/base.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/professional-base.js?$BUST" || true)
+            image_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/leaves.webp -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/assets/concern-leaves.webp?$BUST" || true)
+            if [[ "$html_code" == '200' ]] \
+              && [[ "$loader_code" == '200' ]] \
+              && [[ "$base_code" == '200' ]] \
+              && [[ "$image_code" == '200' ]] \
+              && ! grep -Fq 'class="brand-tagline"' /tmp/site.html \
+              && grep -Fq 'brand-domain' /tmp/loader.js \
+              && grep -Fq 'professional-base.js' /tmp/loader.js \
+              && grep -Fq 'assets/concern-leaves.webp' /tmp/base.js; then
+              echo 'Corrected website preview is live and verified.'
+              exit 0
+            fi
+            echo "Waiting for website deployment; attempt $attempt: html=$html_code loader=$loader_code base=$base_code image=$image_code"
+            sleep 15
+          done
+          echo 'The controlled deployment did not become live during the verification window.'
+          exit 1
