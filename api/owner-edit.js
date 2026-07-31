@@ -2,9 +2,13 @@ import {google} from 'googleapis';
 import {body,json,fail,method} from '../lib/http.js';
 import {requireSession} from '../lib/auth.js';
 import {googleClient} from '../lib/google.js';
+import {db,initDb} from '../lib/db.js';
 
 const SHEET_ID=process.env.GOOGLE_SHEET_ID||'17XTUBhP7zC01qc6aNavMYCoFBEsnE9wUvmMmd-5lt1w';
 const TABS=['Jobs','Master Estimates',"Today's Estimates"];
+const TIME_ZONE='America/Chicago';
+const CALENDAR_MARKER_START='<!-- ARBORWISE_OWNER_EDIT_START -->';
+const CALENDAR_MARKER_END='<!-- ARBORWISE_OWNER_EDIT_END -->';
 
 function clean(value){return String(value??'').trim();}
 function normalized(value){return clean(value).toLowerCase().replace(/[^a-z0-9]+/g,'');}
@@ -115,6 +119,127 @@ function addUpdate(updates,tab,headers,rowNumber,value,names){
   updates.push({range:`${quoted(tab)}!${columnLetter(index)}${rowNumber}`,values:[[value??'']]});
   return true;
 }
+function htmlEscape(value){
+  return clean(value).replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[char]));
+}
+function isCalendarOnly(id,source){
+  const text=clean(source).toLowerCase();
+  return /^CAL-/i.test(id)||(text.includes('calendar')&&!text.includes('sheet'));
+}
+function calendarEventId(payload,id){
+  return clean(payload.calendarEventId||payload.eventId||id.replace(/^CAL-/i,''));
+}
+function removeCalendarBlock(description){
+  const escapedStart=CALENDAR_MARKER_START.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const escapedEnd=CALENDAR_MARKER_END.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return clean(description).replace(new RegExp(`${escapedStart}[\\s\\S]*?${escapedEnd}`,'gi'),'').trim();
+}
+function calendarDescription(existing,payload){
+  const base=removeCalendarBlock(existing);
+  const rows=[
+    payload.status?`Status: ${htmlEscape(payload.status)}`:'',
+    payload.who?`Assigned to: ${htmlEscape(payload.who)}`:'',
+    payload.time?`Arrival window: ${htmlEscape(payload.time)}`:'',
+    payload.notes?`Notes: ${htmlEscape(payload.notes)}`:''
+  ].filter(Boolean);
+  const block=`${CALENDAR_MARKER_START}<p><strong>Arborwise OS</strong><br>${rows.join('<br>')}</p>${CALENDAR_MARKER_END}`;
+  return [base,block].filter(Boolean).join('\n');
+}
+function parseClock(value){
+  const match=clean(value).match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if(!match)return null;
+  let hour=Number(match[1]);
+  const minute=Number(match[2]||0);
+  const meridiem=match[3].toUpperCase();
+  if(hour<1||hour>12||minute<0||minute>59)return null;
+  if(hour===12)hour=0;
+  if(meridiem==='PM')hour+=12;
+  return {hour,minute};
+}
+function parseWindow(value){
+  const parts=clean(value).split(/\s*(?:-|–|—|to)\s*/i).filter(Boolean);
+  if(parts.length!==2)return null;
+  const start=parseClock(parts[0]);
+  const end=parseClock(parts[1]);
+  return start&&end?{start,end}:null;
+}
+function localDateTime(date,clock){
+  return `${date}T${String(clock.hour).padStart(2,'0')}:${String(clock.minute).padStart(2,'0')}:00`;
+}
+function nextIsoDate(date){
+  const [year,month,day]=date.split('-').map(Number);
+  const value=new Date(Date.UTC(year,month-1,day+1,12));
+  return `${value.getUTCFullYear()}-${String(value.getUTCMonth()+1).padStart(2,'0')}-${String(value.getUTCDate()).padStart(2,'0')}`;
+}
+function eventDate(event){
+  return clean(event?.start?.dateTime||event?.start?.date).slice(0,10);
+}
+function calendarTimingPatch(event,payload){
+  const suppliedDate=clean(payload.date);
+  const suppliedTime=clean(payload.time);
+  const date=suppliedDate||eventDate(event);
+  if(!date)return {};
+  if(!suppliedDate&&!suppliedTime)return {};
+  const window=parseWindow(suppliedTime);
+  if(window){
+    return {
+      start:{dateTime:localDateTime(date,window.start),timeZone:TIME_ZONE},
+      end:{dateTime:localDateTime(date,window.end),timeZone:TIME_ZONE}
+    };
+  }
+  if(/^all\s*day$/i.test(suppliedTime)||(!suppliedTime&&suppliedDate)){
+    return {start:{date},end:{date:nextIsoDate(date)}};
+  }
+  return {};
+}
+function isClosedStatus(status){
+  return /^(completed|cancelled|declined|paid)$/i.test(clean(status));
+}
+async function saveCalendarOnly(auth,payload,id){
+  const eventId=calendarEventId(payload,id);
+  if(!eventId){const error=new Error('Google Calendar event ID is missing');error.status=400;throw error;}
+  const calendar=google.calendar({version:'v3',auth});
+  const currentResponse=await calendar.events.get({calendarId:'primary',eventId});
+  const current=currentResponse.data||{};
+  const patch={
+    description:calendarDescription(current.description||'',payload),
+    ...calendarTimingPatch(current,payload)
+  };
+  const updatedResponse=await calendar.events.patch({
+    calendarId:'primary',
+    eventId,
+    sendUpdates:'none',
+    requestBody:patch
+  });
+  const updated=updatedResponse.data||current;
+
+  await initDb();
+  const status=clean(payload.status);
+  const who=clean(payload.who);
+  const date=clean(payload.date);
+  const time=clean(payload.time);
+  const notes=clean(payload.notes);
+  await db().query(
+    `update records set
+      status=case when $2<>'' then $2 else status end,
+      assigned_to=case when $3<>'' then $3 else assigned_to end,
+      work_date=case when $4<>'' then $4::date else work_date end,
+      work_time=case when $5<>'' then $5 else work_time end,
+      notes=case when $6<>'' then $6 else notes end,
+      closed=case when $2<>'' then $7 else closed end,
+      raw=coalesce(raw,'{}'::jsonb)||$8::jsonb,
+      updated_at=now()
+    where id=$1`,
+    [id,status,who,date,time,notes,isClosedStatus(status),JSON.stringify(updated)]
+  );
+
+  return {
+    ok:true,id,tab:'Google Calendar',eventId,matchedBy:'calendar event',
+    updatedFields:Object.keys(patch).length,updatedAt:new Date().toISOString()
+  };
+}
 
 export default async function handler(req,res){
   try{
@@ -125,6 +250,13 @@ export default async function handler(req,res){
     if(!id){const error=new Error('Record ID is required');error.status=400;throw error;}
 
     const auth=await googleClient();
+    if(isCalendarOnly(id,payload.source)){
+      const result=await saveCalendarOnly(auth,payload,id);
+      res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
+      json(res,200,result);
+      return;
+    }
+
     const sheets=google.sheets({version:'v4',auth});
     const found=await findRecord(sheets,orderedTabs(payload.source,payload.type),{...payload,id});
     if(!found){
