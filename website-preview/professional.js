@@ -32,6 +32,13 @@
   const whyLabel = document.querySelector('.intro-section .section-label');
   if (whyLabel) whyLabel.textContent = 'Why Arborwise?';
 
+  const leafConcernImage = document.querySelector('.concern-card[data-concern="leaves"] img');
+  if (leafConcernImage) {
+    leafConcernImage.src = 'assets/concern-leaves.webp';
+    leafConcernImage.alt = 'Real customer tree leaves showing severe browning, spotting, curling, and damaged tissue';
+    leafConcernImage.removeAttribute('referrerpolicy');
+  }
+
   const concerns = {
     leaves: {
       title: 'Leaf spots, browning, curling, or early leaf drop',
@@ -105,7 +112,6 @@
     'image/webp'
   );
 
-  // Annie is AVIF data. Using the correct MIME type prevents the broken-image icon on mobile.
   loadBase64Asset(
     '[data-annie]',
     ['assets/annie-correct.b64'],
