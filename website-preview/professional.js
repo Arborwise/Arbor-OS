@@ -3,42 +3,57 @@
 
   const styles = document.createElement('style');
   styles.textContent = `
-    body{padding-bottom:88px}
+    body{padding-bottom:96px}
+    img[data-brand-logo]{visibility:hidden!important}
     .site-header{padding:8px 8px 0!important}
-    .aw-header{max-width:1360px;margin:0 auto;overflow:hidden;color:#fff;background:#020403;border:1px solid rgba(215,165,66,.58);border-radius:26px;box-shadow:0 18px 45px rgba(0,0,0,.3)}
-    .aw-brand-row{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:13px 14px 9px;text-align:center}
+    .aw-header{max-width:1360px;margin:0 auto;overflow:hidden;color:#fff;background:#020403;border:1px solid rgba(215,165,66,.62);border-radius:26px;box-shadow:0 18px 45px rgba(0,0,0,.32)}
+    .aw-brand-row{display:flex;min-height:116px;align-items:center;justify-content:center;padding:10px 14px;text-align:center}
     .aw-logo-link{display:flex;align-items:center;justify-content:center;width:100%;text-decoration:none}
-    .aw-logo{display:block;width:min(94%,340px);height:auto;max-height:145px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,.55))}
-    .aw-header-tagline{margin:2px 0 7px;color:#d9f378;font-family:Georgia,'Times New Roman',serif;font-size:1rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+    .aw-logo{display:block;width:min(96%,350px);height:auto;max-height:142px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,.58))}
+    .aw-logo-fallback{display:block;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:2.45rem;font-weight:900;line-height:.82;letter-spacing:-.04em;text-align:center}
+    .aw-logo-fallback b{color:#d9f378;font-weight:900}.aw-logo-fallback small{display:block;margin-top:12px;color:#e3b655;font:900 .62rem/1 Inter,system-ui,sans-serif;letter-spacing:.25em;text-transform:uppercase}
     .aw-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.025)}
     .aw-nav a{min-width:0;padding:12px 3px 13px;color:#f5f3ea;text-align:center;text-decoration:none;font-size:.69rem;font-weight:900;line-height:1.15}
     .aw-nav a:last-child{color:#d9f378}
 
-    .hero.aw-hero{position:relative!important;display:block!important;max-width:1336px!important;min-height:665px!important;margin:10px 8px 0!important;padding:0!important;overflow:hidden!important;border-radius:28px!important;box-shadow:0 24px 65px rgba(0,0,0,.27)!important;background:#061f18!important}
+    .hero.aw-hero{position:relative!important;display:block!important;max-width:1336px!important;min-height:740px!important;margin:10px 8px 0!important;padding:0!important;overflow:hidden!important;border-radius:28px!important;box-shadow:0 24px 65px rgba(0,0,0,.29)!important;background:#061f18!important}
     .aw-hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:61% center}
-    .aw-hero-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,6,.98) 0%,rgba(2,8,6,.82) 49%,rgba(2,8,6,.14) 82%,rgba(2,8,6,.02) 100%)}
-    .aw-hero-content{position:relative;z-index:1;min-height:665px;padding:28px 20px 25px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;color:#fff;text-align:center}
-    .aw-kicker{margin:0 0 10px;color:#e0b957;font-size:.66rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
-    .aw-hero h1{margin:0;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:3.25rem;line-height:.9;letter-spacing:-.045em;text-shadow:0 7px 26px rgba(0,0,0,.65)}
-    .aw-hero h1 span{display:block;color:#d9f378}.aw-hero h1 sup{font-size:.21em;vertical-align:super;margin-left:.08em;color:#d7a542}
-    .aw-slogan{margin:14px 0 8px;color:#d9f378;font-family:Georgia,'Times New Roman',serif;font-size:1.36rem;font-weight:900;letter-spacing:.035em;text-shadow:0 3px 15px rgba(0,0,0,.7)}
-    .aw-hero-lead{max-width:610px;margin:0;color:#fff;font-size:1rem;font-weight:850;line-height:1.34;text-shadow:0 3px 16px rgba(0,0,0,.75)}
+    .aw-hero-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,6,.985) 0%,rgba(2,8,6,.84) 54%,rgba(2,8,6,.17) 84%,rgba(2,8,6,.03) 100%)}
+    .aw-hero-content{position:relative;z-index:1;min-height:740px;padding:28px 20px 24px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;color:#fff;text-align:center}
+    .aw-kicker{margin:0 0 10px;color:#e7bd59;font-size:.66rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
+    .aw-hero h1{margin:0;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:3.25rem;line-height:.9;letter-spacing:-.045em;text-shadow:0 7px 26px rgba(0,0,0,.68)}
+    .aw-hero h1 span{display:block;color:#d9f378}
+    .aw-hero h1 sup{font-size:.38em;vertical-align:super;margin-left:.1em;color:#fff;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:0;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+    .aw-slogan{margin:14px 0 8px;color:#f1c66b;font-family:Georgia,'Times New Roman',serif;font-size:1.42rem;font-weight:900;font-style:italic;letter-spacing:.025em;text-shadow:0 3px 15px rgba(0,0,0,.72)}
+    .aw-hero-lead{max-width:610px;margin:0;color:#fff;font-size:1rem;font-weight:850;line-height:1.34;text-shadow:0 3px 16px rgba(0,0,0,.78)}
     .aw-honesty{max-width:600px;margin:13px 0 0;padding:11px 13px;color:#e7ece9;border-top:2px solid #d7a542;border-bottom:2px solid #d7a542;font-size:.87rem;line-height:1.42}
     .aw-actions{display:grid;grid-template-columns:1fr;width:100%;gap:8px;margin-top:18px}
     .aw-primary,.aw-secondary{display:flex;min-height:50px;align-items:center;justify-content:center;padding:11px 16px;border-radius:999px;text-decoration:none;text-align:center;font-size:.9rem;font-weight:950}
     .aw-primary{background:#d9f378;color:#061f18;box-shadow:0 10px 24px rgba(0,0,0,.32)}
-    .aw-secondary{color:#fff;border:1px solid rgba(255,255,255,.8);background:rgba(0,0,0,.28)}
-    .aw-video-link{margin-top:14px;color:#fff;text-underline-offset:5px;font-size:.86rem;font-weight:850}.aw-video-link span{color:#d9f378}
+    .aw-secondary{color:#fff;border:1px solid rgba(255,255,255,.82);background:rgba(0,0,0,.3)}
 
-    .trust-band.aw-proof-rail{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;max-width:1336px!important;margin:10px auto 38px!important;padding:0 8px!important}
-    .aw-proof-rail article{display:flex!important;min-height:96px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:13px 10px!important;background:#071d16!important;border:1px solid rgba(215,165,66,.34)!important;border-radius:18px!important;box-shadow:0 10px 24px rgba(5,30,23,.11)!important;text-align:center!important}
-    .aw-proof-rail small{display:grid;place-items:center;width:31px;height:31px;margin-bottom:8px;border-radius:50%;background:#d9f378;color:#061f18;font-size:.82rem;font-weight:1000}
-    .aw-proof-rail strong{display:block;color:#d9f378!important;font-size:.82rem!important;line-height:1.18}
-    .aw-proof-rail span{display:block;margin-top:4px;color:#e2e9e4!important;font-size:.7rem!important;line-height:1.3}
+    .aw-video-card{display:grid;grid-template-columns:116px minmax(0,1fr);gap:12px;align-items:center;width:100%;margin-top:14px;padding:8px;color:#fff;background:rgba(1,6,4,.76);border:1px solid rgba(241,198,107,.58);border-radius:17px;text-align:left;text-decoration:none;box-shadow:0 10px 26px rgba(0,0,0,.3);backdrop-filter:blur(7px)}
+    .aw-video-thumb{position:relative;display:block;overflow:hidden;aspect-ratio:16/9;border-radius:11px;background:#10261e}
+    .aw-video-thumb img{width:100%;height:100%;object-fit:cover}
+    .aw-video-play{position:absolute;left:50%;top:50%;display:grid;place-items:center;width:38px;height:38px;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.9);border-radius:50%;color:#061f18;background:#d9f378;font-size:.92rem;font-weight:1000;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+    .aw-video-copy{display:flex;min-width:0;flex-direction:column;line-height:1.18}
+    .aw-video-copy small{color:#f1c66b;font-size:.6rem;font-weight:950;letter-spacing:.12em;text-transform:uppercase}
+    .aw-video-copy strong{margin-top:4px;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:1.02rem;line-height:1.08}
+    .aw-video-copy span{margin-top:5px;color:#dce7e1;font-size:.69rem;line-height:1.3}
+
+    .trust-band.aw-proof-rail{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;max-width:1336px!important;margin:10px auto 38px!important;padding:0 8px!important}
+    .aw-proof-rail article{--accent:#d9f378;--panel:#0b3125;display:flex!important;min-height:116px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:14px 10px!important;background:linear-gradient(145deg,var(--panel),#071b15)!important;border:1px solid color-mix(in srgb,var(--accent) 50%,transparent)!important;border-top:5px solid var(--accent)!important;border-radius:18px!important;box-shadow:0 11px 25px rgba(5,30,23,.14)!important;text-align:center!important}
+    .aw-proof-rail article.proof-farmersville{--accent:#f0bf58;--panel:#17472f}
+    .aw-proof-rail article.proof-vanalstyne{--accent:#83c9dc;--panel:#163e4c}
+    .aw-proof-rail article.proof-nextdoor{--accent:#d9f378;--panel:#35431b}
+    .aw-proof-rail article.proof-isa{--accent:#d8a7ed;--panel:#3d2746}
+    .aw-proof-rail small{display:grid;place-items:center;width:34px;height:34px;margin-bottom:8px;border:2px solid rgba(255,255,255,.3);border-radius:50%;background:var(--accent);color:#061f18;font-size:.82rem;font-weight:1000;box-shadow:0 5px 13px rgba(0,0,0,.2)}
+    .aw-proof-rail strong{display:block;color:var(--accent)!important;font-size:.84rem!important;line-height:1.18}
+    .aw-proof-rail span{display:block;margin-top:5px;color:#f0f4f1!important;font-size:.7rem!important;line-height:1.32}
 
     .annie-callout{grid-template-columns:1fr!important;gap:16px!important;padding:28px 20px 30px!important;margin:0 8px 40px!important;text-align:center!important;background:linear-gradient(145deg,#fff5d5,#fffdf7 58%,#e4f1dc)!important}
-    .annie-badge{display:grid;place-items:center;width:188px;height:188px;margin:0 auto 2px;border-radius:50%;background:radial-gradient(circle at 42% 34%,#174c37,#082c22 67%,#041611);border:4px solid #d7a542;box-shadow:0 0 0 7px rgba(217,243,120,.22),0 18px 34px rgba(5,30,23,.23)}
-    .annie-badge img{display:block!important;width:158px!important;height:158px!important;margin:0!important;object-fit:contain!important;filter:drop-shadow(0 13px 13px rgba(0,0,0,.28))}
+    .annie-badge{display:grid;place-items:center;width:188px!important;height:188px!important;min-width:188px;min-height:188px;margin:0 auto 2px!important;aspect-ratio:1/1;border-radius:50%!important;background:radial-gradient(circle at 42% 34%,#174c37,#082c22 67%,#041611);border:4px solid #d7a542;box-shadow:0 0 0 7px rgba(217,243,120,.22),0 18px 34px rgba(5,30,23,.23)}
+    .annie-badge img{display:block!important;visibility:visible!important;width:158px!important;height:158px!important;margin:0!important;object-fit:contain!important;filter:drop-shadow(0 13px 13px rgba(0,0,0,.28))}
     .annie-callout>div{min-width:0!important;width:100%!important}.annie-callout .section-label{margin-left:auto!important;margin-right:auto!important}.annie-callout h2{font-size:2.1rem!important;line-height:1.02!important;margin-bottom:13px!important}.annie-callout p:not(.section-label){font-size:.98rem!important;line-height:1.48!important}.plain-button{display:inline-block;margin-top:4px}
 
     .section-head,.way-intro,.rooted-copy{text-align:center!important;margin-left:auto!important;margin-right:auto!important}
@@ -46,18 +61,32 @@
     .section-label{display:inline-block!important;position:relative!important;margin-bottom:22px!important;text-align:center!important;font-size:.78rem!important;font-weight:950!important;letter-spacing:.16em!important}
     .section-label::after{content:'';position:absolute;left:50%;bottom:-10px;width:76px;height:3px;transform:translateX(-50%);border-radius:99px;background:#d7a542}
     .intro-section .section-head h2,.concern-section .section-head h2,.services-section .section-head h2{font-size:clamp(1.9rem,8vw,2.65rem)!important;line-height:1.05!important}
+    .section-head>p:last-child,.way-intro>p:last-child,.rooted-copy>p{max-width:760px}
+    .process,.service-grid,.recognition-grid,.faq-list{text-align:left}
+    .service-card>div{align-items:flex-start}
 
-    /* The old concern images were mismatched. Do not show misleading photos while assets are being replaced. */
+    /* Mismatched concern images stay hidden until the correct Arborwise photos are installed. */
     .concern-section{display:none!important}
 
+    .site-footer{text-align:center!important}.site-footer img[data-brand-logo]{width:min(88%,430px)!important;height:auto!important;max-height:190px!important;margin:0 auto 18px!important;object-fit:contain!important}
+    .footer-logo-fallback{display:block;margin:0 auto 22px;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:2.7rem;font-weight:900;line-height:.85}.footer-logo-fallback b{color:#d9f378}.footer-logo-fallback small{display:block;margin-top:12px;color:#e3b655;font:900 .65rem/1 Inter,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase}
     .mobile-bar{z-index:1000!important;max-height:72px!important}.mobile-bar a{min-width:0!important}
-    footer{padding-bottom:28px!important}
+    footer{padding-bottom:120px!important}
 
     @media (min-width:701px){
-      body{padding-bottom:0}.site-header{padding:14px 14px 0!important}.aw-header{border-radius:30px}.aw-brand-row{padding:15px 34px 10px}.aw-logo{width:min(75%,520px);max-height:190px}.aw-header-tagline{font-size:1.2rem}.aw-nav{display:flex;justify-content:center;gap:30px}.aw-nav a{padding:13px 16px 15px;font-size:.86rem}
-      .hero.aw-hero{min-height:700px!important;margin:14px auto 0!important;border-radius:34px!important}.aw-hero-photo{object-position:58% center}.aw-hero-shade{background:linear-gradient(90deg,rgba(2,8,6,.91) 0%,rgba(2,8,6,.68) 45%,rgba(2,8,6,.14) 78%,rgba(2,8,6,.03) 100%),linear-gradient(0deg,rgba(2,8,6,.7),transparent 48%)}.aw-hero-content{min-height:700px;max-width:770px;padding:clamp(44px,6vw,84px);align-items:flex-start;justify-content:center;text-align:left}.aw-kicker{font-size:.82rem}.aw-hero h1{font-size:clamp(3.8rem,7vw,6.5rem)}.aw-slogan{font-size:1.8rem}.aw-hero-lead{font-size:clamp(1.18rem,2vw,1.5rem)}.aw-honesty{text-align:left}.aw-actions{display:flex;width:auto;gap:12px}.aw-primary,.aw-secondary{min-height:54px;padding:13px 22px;font-size:1rem}
-      .trust-band.aw-proof-rail{grid-template-columns:repeat(4,1fr)!important;gap:12px!important;padding:0 14px!important}.aw-proof-rail article{min-height:128px!important}.aw-proof-rail strong{font-size:1rem!important}.aw-proof-rail span{font-size:.8rem!important}
-      .annie-callout{grid-template-columns:250px 1fr!important;gap:44px!important;padding:38px 50px!important;margin:0 auto 52px!important;text-align:left!important}.annie-badge{width:230px;height:230px;margin:0}.annie-badge img{width:198px!important;height:198px!important}.annie-callout .section-label{margin-left:0!important}.annie-callout .section-label::after{left:0;transform:none}.annie-callout h2{font-size:clamp(2rem,3.2vw,3.35rem)!important}
+      body{padding-bottom:0}.site-header{padding:14px 14px 0!important}.aw-header{border-radius:30px}.aw-brand-row{min-height:150px;padding:12px 34px}.aw-logo{width:min(75%,520px);max-height:190px}.aw-nav{display:flex;justify-content:center;gap:30px}.aw-nav a{padding:13px 16px 15px;font-size:.86rem}
+      .hero.aw-hero{min-height:720px!important;margin:14px auto 0!important;border-radius:34px!important}.aw-hero-photo{object-position:58% center}.aw-hero-shade{background:linear-gradient(90deg,rgba(2,8,6,.94) 0%,rgba(2,8,6,.72) 47%,rgba(2,8,6,.16) 79%,rgba(2,8,6,.03) 100%),linear-gradient(0deg,rgba(2,8,6,.72),transparent 48%)}.aw-hero-content{min-height:720px;max-width:790px;padding:clamp(44px,6vw,84px);align-items:flex-start;justify-content:center;text-align:left}.aw-kicker{font-size:.82rem}.aw-hero h1{font-size:clamp(3.8rem,7vw,6.5rem)}.aw-slogan{font-size:1.85rem}.aw-hero-lead{font-size:clamp(1.18rem,2vw,1.5rem)}.aw-honesty{text-align:left}.aw-actions{display:flex;width:auto;gap:12px}.aw-primary,.aw-secondary{min-height:54px;padding:13px 22px;font-size:1rem}.aw-video-card{max-width:520px;grid-template-columns:160px 1fr}.aw-video-copy strong{font-size:1.22rem}.aw-video-copy span{font-size:.8rem}
+      .trust-band.aw-proof-rail{grid-template-columns:repeat(4,1fr)!important;gap:12px!important;padding:0 14px!important}.aw-proof-rail article{min-height:148px!important}.aw-proof-rail strong{font-size:1rem!important}.aw-proof-rail span{font-size:.8rem!important}
+      .annie-callout{grid-template-columns:250px 1fr!important;gap:44px!important;padding:38px 50px!important;margin:0 auto 52px!important;text-align:left!important}.annie-badge{width:230px!important;height:230px!important;min-width:230px;min-height:230px;margin:0!important}.annie-badge img{width:198px!important;height:198px!important}.annie-callout .section-label{margin-left:0!important}.annie-callout .section-label::after{left:0;transform:none}.annie-callout h2{font-size:clamp(2rem,3.2vw,3.35rem)!important}
+      footer{padding-bottom:40px!important}
+    }
+
+    @media(max-width:430px){
+      .aw-brand-row{min-height:108px;padding:9px 11px}.aw-logo{width:min(98%,340px);max-height:132px}.aw-logo-fallback{font-size:2.25rem}
+      .aw-nav a{font-size:.64rem;padding-left:2px;padding-right:2px}
+      .aw-hero h1{font-size:3.08rem}.aw-hero h1 sup{font-size:.39em}.aw-slogan{font-size:1.35rem}
+      .aw-video-card{grid-template-columns:108px minmax(0,1fr);gap:10px}.aw-video-copy strong{font-size:.96rem}.aw-video-copy span{font-size:.65rem}
+      .aw-proof-rail article{min-height:120px!important;padding:13px 8px!important}.aw-proof-rail strong{font-size:.8rem!important}.aw-proof-rail span{font-size:.67rem!important}
     }
   `;
   document.head.appendChild(styles);
@@ -68,9 +97,9 @@
       <div class="aw-header">
         <div class="aw-brand-row">
           <a class="aw-logo-link" href="#top" aria-label="Arborwise Tree Care home">
-            <img class="aw-logo" src="/assets/arborwise-logo.png?website=proof-rail-1" alt="Arborwise Tree Care. Nurture Your Nature.">
+            <span class="aw-logo-fallback">Arbor<b>wise</b><small>Tree Care</small></span>
+            <img class="aw-logo" data-brand-logo alt="Arborwise Tree Care. Nurture Your Nature.">
           </a>
-          <p class="aw-header-tagline">Nurture Your Nature</p>
         </div>
         <nav class="aw-nav" aria-label="Main navigation">
           <a href="#services">Services</a>
@@ -97,8 +126,23 @@
           <a class="aw-primary" href="#estimate">Get a Free Estimate</a>
           <a class="aw-secondary" href="sms:+19724308330?body=Hi%20Arborwise%2C%20I%20have%20photos%20of%20a%20tree%20concern.">Text Photos</a>
         </div>
-        <a class="aw-video-link" href="https://www.youtube.com/watch?v=Mr4wQ1d3RAA" target="_blank" rel="noopener noreferrer">Watch the full Arborwise job <span>↗</span></a>
+        <a class="aw-video-card" href="https://www.youtube.com/watch?v=Mr4wQ1d3RAA" target="_blank" rel="noopener noreferrer" aria-label="Watch the full Arborwise job on YouTube">
+          <span class="aw-video-thumb">
+            <img src="https://i.ytimg.com/vi/Mr4wQ1d3RAA/hqdefault.jpg" alt="Preview of the full Arborwise tree job video">
+            <span class="aw-video-play" aria-hidden="true">▶</span>
+          </span>
+          <span class="aw-video-copy">
+            <small>Real Arborwise work</small>
+            <strong>Watch the full job</strong>
+            <span>See the climber, ground crew, and controlled work on YouTube.</span>
+          </span>
+        </a>
       </div>`;
+
+    const videoImage = hero.querySelector('.aw-video-thumb img');
+    videoImage?.addEventListener('error', () => {
+      videoImage.src = 'assets/hero-climber.webp';
+    }, { once: true });
   }
 
   const trustBand = document.querySelector('.trust-band');
@@ -106,10 +150,10 @@
     trustBand.className = 'trust-band aw-proof-rail';
     trustBand.setAttribute('aria-label', 'Arborwise local credentials and recognition');
     trustBand.innerHTML = `
-      <article><small>F</small><strong>Farmersville Chamber</strong><span>Local member serving the community where Greg lives.</span></article>
-      <article><small>VA</small><strong>Van Alstyne Chamber</strong><span>Local member serving the community Brandon calls home.</span></article>
-      <article><small>★</small><strong>Nextdoor Fave 2024 &amp; 2025</strong><span>Chosen by North Texas neighbors two years in a row.</span></article>
-      <article><small>ISA</small><strong>Certified Arborist on Staff</strong><span>Knowledge and reasoning behind the recommendation.</span></article>`;
+      <article class="proof-farmersville"><small>F</small><strong>Farmersville Chamber</strong><span>Local member serving the community where Greg lives.</span></article>
+      <article class="proof-vanalstyne"><small>VA</small><strong>Van Alstyne Chamber</strong><span>Local member serving the community Brandon calls home.</span></article>
+      <article class="proof-nextdoor"><small>★</small><strong>Nextdoor Fave 2024 &amp; 2025</strong><span>Chosen by North Texas neighbors two years in a row.</span></article>
+      <article class="proof-isa"><small>ISA</small><strong>Certified Arborist on Staff</strong><span>Knowledge and reasoning behind the recommendation.</span></article>`;
   }
 
   const annieSection = document.querySelector('.annie-callout');
@@ -120,6 +164,50 @@
     annieImage.before(badge);
     badge.appendChild(annieImage);
   }
+
+  const installLogoFallback = image => {
+    const parent = image.parentElement;
+    if (!parent || parent.querySelector('.aw-logo-fallback,.footer-logo-fallback')) return;
+    const fallback = document.createElement('span');
+    fallback.className = parent.closest('.site-footer') ? 'footer-logo-fallback' : 'aw-logo-fallback';
+    fallback.innerHTML = 'Arbor<b>wise</b><small>Tree Care</small>';
+    image.insertAdjacentElement('afterend', fallback);
+  };
+
+  const loadBrandLogos = async () => {
+    const logos = [...document.querySelectorAll('[data-brand-logo]')];
+    if (!logos.length) return;
+    logos.forEach(image => {
+      image.style.visibility = 'hidden';
+      installLogoFallback(image);
+    });
+
+    try {
+      const response = await fetch('assets/logo-correct.b64?rev=real-logo-4', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Logo asset could not be loaded.');
+      const encoded = (await response.text()).replace(/\s+/g, '');
+      if (!encoded.startsWith('UklG')) throw new Error('Logo asset is not the expected WebP data.');
+      const source = `data:image/webp;base64,${encoded}`;
+
+      await Promise.all(logos.map(image => new Promise((resolve, reject) => {
+        image.onload = () => {
+          image.style.visibility = 'visible';
+          image.parentElement?.querySelector('.aw-logo-fallback,.footer-logo-fallback')?.remove();
+          resolve();
+        };
+        image.onerror = reject;
+        image.src = source;
+      })));
+    } catch (error) {
+      console.error(error);
+      logos.forEach(image => {
+        image.style.display = 'none';
+        installLogoFallback(image);
+      });
+    }
+  };
+
+  loadBrandLogos();
 
   const concerns = {
     leaves: { title: 'Leaf spots, browning, curling, or early leaf drop', text: 'Water stress, root problems, insects, disease, heat, and seasonal change can create similar symptoms. The pattern across the whole canopy matters more than one damaged leaf.' },
