@@ -1,254 +1,87 @@
-'use strict';
-(() => {
-  const VERSION='81';
-  const STORAGE_KEY='arborwise-pmg-native-v81';
-  const PMG_ALL='PMGS';
-  const VALID_CHOICES=new Set([PMG_ALL,'GOODWIN','SBB','KW','KANAM']);
-  let active=false;
-  let choice=PMG_ALL;
-  let suppressTopReset=false;
-  let queued=false;
-  let filterObserver=null;
-  let mainObserver=null;
+(()=>{
+  'use strict';
 
-  const upper=value=>String(value??'').trim().toUpperCase();
+  const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@93fd4b46ea4cf59f11897bb23f47f10aef55bc56/public/sbb-kw-group-63.js';
+  const CLEAN_VERSION='82';
+  let cleanupQueued=false;
 
-  function readPreference(){
-    try{
-      const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-      active=Boolean(saved.active);
-      choice=VALID_CHOICES.has(upper(saved.choice))?upper(saved.choice):PMG_ALL;
-    }catch{
-      active=false;
-      choice=PMG_ALL;
-    }
-  }
-
-  function savePreference(){
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify({active,choice}));}catch{}
-  }
-
-  function classify(record={}){
-    const category=upper(record.category);
-    const who=upper(record.who);
-    const managementGroup=upper(record.managementGroup);
-    const subcontractor=upper(record.subcontractor);
-    const text=upper([
-      record.category,
-      record.managementGroup,
-      record.subcontractor,
-      record.who,
-      record.name,
-      record.address,
-      record.service,
-      record.notes
-    ].filter(Boolean).join(' '));
-
-    const kw=category==='KW'
-      ||who.includes('KW')
-      ||subcontractor.includes('KW LANDSCAPING')
-      ||text.includes('KW LANDSCAPING');
-    const goodwin=category==='GOODWIN'
-      ||managementGroup.includes('GOODWIN')
-      ||text.includes('GOODWIN & COMPANY')
-      ||text.includes('GOODWIN');
-    const kanam=category==='KANAM'
-      ||managementGroup.includes('KANAM')
-      ||text.includes('KANAM REALTY')
-      ||text.includes('KANAM');
-    const sbb=!kw&&(
-      category==='SBB'
-      ||managementGroup.includes('SBB MANAGEMENT')
-      ||text.includes('SBB MANAGEMENT')
-      ||/(^|\s)SBB(\s|$)/.test(text)
-    );
-
-    return {kw,goodwin,kanam,sbb,isPmg:kw||goodwin||kanam||sbb};
-  }
-
-  function matchesChoice(record){
-    if(!record)return false;
-    const group=classify(record);
-    if(choice===PMG_ALL)return group.isPmg;
-    if(choice==='GOODWIN')return group.goodwin;
-    if(choice==='SBB')return group.sbb;
-    if(choice==='KW')return group.kw;
-    if(choice==='KANAM')return group.kanam;
-    return false;
-  }
-
-  function recordsById(){
-    const records=window.ARBORWISE_CURRENT_OPERATIONS?.records;
-    const map=new Map();
-    if(!Array.isArray(records))return map;
-    records.forEach(record=>{
-      const id=String(record?.id??'').trim();
-      if(id)map.set(id,record);
+  function decodeEntities(value=''){
+    const named={nbsp:' ',amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"};
+    return String(value).replace(/&(#x?[0-9a-f]+|nbsp|amp|lt|gt|quot|apos);/gi,(match,entity)=>{
+      const key=String(entity).toLowerCase();
+      if(Object.prototype.hasOwnProperty.call(named,key))return named[key];
+      try{
+        const numeric=key.startsWith('#x')
+          ? Number.parseInt(key.slice(2),16)
+          : Number.parseInt(key.slice(1),10);
+        return Number.isFinite(numeric)?String.fromCodePoint(numeric):match;
+      }catch{return match;}
     });
-    return map;
   }
 
-  function resetUnderlyingManagementFilter(){
-    const all=document.querySelector('#groupFilters54 button[data-group="ALL"]');
-    if(all&&!all.classList.contains('on'))all.click();
+  function readableText(value=''){
+    let text=decodeEntities(value);
+    if(!/[<&]/.test(text))return text.trim();
+    text=text
+      .replace(/<\s*br\s*\/?>/gi,'\n')
+      .replace(/<\s*li\b[^>]*>/gi,'• ')
+      .replace(/<\s*\/\s*li\s*>/gi,'\n')
+      .replace(/<\s*\/\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\s*>/gi,'\n')
+      .replace(/<\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\b[^>]*>/gi,'')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/\r\n?/g,'\n')
+      .replace(/[ \t]+\n/g,'\n')
+      .replace(/\n[ \t]+/g,'\n')
+      .replace(/[ \t]{2,}/g,' ')
+      .replace(/\n{3,}/g,'\n\n')
+      .trim();
+    return text;
   }
 
-  function selectTopAll(){
-    const all=document.querySelector('#filters button[data-filter="ALL"]');
-    if(all&&!all.classList.contains('on'))all.click();
+  function cleanElement(element){
+    if(!element)return;
+    if(element instanceof HTMLTextAreaElement){
+      const cleaned=readableText(element.value);
+      if(cleaned!==element.value)element.value=cleaned;
+      return;
+    }
+    const original=element.textContent||'';
+    const cleaned=readableText(original);
+    if(cleaned!==original.trim())element.textContent=cleaned;
   }
 
-  function activatePmg(nextChoice){
-    choice=VALID_CHOICES.has(upper(nextChoice))?upper(nextChoice):PMG_ALL;
-    active=true;
-    savePreference();
-    suppressTopReset=true;
-    resetUnderlyingManagementFilter();
-    selectTopAll();
-    setTimeout(()=>{
-      suppressTopReset=false;
-      queueApply();
-    },40);
+  function sweep(){
+    cleanupQueued=false;
+    document.querySelectorAll([
+      '.service','.notes','.sourceLine','.ownerCurrentNotes','.ownerSource',
+      '.invoiceFact72','.invoiceChoice72','#sheet textarea'
+    ].join(',')).forEach(cleanElement);
   }
 
-  function deactivatePmg(){
-    if(!active)return;
-    active=false;
-    savePreference();
-    queueApply();
+  function queueSweep(){
+    if(cleanupQueued)return;
+    cleanupQueued=true;
+    requestAnimationFrame(sweep);
   }
 
-  function installStyle(){
-    if(document.getElementById(`pmg-native-${VERSION}`))return;
+  function installCleanup(){
+    if(document.documentElement.dataset.boardMarkupCleanup===CLEAN_VERSION)return;
+    document.documentElement.dataset.boardMarkupCleanup=CLEAN_VERSION;
     const style=document.createElement('style');
-    style.id=`pmg-native-${VERSION}`;
-    style.textContent=`
-      #groupFilters54{display:none!important}
-      #filters.filters{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-      #filters button[data-filter="KW"],#filters button[data-filter="UNASSIGNED"]{display:none!important}
-      .pmgNative81{display:block;min-width:0;margin:0;padding:0}
-      .pmgNative81 select{
-        display:block;
-        width:100%;
-        min-width:0;
-        min-height:37px;
-        margin:0;
-        border:1.5px solid #17402b;
-        border-radius:999px;
-        background:#fff;
-        color:#17402b;
-        padding:8px 4px;
-        font-family:Arial,Helvetica,sans-serif;
-        font-size:12px;
-        font-weight:900;
-        text-align:center;
-        text-align-last:center;
-        appearance:auto;
-        -webkit-appearance:menulist;
-      }
-      .pmgNative81.on select{background:#17402b;color:#fff}
-      @media(max-width:390px){
-        .pmgNative81 select{font-size:10px;padding:8px 1px}
-      }
-    `;
+    style.id=`board-markup-cleanup-${CLEAN_VERSION}`;
+    style.textContent='.service,.notes,.sourceLine,.ownerCurrentNotes,.ownerSource,.invoiceFact72,.invoiceChoice72{white-space:pre-line}';
     document.head.appendChild(style);
+    const observer=new MutationObserver(queueSweep);
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+    window.addEventListener('arborwise:data-ready',queueSweep);
+    queueSweep();
   }
 
-  function buildNativeSelect(){
-    const filters=document.getElementById('filters');
-    if(!filters)return;
+  installCleanup();
 
-    filters.querySelectorAll('button[data-filter="KW"],button[data-filter="UNASSIGNED"]').forEach(button=>{
-      button.hidden=true;
-      button.setAttribute('aria-hidden','true');
-      button.tabIndex=-1;
-    });
-
-    filters.querySelectorAll('button[data-filter="ALL"],button[data-filter="ARBORWISE"],button[data-filter="DALLAS"]').forEach(button=>{
-      if(button.dataset.pmgResetBound===VERSION)return;
-      button.dataset.pmgResetBound=VERSION;
-      button.addEventListener('click',()=>{
-        if(suppressTopReset)return;
-        deactivatePmg();
-        setTimeout(()=>{
-          resetUnderlyingManagementFilter();
-          queueApply();
-        },0);
-      });
-    });
-
-    let wrapper=filters.querySelector('.pmgNative81');
-    if(!wrapper){
-      wrapper=document.createElement('label');
-      wrapper.className='pmgNative81';
-      wrapper.innerHTML=`
-        <select id="pmgNativeSelect81" aria-label="Property management groups">
-          <option value="PMGS">PMGs</option>
-          <option value="GOODWIN">Goodwin &amp; Company</option>
-          <optgroup label="SBB Management">
-            <option value="SBB">SBB Management</option>
-            <option value="KW">KW Landscaping</option>
-          </optgroup>
-          <option value="KANAM">KANAM Realty</option>
-        </select>`;
-      filters.appendChild(wrapper);
-      const select=wrapper.querySelector('select');
-      select.addEventListener('change',()=>activatePmg(select.value));
-    }
-
-    const select=wrapper.querySelector('select');
-    if(select&&select.value!==choice)select.value=choice;
-    wrapper.classList.toggle('on',active);
-  }
-
-  function applyCardFilter(){
-    const main=document.getElementById('main');
-    if(!main)return;
-    const records=recordsById();
-    let visible=0;
-
-    main.querySelectorAll('.card').forEach(card=>{
-      const id=String(card.querySelector('.recordId')?.textContent||'').trim();
-      const show=!active||matchesChoice(records.get(id));
-      card.hidden=!show;
-      if(show)visible+=1;
-    });
-
-    if(active){
-      const count=main.querySelector('.title .count');
-      if(count)count.textContent=String(visible);
-    }
-  }
-
-  function apply(){
-    queued=false;
-    installStyle();
-    buildNativeSelect();
-    applyCardFilter();
-  }
-
-  function queueApply(){
-    if(queued)return;
-    queued=true;
-    requestAnimationFrame(apply);
-  }
-
-  function start(){
-    readPreference();
-    installStyle();
-
-    const filters=document.getElementById('filters');
-    const main=document.getElementById('main');
-    filterObserver=new MutationObserver(queueApply);
-    mainObserver=new MutationObserver(queueApply);
-    if(filters)filterObserver.observe(filters,{childList:true});
-    if(main)mainObserver.observe(main,{childList:true,subtree:true});
-
-    window.addEventListener('arborwise:data-ready',queueApply);
-    window.addEventListener('arborwise:data-cleared',queueApply);
-    apply();
-  }
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
+  const base=document.createElement('script');
+  base.src=BASE_BUILD;
+  base.async=false;
+  base.onerror=()=>console.error('The Arborwise PMG filter base build could not be loaded.');
+  document.head.appendChild(base);
 })();
