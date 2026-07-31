@@ -1,128 +1,207 @@
 (() => {
   'use strict';
 
-  const loadBase64Asset = async (selector, paths, fallback, mime = 'image/webp') => {
-    const images = [...document.querySelectorAll(selector)];
-    if (!images.length) return;
+  const logos = [...document.querySelectorAll('[data-brand-logo]')];
+  logos.forEach((image, index) => {
+    image.removeAttribute('data-brand-logo');
+    image.src = 'assets/logo.webp';
+    image.decoding = 'async';
+    image.loading = index === 0 ? 'eager' : 'lazy';
+    if (index === 0) image.fetchPriority = 'high';
+  });
 
-    try {
-      const parts = await Promise.all(paths.map(async path => {
-        const response = await fetch(path, { cache: 'force-cache' });
-        if (!response.ok) throw new Error(`Unable to load ${path}`);
-        return (await response.text()).replace(/\s+/g, '');
-      }));
-
-      const source = `data:${mime};base64,${parts.join('')}`;
-      images.forEach(image => {
-        image.onerror = () => {
-          image.onerror = null;
-          image.src = fallback;
-        };
-        image.src = source;
-      });
-    } catch (error) {
-      images.forEach(image => {
-        image.onerror = null;
-        image.src = fallback;
-      });
-      console.error('Arborwise asset fallback used.', error);
-    }
-  };
-
-  const whyLabel = document.querySelector('.intro-section .section-label');
-  if (whyLabel) whyLabel.textContent = 'Why Arborwise?';
-
-  const leafConcernImage = document.querySelector('.concern-card[data-concern="leaves"] img');
-  if (leafConcernImage) {
-    leafConcernImage.src = 'assets/concern-leaves.webp';
-    leafConcernImage.alt = 'Real customer tree leaves showing severe browning, spotting, curling, and damaged tissue';
-    leafConcernImage.removeAttribute('referrerpolicy');
+  const brand = document.querySelector('.site-header .brand');
+  if (brand && !brand.querySelector('.brand-domain')) {
+    const domain = document.createElement('span');
+    domain.className = 'brand-domain';
+    domain.textContent = 'arborwisetreecare.com';
+    brand.appendChild(domain);
   }
 
-  const concerns = {
-    leaves: {
-      title: 'Leaf spots, browning, curling, or early leaf drop',
-      text: 'Water stress, root problems, insects, disease, heat, and seasonal change can create similar symptoms. The pattern across the whole canopy matters more than one damaged leaf.'
-    },
-    canopy: {
-      title: 'Dead branches or a thinning canopy',
-      text: 'Drought, root damage, disease, storm injury, structural problems, and long-term decline can all appear in the canopy. Arborwise looks at where the thinning begins and how quickly it changed.'
-    },
-    trunk: {
-      title: 'Cracks, cavities, loose bark, or mushrooms',
-      text: 'A defect does not automatically mean removal. Location, sound wood, species, nearby targets, movement, and the surrounding root zone all affect the recommendation.'
-    },
-    lean: {
-      title: 'A new lean, exposed roots, or moving soil',
-      text: 'A new lean or soil movement after wind or rain deserves prompt attention. Photograph the whole tree, the trunk base, and the ground on both sides of the lean.'
+  const style = document.createElement('style');
+  style.id = 'arborwise-final-mobile-brand-repair';
+  style.textContent = `
+    html,body{max-width:100%;overflow-x:hidden}
+    main,.site-header,.site-footer{max-width:100%}
+    .brand-domain{
+      display:block;
+      margin-top:-6px;
+      color:#f0cd75;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(.78rem,1.4vw,1rem);
+      font-weight:900;
+      letter-spacing:.035em;
+      text-decoration:underline;
+      text-decoration-thickness:1px;
+      text-underline-offset:4px;
+      text-shadow:0 2px 10px rgba(0,0,0,.9);
     }
-  };
+    .hero-promise{
+      border:2px solid #f0cd75;
+      box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,.06),
+        inset 0 -22px 42px rgba(0,0,0,.28),
+        0 0 0 2px rgba(91,56,3,.55),
+        0 18px 38px rgba(2,11,8,.3);
+    }
+    .hero-promise strong{
+      color:#fff3c5;
+      background:linear-gradient(180deg,#fffbe8 0%,#f8d67a 48%,#fff0b3 72%,#d89b2c 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color:transparent;
+      -webkit-text-stroke:1.45px #4c2d00;
+      paint-order:stroke fill;
+      letter-spacing:-.025em;
+      text-shadow:
+        -1px -1px 0 #f6df9b,
+        1px -1px 0 #f6df9b,
+        -1px 1px 0 #5b3600,
+        1px 1px 0 #5b3600,
+        0 3px 0 #5b3600,
+        0 6px 0 rgba(28,14,0,.78),
+        0 12px 24px rgba(0,0,0,.78);
+      filter:drop-shadow(0 0 9px rgba(240,205,117,.3));
+    }
+    .estimate-section,.estimate-section>*,.estimate-actions,.estimate-actions>*{min-width:0}
+    .email-link,.footer-domain{overflow-wrap:anywhere;word-break:break-word}
+    .site-footer{width:100%;overflow:hidden}
 
-  const dialog = document.getElementById('concernDialog');
-  const dialogTitle = document.getElementById('dialogTitle');
-  const dialogText = document.getElementById('dialogText');
-  let lastTrigger = null;
+    @media(max-width:760px){
+      .brand-row{
+        width:100%;
+        padding:10px 14px 9px;
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+        grid-template-areas:
+          "brand brand"
+          "local established";
+        gap:5px 20px;
+      }
+      .brand{
+        grid-area:brand;
+        width:100%;
+        max-width:460px;
+        justify-self:center;
+        min-width:0;
+      }
+      .brand img{
+        width:100%;
+        height:144px;
+        max-height:none;
+        object-fit:contain;
+        object-position:center;
+        filter:drop-shadow(0 12px 20px rgba(0,0,0,.5));
+      }
+      .brand-domain{
+        margin-top:-13px;
+        margin-bottom:5px;
+        font-size:.89rem;
+        letter-spacing:.035em;
+      }
+      .brand-proof-left{grid-area:local;justify-self:start}
+      .brand-proof-right{grid-area:established;justify-self:end}
+      .brand-proof{
+        width:100%;
+        max-width:150px;
+        flex-direction:row;
+        justify-content:center;
+        gap:7px;
+        padding:4px 2px 9px;
+        text-align:left;
+      }
+      .brand-proof-right{text-align:right}
+      .brand-proof::after{left:0;right:0}
+      .brand-proof .proof-icon{font-size:1.15rem}
+      .brand-proof small{font-size:.55rem;letter-spacing:.055em}
+      .brand-proof strong{font-size:.76rem;line-height:1.05;white-space:normal}
 
-  document.querySelectorAll('.concern-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const concern = concerns[card.dataset.concern];
-      if (!concern || !dialog || !dialogTitle || !dialogText) return;
-      lastTrigger = card;
-      dialogTitle.textContent = concern.title;
-      dialogText.textContent = concern.text;
-      dialog.showModal();
-    });
-  });
+      .hero,.hero-copy,.hero-media,.hero-actions,.hero-promise,.hero-annie{min-width:0;max-width:100%}
+      .hero-lead{overflow-wrap:anywhere}
+      .hero-promise{
+        width:100%;
+        padding:30px 27px 28px;
+        border-radius:21px;
+      }
+      .hero-promise::before{left:11px}
+      .hero-promise::after{right:11px}
+      .hero-promise strong{
+        font-size:clamp(2.25rem,10.7vw,3rem);
+        line-height:.96;
+        -webkit-text-stroke:1.25px #4c2d00;
+      }
+      .hero-promise span{font-size:.92rem}
 
-  const closeDialog = () => {
-    if (dialog?.open) dialog.close();
-  };
+      .estimate-section{
+        width:calc(100% - 24px);
+        max-width:none;
+        margin:0 12px 50px;
+        padding:31px 18px;
+        overflow:hidden;
+        border-radius:24px;
+      }
+      .estimate-section>div{width:100%;max-width:100%}
+      .estimate-section .section-label{
+        width:100%;
+        max-width:100%;
+        margin-left:0;
+        margin-right:0;
+        padding-left:0;
+        padding-right:0;
+        font-size:clamp(.98rem,4.8vw,1.2rem);
+        line-height:1.25;
+        letter-spacing:.055em;
+        white-space:normal;
+        overflow-wrap:anywhere;
+      }
+      .estimate-section h2{
+        width:100%;
+        max-width:18ch;
+        margin-left:auto;
+        margin-right:auto;
+        font-size:clamp(1.9rem,8vw,2.45rem);
+      }
+      .estimate-section p:last-child{
+        width:100%;
+        max-width:34ch;
+        margin-left:auto;
+        margin-right:auto;
+        font-size:1rem;
+      }
+      .estimate-actions{width:100%;max-width:100%;min-width:0}
+      .estimate-actions .button{width:100%;max-width:100%;min-width:0;padding-left:12px;padding-right:12px}
+      .email-link{display:block;width:100%;max-width:100%;font-size:.93rem;line-height:1.35;padding:4px 2px}
 
-  document.querySelector('.dialog-close')?.addEventListener('click', closeDialog);
-  document.querySelector('[data-close-dialog]')?.addEventListener('click', closeDialog);
-  dialog?.addEventListener('click', event => {
-    if (event.target === dialog) closeDialog();
-  });
-  dialog?.addEventListener('close', () => lastTrigger?.focus());
+      .site-footer{
+        width:100%;
+        max-width:100%;
+        margin:0;
+        padding:35px 16px 98px;
+      }
+      .site-footer>img{
+        width:min(100%,430px);
+        height:175px;
+        margin:0 auto 2px;
+        object-fit:contain;
+      }
+      .footer-domain{display:block;width:100%;max-width:100%;font-size:clamp(1.1rem,6vw,1.42rem);line-height:1.2}
+      .footer-contact{width:100%;max-width:100%;gap:10px}
+    }
 
-  const tips = [
-    'Show us what changed, where it changed, and how quickly. The pattern tells us where to look next.',
-    'Send one photo of the whole tree, one close-up of the concern, and one photo of the trunk base.',
-    'A sudden change matters more than a condition that has looked the same for years.',
-    'Do not stand under a cracked limb to take a picture. Step back and use your camera zoom.',
-    'Watering changes, construction, storms, soil disturbance, and recent pruning can all help explain what a tree is doing.'
-  ];
+    @media(max-width:390px){
+      .brand-row{padding-left:10px;padding-right:10px;gap:4px 12px}
+      .brand img{height:132px}
+      .brand-domain{font-size:.82rem}
+      .brand-proof{max-width:136px}
+      .brand-proof small{font-size:.5rem}
+      .brand-proof strong{font-size:.69rem}
+      .hero-promise{padding-left:23px;padding-right:23px}
+      .hero-promise strong{font-size:clamp(2.12rem,10.8vw,2.7rem)}
+    }
+  `;
+  document.head.appendChild(style);
 
-  const tip = document.getElementById('annieTip');
-  const tipButton = document.getElementById('annieButton');
-  let tipIndex = 0;
-
-  tipButton?.addEventListener('click', () => {
-    tipIndex = (tipIndex + 1) % tips.length;
-    if (tip) tip.textContent = tips[tipIndex];
-  });
-
-  const year = document.getElementById('year');
-  if (year) year.textContent = String(new Date().getFullYear());
-
-  loadBase64Asset(
-    '[data-brand-logo]',
-    Array.from({ length: 8 }, (_, index) => `assets/logo-final-${String(index).padStart(2, '0')}.b64`),
-    'assets/logo.webp',
-    'image/webp'
-  );
-
-  loadBase64Asset(
-    '[data-annie]',
-    ['assets/annie-correct.b64'],
-    'assets/annie.webp',
-    'image/avif'
-  );
-
-  loadBase64Asset(
-    '[data-after-photo]',
-    ['assets/anacapri-after.b64'],
-    'assets/healthy-tree.webp',
-    'image/webp'
-  );
+  const baseScript = document.createElement('script');
+  baseScript.src = 'professional-base.js?v=20260730-2103';
+  baseScript.async = false;
+  document.body.appendChild(baseScript);
 })();
