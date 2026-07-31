@@ -1,5 +1,35 @@
 @import url("https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@a20432e22b29264a215ec1e179d8f9c051f2933e/website-preview/professional.css");
 
+/* Header mark: keep the uploaded artwork untouched and place the founding date
+   in the natural black space beside the tree canopy. */
+html body .aw-brand .aw-art{
+  position:relative!important;
+  isolation:isolate;
+}
+html body .aw-brand .aw-art::before,
+html body .aw-brand .aw-art::after{
+  position:absolute;
+  top:28%;
+  z-index:2;
+  color:#efc45f;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-size:clamp(.7rem,2.7vw,.96rem);
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.13em;
+  text-shadow:0 2px 8px #000,0 0 16px #000;
+  opacity:.94;
+  pointer-events:none;
+}
+html body .aw-brand .aw-art::before{
+  content:"EST.";
+  left:5.5%;
+}
+html body .aw-brand .aw-art::after{
+  content:"2019";
+  right:4.5%;
+}
+
 /* Footer: visitors are already on the site, so make Facebook the destination. */
 html body .site-footer .footer-domain{
   display:none!important;
@@ -35,38 +65,38 @@ html body .site-footer .fb span::after{
   letter-spacing:.01em!important;
 }
 
-/* Mobile hero: move the message into the photograph and give the care line
-   enough contrast to read as a real heading instead of fine print. */
+/* Mobile hero: remove the outlined badge and move the message higher into the
+   photograph. A soft shadow strip keeps the heading readable without boxing it. */
 @media (max-width:700px){
   html body .hero.aw-hero{
     min-height:0!important;
   }
   html body .hero.aw-hero .aw-copy{
     min-height:0!important;
-    padding:108px 20px 26px!important;
+    padding:36px 20px 26px!important;
     justify-content:flex-start!important;
   }
   html body .hero.aw-hero .aw-kicker{
     display:block!important;
-    width:min(100%,340px)!important;
-    max-width:100%!important;
-    margin:0 auto 14px!important;
-    padding:10px 12px 9px!important;
-    color:#f4c96a!important;
-    background:rgba(2,8,6,.78)!important;
-    border:1px solid rgba(244,201,106,.72)!important;
-    border-radius:13px!important;
-    box-shadow:0 8px 24px rgba(0,0,0,.28)!important;
+    width:100%!important;
+    max-width:350px!important;
+    margin:0 auto 12px!important;
+    padding:7px 4px 6px!important;
+    color:#f6c966!important;
+    background:linear-gradient(90deg,transparent,rgba(1,7,5,.72) 18%,rgba(1,7,5,.72) 82%,transparent)!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
     font-size:0!important;
-    line-height:1.12!important;
-    letter-spacing:.07em!important;
+    line-height:1.1!important;
+    letter-spacing:.065em!important;
     text-align:center!important;
-    text-shadow:0 2px 8px #000!important;
+    text-shadow:0 2px 2px #000,0 0 12px #000,0 0 24px #000!important;
   }
   html body .hero.aw-hero .aw-kicker::before,
   html body .hero.aw-hero .aw-kicker::after{
     display:block!important;
-    font-size:1.02rem!important;
+    font-size:1.08rem!important;
     font-weight:950!important;
     text-transform:uppercase!important;
   }
