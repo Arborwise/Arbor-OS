@@ -19,18 +19,37 @@
     if (!images.length) return;
 
     images.forEach(image => {
-      image.src = fallbackPath;
+      image.removeAttribute('src');
+      image.style.visibility = 'hidden';
     });
 
     try {
       const response = await fetch(encodedPath, { cache: 'no-store' });
       if (!response.ok) throw new Error(`Could not load ${encodedPath}`);
-      const encoded = (await response.text()).trim();
+      const encoded = (await response.text()).replace(/\s+/g, '');
       const source = `data:${mimeType};base64,${encoded}`;
+
       images.forEach(image => {
+        image.onload = () => {
+          image.style.visibility = 'visible';
+        };
+        image.onerror = () => {
+          image.removeAttribute('src');
+          image.style.display = 'none';
+        };
         image.src = source;
       });
     } catch (error) {
+      images.forEach(image => {
+        image.onload = () => {
+          image.style.visibility = 'visible';
+        };
+        image.onerror = () => {
+          image.removeAttribute('src');
+          image.style.display = 'none';
+        };
+        image.src = fallbackPath;
+      });
       console.error(`Using fallback asset for ${selector}.`, error);
     }
   };
