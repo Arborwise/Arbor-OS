@@ -61,6 +61,22 @@
     heroLead.textContent = 'Greg, Brandon, and the Arborwise team help you understand what is wrong with your trees, what actually needs attention, and how to protect your property without pressure or guesswork. And sometimes there is nothing wrong with the tree—it is just a tree being a tree.';
   }
 
+  const heroCaption = document.querySelector('.hero-media figcaption');
+  if (heroCaption) {
+    const videoLink = document.createElement('a');
+    videoLink.href = 'https://www.youtube.com/watch?v=Mr4wQ1d3RAA';
+    videoLink.target = '_blank';
+    videoLink.rel = 'noopener noreferrer';
+    videoLink.textContent = 'Watch the full Arborwise job ↗';
+    videoLink.setAttribute('aria-label', 'Watch the full Arborwise tree job on YouTube');
+    videoLink.style.display = 'inline-block';
+    videoLink.style.marginTop = '6px';
+    videoLink.style.color = 'var(--lime)';
+    videoLink.style.fontWeight = '950';
+    videoLink.style.textUnderlineOffset = '4px';
+    heroCaption.append(document.createElement('br'), videoLink);
+  }
+
   const concerns = {
     leaves: {
       title: 'Leaf spots, browning, curling, or early leaf drop',
