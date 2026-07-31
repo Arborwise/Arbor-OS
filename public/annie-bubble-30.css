@@ -1,3 +1,6 @@
+/* Never allow the Arborwise board to remain blank if a deferred startup script stalls. */
+body.booting{visibility:visible!important}
+
 /* Annie's compact speech bubble: playful, soft, and only as large as her text. */
 #annieBubble.bubble{
   position:fixed;
