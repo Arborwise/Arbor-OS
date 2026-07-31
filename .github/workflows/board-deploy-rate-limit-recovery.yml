@@ -1,0 +1,118 @@
+name: Recover Arborwise board deployment after Vercel rate limit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/board-deploy-rate-limit-recovery.yml'
+  schedule:
+    - cron: '4,14,24,34,44,54 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arborwise-board-deployment-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.repository == 'Arborwise/Arbor-OS'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Check whether the native PMG board is live
+        id: live
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os.vercel.app'
+          BUST="board-check-$(date +%s)"
+          page_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?$BUST" || true)
+          script_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/pmg.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/sbb-kw-group-63.js?$BUST" || true)
+          if [[ "$page_code" == '200' ]] \
+            && [[ "$script_code" == '200' ]] \
+            && grep -Fq 'pmgNativeSelect81' /tmp/pmg.js \
+            && grep -Fq 'Goodwin &amp; Company' /tmp/pmg.js \
+            && grep -Fq 'KW Landscaping' /tmp/pmg.js \
+            && grep -Fq 'KANAM Realty' /tmp/pmg.js; then
+            echo 'live=true' >> "$GITHUB_OUTPUT"
+            echo 'Native Android PMG selector is live.'
+          else
+            echo 'live=false' >> "$GITHUB_OUTPUT"
+            echo "Board correction is not live yet: page=$page_code script=$script_code"
+          fi
+
+      - name: Respect Vercel build-rate cooldown
+        id: cooldown
+        if: steps.live.outputs.live != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          now=$(date +%s)
+          marker='public/board-deploy-recovery-marker.txt'
+          if [[ -f "$marker" ]]; then
+            last_attempt=$(sed -n 's/^epoch=//p' "$marker" | head -n 1)
+            last_attempt=${last_attempt:-0}
+            minimum_wait=21600
+            reason='six-hour retry spacing after a controlled retry'
+          else
+            last_attempt=$(git show -s --format=%ct e950caf094195ff32a48773832b2b024f73bd0c3)
+            minimum_wait=3900
+            reason='initial Vercel one-hour reset window'
+          fi
+          age=$((now-last_attempt))
+          if (( age >= minimum_wait )); then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+            echo "Cooldown complete: $reason."
+          else
+            remaining=$((minimum_wait-age))
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+            echo "Cooldown remains active for about $remaining seconds."
+          fi
+
+      - name: Trigger one controlled board redeployment
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          epoch=$(date +%s)
+          stamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          printf 'epoch=%s\nutc=%s\nreason=controlled Arborwise board retry after Vercel build-rate limit\n' "$epoch" "$stamp" > public/board-deploy-recovery-marker.txt
+          git config user.name 'Arborwise board deployment recovery'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/board-deploy-recovery-marker.txt
+          git commit -m 'Retry Arborwise board deployment after Vercel cooldown'
+          git push origin HEAD:main
+
+      - name: Verify native PMG board after retry
+        if: steps.live.outputs.live != 'true' && steps.cooldown.outputs.eligible == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://arborwise-os.vercel.app'
+          for attempt in $(seq 1 40); do
+            BUST="board-verify-$(date +%s)-$attempt"
+            page_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/board.html -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/board-now.html?$BUST" || true)
+            script_code=$(curl -sS -L --connect-timeout 10 --max-time 30 -o /tmp/pmg.js -w '%{http_code}' -H 'Cache-Control: no-cache' "$BASE/sbb-kw-group-63.js?$BUST" || true)
+            if [[ "$page_code" == '200' ]] \
+              && [[ "$script_code" == '200' ]] \
+              && grep -Fq 'pmgNativeSelect81' /tmp/pmg.js \
+              && grep -Fq 'Goodwin &amp; Company' /tmp/pmg.js \
+              && grep -Fq 'KW Landscaping' /tmp/pmg.js \
+              && grep -Fq 'KANAM Realty' /tmp/pmg.js; then
+              echo 'Corrected Arborwise board is live and verified.'
+              exit 0
+            fi
+            echo "Waiting for board deployment; attempt $attempt: page=$page_code script=$script_code"
+            sleep 15
+          done
+          echo 'The controlled board deployment did not become live during the verification window.'
+          exit 1
