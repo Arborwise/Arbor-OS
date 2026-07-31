@@ -4,7 +4,7 @@
       selector: '[data-brand-logo]',
       encodedPath: 'assets/logo-correct.b64',
       fallbackPath: 'assets/logo.webp',
-      mimeType: 'image/avif'
+      mimeType: 'image/webp'
     },
     {
       selector: '[data-annie]',
@@ -36,6 +36,11 @@
   };
 
   Promise.allSettled(assetJobs.map(loadEncodedAsset));
+
+  const heroLead = document.querySelector('.hero-lead');
+  if (heroLead) {
+    heroLead.textContent = 'Greg, Brandon, and the Arborwise team help you understand what is wrong with your trees, what actually needs attention, and how to protect your property without pressure or guesswork. And sometimes there is nothing wrong with the tree—it is just a tree being a tree.';
+  }
 
   const concerns = {
     leaves: {
