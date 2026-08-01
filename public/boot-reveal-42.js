@@ -2,12 +2,12 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v87')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v88')!=='1'){
       localStorage.removeItem('arborwise-board-ui-v57');
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
-      localStorage.setItem('arborwise-cache-reset-v87','1');
+      localStorage.setItem('arborwise-cache-reset-v88','1');
     }
   }catch{}
 
@@ -43,15 +43,15 @@
   const loadPaidStatus=()=>{
     if(document.querySelector('script[data-arborwise-paid-status]'))return;
     const script=document.createElement('script');
-    script.src='/paid-status-87.js?v=87';
+    script.src='/paid-status-87.js?v=88';
     script.defer=true;
-    script.dataset.arborwisePaidStatus='87';
+    script.dataset.arborwisePaidStatus='88';
     document.head.appendChild(script);
   };
 
   const installEmptyViewRepair=()=>{
-    if(document.documentElement.dataset.emptyViewRepair==='87')return;
-    document.documentElement.dataset.emptyViewRepair='87';
+    if(document.documentElement.dataset.emptyViewRepair==='88')return;
+    document.documentElement.dataset.emptyViewRepair='88';
 
     const repair=()=>{
       const records=window.ARBORWISE_CURRENT_OPERATIONS?.records;
