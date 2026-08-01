@@ -2,12 +2,12 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v72')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v86')!=='1'){
       localStorage.removeItem('arborwise-board-ui-v57');
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
-      localStorage.setItem('arborwise-cache-reset-v72','1');
+      localStorage.setItem('arborwise-cache-reset-v86','1');
     }
   }catch{}
 
@@ -31,9 +31,18 @@
     document.head.appendChild(script);
   };
 
+  const loadCardColors=()=>{
+    if(document.querySelector('script[data-arborwise-card-colors]'))return;
+    const script=document.createElement('script');
+    script.src='/card-color-fill-86.js?v=86';
+    script.defer=true;
+    script.dataset.arborwiseCardColors='86';
+    document.head.appendChild(script);
+  };
+
   const installEmptyViewRepair=()=>{
-    if(document.documentElement.dataset.emptyViewRepair==='72')return;
-    document.documentElement.dataset.emptyViewRepair='72';
+    if(document.documentElement.dataset.emptyViewRepair==='86')return;
+    document.documentElement.dataset.emptyViewRepair='86';
 
     const repair=()=>{
       const records=window.ARBORWISE_CURRENT_OPERATIONS?.records;
@@ -98,8 +107,22 @@
     }
   };
 
-  const ready=()=>{loadContactIcons();loadWorkflowStatusBoard();reveal();installLiveRefresh();installEmptyViewRepair();};
+  const ready=()=>{
+    loadContactIcons();
+    loadWorkflowStatusBoard();
+    loadCardColors();
+    reveal();
+    installLiveRefresh();
+    installEmptyViewRepair();
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
   else ready();
-  setTimeout(()=>{loadContactIcons();loadWorkflowStatusBoard();document.body.classList.remove('booting');installLiveRefresh();installEmptyViewRepair();},1800);
+  setTimeout(()=>{
+    loadContactIcons();
+    loadWorkflowStatusBoard();
+    loadCardColors();
+    document.body.classList.remove('booting');
+    installLiveRefresh();
+    installEmptyViewRepair();
+  },1800);
 })();
