@@ -2,7 +2,7 @@
   'use strict';
 
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@93fd4b46ea4cf59f11897bb23f47f10aef55bc56/public/sbb-kw-group-63.js';
-  const CLEAN_VERSION='82';
+  const CLEAN_VERSION='83';
   let cleanupQueued=false;
 
   function decodeEntities(value=''){
@@ -19,23 +19,32 @@
     });
   }
 
+  function removeInternalIds(value=''){
+    return String(value)
+      .replace(/\s*Google Calendar event\s+[a-z0-9_-]+\s+(?:created|updated)\.?/gi,'')
+      .replace(/\s*Calendar event ID\s*[:#-]?\s*[a-z0-9_-]+\.?/gi,'')
+      .replace(/[ \t]{2,}/g,' ')
+      .replace(/\s+([.,;:])/g,'$1')
+      .trim();
+  }
+
   function readableText(value=''){
     let text=decodeEntities(value);
-    if(!/[<&]/.test(text))return text.trim();
-    text=text
-      .replace(/<\s*br\s*\/?>/gi,'\n')
-      .replace(/<\s*li\b[^>]*>/gi,'• ')
-      .replace(/<\s*\/\s*li\s*>/gi,'\n')
-      .replace(/<\s*\/\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\s*>/gi,'\n')
-      .replace(/<\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\b[^>]*>/gi,'')
-      .replace(/<[^>]+>/g,' ')
-      .replace(/\r\n?/g,'\n')
-      .replace(/[ \t]+\n/g,'\n')
-      .replace(/\n[ \t]+/g,'\n')
-      .replace(/[ \t]{2,}/g,' ')
-      .replace(/\n{3,}/g,'\n\n')
-      .trim();
-    return text;
+    if(/[<&]/.test(text)){
+      text=text
+        .replace(/<\s*br\s*\/?>/gi,'\n')
+        .replace(/<\s*li\b[^>]*>/gi,'• ')
+        .replace(/<\s*\/\s*li\s*>/gi,'\n')
+        .replace(/<\s*\/\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\s*>/gi,'\n')
+        .replace(/<\s*(?:p|div|section|article|h[1-6]|ul|ol|tr)\b[^>]*>/gi,'')
+        .replace(/<[^>]+>/g,' ')
+        .replace(/\r\n?/g,'\n')
+        .replace(/[ \t]+\n/g,'\n')
+        .replace(/\n[ \t]+/g,'\n')
+        .replace(/[ \t]{2,}/g,' ')
+        .replace(/\n{3,}/g,'\n\n');
+    }
+    return removeInternalIds(text);
   }
 
   function cleanElement(element){
