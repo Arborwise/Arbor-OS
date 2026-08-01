@@ -115,3 +115,251 @@ html body .site-footer .fb span::after{
     line-height:1.28!important;
   }
 }
+
+/* Recognition cards: preserve the black-and-gold website and make this one
+   proof section feel earned, dimensional, and alive instead of filing-cabinet plain. */
+html body .rooted-section .recognition-grid{
+  gap:16px!important;
+  align-items:stretch!important;
+  perspective:1100px;
+}
+html body .rooted-section .recognition-grid article{
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden!important;
+  min-height:168px!important;
+  padding:20px!important;
+  border:1px solid rgba(215,165,66,.66)!important;
+  border-radius:25px!important;
+  box-shadow:0 18px 38px rgba(5,30,23,.18),inset 0 1px 0 rgba(255,255,255,.65)!important;
+  transform:translateY(0) rotateX(0)!important;
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease!important;
+  animation:awProofRise .62s cubic-bezier(.2,.8,.2,1) both;
+}
+html body .rooted-section .recognition-grid article:hover{
+  z-index:4;
+  transform:translateY(-7px) rotateX(1.5deg)!important;
+  border-color:#efc45f!important;
+  box-shadow:0 25px 50px rgba(5,30,23,.27),0 0 0 3px rgba(217,243,120,.18)!important;
+}
+html body .rooted-section .recognition-grid article::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-55% -35%;
+  background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.34) 48%,transparent 58%);
+  transform:translateX(-70%) rotate(8deg);
+  animation:awProofShine 6.5s ease-in-out infinite;
+  pointer-events:none;
+}
+html body .rooted-section .recognition-grid article::after{
+  position:absolute;
+  right:15px;
+  top:13px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.61rem;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  pointer-events:none;
+}
+html body .rooted-section .recognition-grid article img{
+  position:relative;
+  z-index:2;
+  width:112px!important;
+  height:112px!important;
+  padding:8px;
+  border-radius:20px;
+  filter:drop-shadow(0 10px 12px rgba(0,0,0,.18));
+  transition:transform .28s ease!important;
+}
+html body .rooted-section .recognition-grid article:hover img{
+  transform:scale(1.06) rotate(-2deg);
+}
+html body .rooted-section .recognition-grid article strong{
+  position:relative;
+  z-index:2;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(1.05rem,1.7vw,1.38rem)!important;
+  line-height:1.08!important;
+}
+html body .rooted-section .recognition-grid article span{
+  position:relative;
+  z-index:2;
+  font-size:.72rem!important;
+  letter-spacing:.14em!important;
+}
+
+/* Put the strongest social proof first. */
+html body .rooted-section .recognition-grid article:nth-child(4){
+  order:1;
+  grid-column:1/-1;
+  min-height:215px!important;
+  grid-template-columns:155px 1fr!important;
+  padding:26px 28px!important;
+  color:white!important;
+  background:
+    radial-gradient(circle at 21% 47%,rgba(217,243,120,.28),transparent 145px),
+    linear-gradient(135deg,#061f18 0%,#0b4c37 62%,#102c21 100%)!important;
+  border:2px solid #efc45f!important;
+}
+html body .rooted-section .recognition-grid article:nth-child(4)::after{
+  content:"Two years running";
+  color:#07110d;
+  background:#d9f378;
+  box-shadow:0 7px 18px rgba(0,0,0,.22);
+}
+html body .rooted-section .recognition-grid article:nth-child(4) img{
+  width:148px!important;
+  height:148px!important;
+  padding:0;
+  background:radial-gradient(circle,#fff 0 48%,transparent 49%);
+  border-radius:50%;
+  box-shadow:0 0 0 7px rgba(217,243,120,.16),0 14px 24px rgba(0,0,0,.32);
+}
+html body .rooted-section .recognition-grid article:nth-child(4) strong{
+  color:white!important;
+  font-size:clamp(1.7rem,3.1vw,2.55rem)!important;
+  text-shadow:0 2px 0 rgba(0,0,0,.35);
+}
+html body .rooted-section .recognition-grid article:nth-child(4) span{
+  color:#efc45f!important;
+  font-size:1.05rem!important;
+}
+
+html body .rooted-section .recognition-grid article:nth-child(3){
+  order:2;
+  grid-column:1/-1;
+  grid-template-columns:125px 1fr!important;
+  min-height:176px!important;
+  color:#10271e!important;
+  background:
+    radial-gradient(circle at 17% 50%,rgba(84,163,78,.16),transparent 125px),
+    linear-gradient(135deg,#fffdf7,#f2e1b3)!important;
+}
+html body .rooted-section .recognition-grid article:nth-child(3)::after{
+  content:"Neighbor-voted";
+  color:#fff;
+  background:#0b3f2f;
+}
+html body .rooted-section .recognition-grid article:nth-child(3) img{
+  width:120px!important;
+  height:120px!important;
+  padding:0;
+  border-radius:50%;
+}
+html body .rooted-section .recognition-grid article:nth-child(3) strong{
+  color:#0b3f2f!important;
+  font-size:clamp(1.35rem,2.3vw,1.9rem)!important;
+}
+html body .rooted-section .recognition-grid article:nth-child(3) span{
+  color:#8a6116!important;
+  font-size:.92rem!important;
+}
+
+/* Chamber memberships support the awards without competing with them. */
+html body .rooted-section .recognition-grid article:nth-child(1),
+html body .rooted-section .recognition-grid article:nth-child(2){
+  min-height:154px!important;
+  grid-template-columns:98px 1fr!important;
+  color:white!important;
+  background:linear-gradient(145deg,#070b09,#0c291f)!important;
+}
+html body .rooted-section .recognition-grid article:nth-child(1){order:3;animation-delay:.12s}
+html body .rooted-section .recognition-grid article:nth-child(2){order:4;animation-delay:.18s}
+html body .rooted-section .recognition-grid article:nth-child(1)::after,
+html body .rooted-section .recognition-grid article:nth-child(2)::after{
+  content:"Local member";
+  color:#07110d;
+  background:#efc45f;
+}
+html body .rooted-section .recognition-grid article:nth-child(1) img,
+html body .rooted-section .recognition-grid article:nth-child(2) img{
+  width:94px!important;
+  height:94px!important;
+  padding:10px;
+  background:#fffdf7;
+  border:1px solid rgba(239,196,95,.7);
+}
+html body .rooted-section .recognition-grid article:nth-child(1) strong,
+html body .rooted-section .recognition-grid article:nth-child(2) strong{
+  color:white!important;
+}
+html body .rooted-section .recognition-grid article:nth-child(1) span,
+html body .rooted-section .recognition-grid article:nth-child(2) span{
+  color:#d9f378!important;
+}
+
+@keyframes awProofRise{
+  from{opacity:0;transform:translateY(24px) scale(.975)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes awProofShine{
+  0%,52%,100%{transform:translateX(-72%) rotate(8deg)}
+  66%{transform:translateX(72%) rotate(8deg)}
+}
+
+@media (max-width:700px){
+  html body .rooted-section .recognition-grid{
+    grid-template-columns:1fr!important;
+    gap:15px!important;
+  }
+  html body .rooted-section .recognition-grid article,
+  html body .rooted-section .recognition-grid article:nth-child(1),
+  html body .rooted-section .recognition-grid article:nth-child(2),
+  html body .rooted-section .recognition-grid article:nth-child(3),
+  html body .rooted-section .recognition-grid article:nth-child(4){
+    grid-column:1!important;
+    grid-template-columns:106px 1fr!important;
+    min-height:148px!important;
+    padding:18px!important;
+    text-align:left!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(4){
+    min-height:180px!important;
+    grid-template-columns:126px 1fr!important;
+    padding-top:45px!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(4) img{
+    width:120px!important;
+    height:120px!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(4) strong{
+    font-size:1.65rem!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(3){
+    padding-top:42px!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(3) img{
+    width:102px!important;
+    height:102px!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(3) strong{
+    font-size:1.35rem!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(1),
+  html body .rooted-section .recognition-grid article:nth-child(2){
+    grid-template-columns:88px 1fr!important;
+    padding-top:42px!important;
+  }
+  html body .rooted-section .recognition-grid article:nth-child(1) img,
+  html body .rooted-section .recognition-grid article:nth-child(2) img{
+    width:82px!important;
+    height:82px!important;
+  }
+  html body .rooted-section .recognition-grid article::after{
+    left:16px;
+    right:auto;
+    top:13px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body .rooted-section .recognition-grid article,
+  html body .rooted-section .recognition-grid article::before{
+    animation:none!important;
+    transition:none!important;
+  }
+}
