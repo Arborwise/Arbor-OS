@@ -1,0 +1,3 @@
+epoch=1785543228
+utc=2026-08-01T00:13:48Z
+reason=controlled Arborwise board retry after Vercel build-rate limit
