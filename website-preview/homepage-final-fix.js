@@ -1,11 +1,12 @@
 (() => {
   if (document.querySelector('script[data-arborwise-homepage-v5]')) return;
 
-  const load = (src, dataName) => new Promise(resolve => {
+  const load = (src, dataName) => new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
     script.dataset[dataName] = 'true';
     script.addEventListener('load', resolve, { once: true });
+    script.addEventListener('error', () => reject(new Error(`Could not load ${src}`)), { once: true });
     document.head.appendChild(script);
   });
 
@@ -16,5 +17,6 @@
     .then(() => load('homepage-final-v11.js?v=20260730-1728', 'arborwiseFinalV11'))
     .then(() => load('homepage-customer-review-v12.js?v=20260730-1748', 'arborwiseCustomerReviewV12'))
     .then(() => load('homepage-no-circle-v13.js?v=20260730-2105', 'arborwiseNoCircleV13'))
+    .then(() => load('homepage-proof-wall-v15.js?v=20260801-0131', 'arborwiseProofWallV15'))
     .catch(console.error);
 })();
