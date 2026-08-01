@@ -2,12 +2,12 @@
 (() => {
   try{
     localStorage.setItem('arborwise-owner-device','1');
-    if(localStorage.getItem('arborwise-cache-reset-v86')!=='1'){
+    if(localStorage.getItem('arborwise-cache-reset-v87')!=='1'){
       localStorage.removeItem('arborwise-board-ui-v57');
       localStorage.removeItem('arborwise-board-last-good-v57');
       localStorage.removeItem('arborwise-board-last-good-v56');
       localStorage.removeItem('arborwise-live-board-v24');
-      localStorage.setItem('arborwise-cache-reset-v86','1');
+      localStorage.setItem('arborwise-cache-reset-v87','1');
     }
   }catch{}
 
@@ -40,9 +40,18 @@
     document.head.appendChild(script);
   };
 
+  const loadPaidStatus=()=>{
+    if(document.querySelector('script[data-arborwise-paid-status]'))return;
+    const script=document.createElement('script');
+    script.src='/paid-status-87.js?v=87';
+    script.defer=true;
+    script.dataset.arborwisePaidStatus='87';
+    document.head.appendChild(script);
+  };
+
   const installEmptyViewRepair=()=>{
-    if(document.documentElement.dataset.emptyViewRepair==='86')return;
-    document.documentElement.dataset.emptyViewRepair='86';
+    if(document.documentElement.dataset.emptyViewRepair==='87')return;
+    document.documentElement.dataset.emptyViewRepair='87';
 
     const repair=()=>{
       const records=window.ARBORWISE_CURRENT_OPERATIONS?.records;
@@ -111,6 +120,7 @@
     loadContactIcons();
     loadWorkflowStatusBoard();
     loadCardColors();
+    loadPaidStatus();
     reveal();
     installLiveRefresh();
     installEmptyViewRepair();
@@ -121,6 +131,7 @@
     loadContactIcons();
     loadWorkflowStatusBoard();
     loadCardColors();
+    loadPaidStatus();
     document.body.classList.remove('booting');
     installLiveRefresh();
     installEmptyViewRepair();
