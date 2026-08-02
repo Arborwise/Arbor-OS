@@ -3,8 +3,8 @@
 
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@f63013983ef3a82fe01acb614a710122e5c57a81/website-preview/professional.js';
   const ENHANCEMENTS=[
-    'chamber-memberships-v16.js?v=20260802-1540',
-    'annie-scroll-flight-v16.js?v=20260802-1540'
+    'chamber-memberships-v16.js?v=20260802-1544',
+    'annie-scroll-flight-v16.js?v=20260802-1544'
   ];
 
   function installReadOnlyAnnie(){
@@ -27,6 +27,13 @@
     });
   }
 
+  function polishPublicCopy(){
+    const communityLine=document.querySelector('.aw-proof-card--farmersville .aw-proof-card__copy span');
+    if(communityLine){
+      communityLine.textContent='Serving the community where Greg lives and Arborwise is rooted.';
+    }
+  }
+
   async function finishWebsite(){
     installReadOnlyAnnie();
     for(const src of ENHANCEMENTS){
@@ -36,6 +43,7 @@
         console.error(error);
       }
     }
+    polishPublicCopy();
   }
 
   const base=document.createElement('script');
