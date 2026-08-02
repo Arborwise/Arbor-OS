@@ -3,6 +3,7 @@ import {requireCronOrSession} from '../lib/auth.js';
 import {runSync} from '../lib/sync.js';
 import {applyPaidInvoiceStatuses} from '../lib/paid-invoices.js';
 import {processCommunicationTransitions} from '../lib/communications.js';
+import {applyAllCustomerReplyStops} from '../lib/reply-stops.js';
 
 export const maxDuration=60;
 
@@ -26,9 +27,11 @@ export default async function handler(req,res){
     }
 
     try{
+      const replyStops=await applyAllCustomerReplyStops();
       summary.communications={
         status:'success',
-        ...(await processCommunicationTransitions(syncTrigger))
+        ...(await processCommunicationTransitions(syncTrigger)),
+        sharedEmailReplyStops:replyStops.cancelled
       };
     }catch(error){
       summary.communications={status:'error',error:error.message};
