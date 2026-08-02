@@ -3,8 +3,8 @@
 
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@f63013983ef3a82fe01acb614a710122e5c57a81/website-preview/professional.js';
   const ENHANCEMENTS=[
-    'chamber-memberships-v16.js?v=20260802-1544',
-    'annie-scroll-flight-v16.js?v=20260802-1544'
+    'chamber-memberships-v16.js?v=20260802-1618',
+    'annie-scroll-flight-v16.js?v=20260802-1618'
   ];
 
   function installReadOnlyAnnie(){
