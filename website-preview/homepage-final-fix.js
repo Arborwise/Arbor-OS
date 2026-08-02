@@ -16,5 +16,6 @@
     .then(() => load('homepage-final-v11.js?v=20260730-1728', 'arborwiseFinalV11'))
     .then(() => load('homepage-customer-review-v12.js?v=20260730-1748', 'arborwiseCustomerReviewV12'))
     .then(() => load('homepage-no-circle-v13.js?v=20260730-2105', 'arborwiseNoCircleV13'))
+    .then(() => load('chamber-memberships-v14.js?v=20260802-1418', 'arborwiseChamberMembershipsV14'))
     .catch(console.error);
 })();
