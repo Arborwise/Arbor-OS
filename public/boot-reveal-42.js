@@ -49,6 +49,21 @@
     document.head.appendChild(script);
   };
 
+  const loadAnnieFlight=()=>{
+    if(!document.querySelector('link[data-arborwise-annie-flight]')){
+      const style=document.createElement('link');
+      style.rel='stylesheet';
+      style.href='/annie-flight-87.css?v=87';
+      style.dataset.arborwiseAnnieFlight='87';
+      document.head.appendChild(style);
+    }
+    if(document.querySelector('script[data-arborwise-annie-flight]'))return;
+    const script=document.createElement('script');
+    script.src='/annie-flight-87.js?v=87';
+    script.dataset.arborwiseAnnieFlight='87';
+    document.head.appendChild(script);
+  };
+
   const installEmptyViewRepair=()=>{
     if(document.documentElement.dataset.emptyViewRepair==='88')return;
     document.documentElement.dataset.emptyViewRepair='88';
@@ -121,6 +136,7 @@
     loadWorkflowStatusBoard();
     loadCardColors();
     loadPaidStatus();
+    loadAnnieFlight();
     reveal();
     installLiveRefresh();
     installEmptyViewRepair();
@@ -132,6 +148,7 @@
     loadWorkflowStatusBoard();
     loadCardColors();
     loadPaidStatus();
+    loadAnnieFlight();
     document.body.classList.remove('booting');
     installLiveRefresh();
     installEmptyViewRepair();
