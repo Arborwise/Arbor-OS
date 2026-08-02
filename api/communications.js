@@ -1,6 +1,7 @@
 import {body,json,fail,method} from '../lib/http.js';
 import {requireCronOrSession,requireSession} from '../lib/auth.js';
 import {listCommunicationQueue,processCommunicationTransitions} from '../lib/communications.js';
+import {applyAllCustomerReplyStops} from '../lib/reply-stops.js';
 
 export const maxDuration=60;
 
@@ -16,7 +17,11 @@ export default async function handler(req,res){
     }
     await requireCronOrSession(req);
     const payload=await body(req);
-    const summary=await processCommunicationTransitions(String(payload?.trigger||'manual-communications'));
+    const replyStops=await applyAllCustomerReplyStops();
+    const summary={
+      ...(await processCommunicationTransitions(String(payload?.trigger||'manual-communications'))),
+      sharedEmailReplyStops:replyStops.cancelled
+    };
     res.setHeader('Cache-Control','private, no-store, max-age=0, must-revalidate');
     json(res,200,{ok:true,summary});
   }catch(error){fail(res,error);}
