@@ -1,0 +1,39 @@
+name: Arborwise Automatic Sync
+
+"on":
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: arborwise-automatic-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Sync Arborwise systems and communication queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl --fail --silent --show-error \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=arborwise-os")"
+          OIDC_TOKEN="$(printf '%s' "${OIDC_JSON}" | jq -r '.value')"
+          test -n "${OIDC_TOKEN}"
+          test "${OIDC_TOKEN}" != "null"
+          curl --fail --silent --show-error \
+            --retry 2 \
+            --retry-all-errors \
+            --connect-timeout 15 \
+            --max-time 90 \
+            -H "Authorization: Bearer ${OIDC_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -X POST \
+            "https://arborwise-os.vercel.app/api/sync?scheduled=quarter-hour"
