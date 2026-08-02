@@ -3,9 +3,19 @@
 
   const stops = [
     {
+      selector: '.hero',
+      top: 28,
+      mobileTop: 26,
+      tips: [
+        'Welcome to Arborwise. Honest answers come before recommendations.',
+        'A healthy tree starts with understanding the whole site.',
+        'Sometimes a tree needs work. Sometimes it needs time.'
+      ]
+    },
+    {
       selector: '.annie-callout',
-      top: 24,
-      mobileTop: 22,
+      top: 22,
+      mobileTop: 21,
       tips: [
         'You do not need to know the diagnosis before you call.',
         'Show us what changed, where it changed, and how quickly.',
@@ -55,21 +65,23 @@
   ];
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let emerged = false;
+  let launched = false;
+  let peeked = false;
   let landedIndex = 0;
   let side = 'right';
   let tipIndex = 0;
   let bubbleTimer = 0;
   let scrollTimer = 0;
   let flight = null;
+  let initialScrollY = window.scrollY;
 
   function installStyles() {
-    document.getElementById('arborwise-annie-scroll-flight-v20')?.remove();
+    document.getElementById('arborwise-annie-scroll-flight-v21')?.remove();
     const style = document.createElement('style');
-    style.id = 'arborwise-annie-scroll-flight-v20';
+    style.id = 'arborwise-annie-scroll-flight-v21';
     style.textContent = `
       .aw-annie-scroll{
-        --annie-top:24vh;
+        --annie-top:28vh;
         position:fixed;
         z-index:80;
         top:var(--annie-top);
@@ -83,6 +95,7 @@
       .aw-annie-scroll.is-visible{opacity:1;visibility:visible}
       .aw-annie-scroll.is-left{left:18px;right:auto}
       .aw-annie-scroll.is-right{right:18px;left:auto}
+      .aw-annie-scroll.is-at-logo{right:auto}
       .aw-annie-scroll__bubble{
         position:absolute;
         bottom:calc(100% + 12px);
@@ -98,7 +111,7 @@
         line-height:1.4;
         opacity:0;
         transform:translateY(8px) scale(.96);
-        transition:opacity .16s ease,transform .16s ease;
+        transition:opacity .14s ease,transform .14s ease;
       }
       .aw-annie-scroll.is-left .aw-annie-scroll__bubble{left:0}
       .aw-annie-scroll.is-right .aw-annie-scroll__bubble{right:0}
@@ -147,9 +160,9 @@
         outline:3px solid #d8f277!important;
         outline-offset:4px!important;
       }
-      .aw-annie-scroll__perch img{
+      .aw-annie-scroll__owl{
         position:relative;
-        z-index:2;
+        z-index:3;
         display:block;
         width:108px;
         height:108px;
@@ -157,6 +170,7 @@
         transform-origin:50% 78%;
         user-select:none;
         -webkit-user-drag:none;
+        will-change:transform,opacity;
       }
       .aw-annie-scroll__branch{
         position:absolute;
@@ -169,7 +183,10 @@
         background:linear-gradient(180deg,#85522e,#4f2d17);
         transform:rotate(-3deg);
         box-shadow:0 2px 0 rgba(255,255,255,.2) inset;
+        opacity:1;
+        transition:opacity .18s ease;
       }
+      .aw-annie-scroll.is-at-logo .aw-annie-scroll__branch{opacity:0}
       .aw-annie-scroll__branch::before,
       .aw-annie-scroll__branch::after{
         content:'';
@@ -182,28 +199,22 @@
       .aw-annie-scroll__branch::before{left:13px;top:-9px;transform:rotate(-24deg)}
       .aw-annie-scroll__branch::after{right:17px;top:-7px;transform:scaleX(-1) rotate(-18deg)}
       .aw-annie-scroll.is-flying .aw-annie-scroll__bubble{opacity:0;transform:translateY(10px) scale(.94)}
-      .aw-annie-scroll.is-flying .aw-annie-scroll__branch,
-      .aw-annie-scroll.is-emerging .aw-annie-scroll__branch{opacity:0}
-      .aw-annie-scroll.is-flying .aw-annie-scroll__perch img,
-      .aw-annie-scroll.is-emerging .aw-annie-scroll__perch img{
-        animation:aw-annie-wingbeat .15s ease-in-out infinite alternate;
-      }
-      .aw-annie-scroll.is-settling .aw-annie-scroll__perch img{
-        animation:aw-annie-settle .78s ease-out both;
-      }
-      .aw-annie-scroll.is-tapped .aw-annie-scroll__perch img{
-        animation:aw-annie-tap .42s ease-out both;
-      }
-      .aw-annie-source-departing{animation:aw-annie-source-pulse 1.1s ease-in-out both}
-      @keyframes aw-annie-wingbeat{
-        from{transform:translateY(2px) rotate(-5deg) scaleX(.95)}
-        to{transform:translateY(-8px) rotate(5deg) scaleX(1.05)}
+      .aw-annie-scroll.is-settling .aw-annie-scroll__owl{animation:aw-annie-settle .9s ease-out both}
+      .aw-annie-scroll.is-tapped .aw-annie-scroll__owl{animation:aw-annie-tap .42s ease-out both}
+      .aw-annie-scroll.is-peeking .aw-annie-scroll__owl{animation:aw-annie-peek 1.35s ease-in-out both}
+      @keyframes aw-annie-peek{
+        0%{opacity:0;transform:translateY(24px) scale(.72) rotate(0)}
+        30%{opacity:1;transform:translateY(5px) scale(.86) rotate(-4deg)}
+        53%{transform:translateY(0) scale(.9) rotate(4deg)}
+        72%{transform:translateY(0) scale(.9,.84) rotate(0)}
+        100%{opacity:1;transform:translateY(0) scale(.9) rotate(0)}
       }
       @keyframes aw-annie-settle{
-        0%{transform:translateY(-24px) rotate(-4deg)}
-        28%{transform:translateY(-15px) rotate(4deg)}
-        54%{transform:translateY(-8px) rotate(-3deg)}
-        76%{transform:translateY(-3px) rotate(2deg)}
+        0%{transform:translateY(-28px) rotate(-5deg)}
+        24%{transform:translateY(-19px) rotate(5deg)}
+        48%{transform:translateY(-11px) rotate(-4deg)}
+        68%{transform:translateY(-6px) rotate(3deg)}
+        84%{transform:translateY(-2px) rotate(-1deg)}
         100%{transform:translateY(0) rotate(0)}
       }
       @keyframes aw-annie-tap{
@@ -211,16 +222,12 @@
         45%{transform:translateY(-6px) rotate(-3deg)}
         100%{transform:translateY(0) rotate(0)}
       }
-      @keyframes aw-annie-source-pulse{
-        0%,100%{opacity:1;transform:scale(1)}
-        48%{opacity:.28;transform:scale(.93)}
-      }
       @media(max-width:700px){
         .aw-annie-scroll{width:92px;top:var(--annie-top)}
         .aw-annie-scroll.is-left{left:8px}
         .aw-annie-scroll.is-right{right:8px}
         .aw-annie-scroll__perch{width:92px;height:108px}
-        .aw-annie-scroll__perch img{width:84px;height:84px}
+        .aw-annie-scroll__owl{width:84px;height:84px}
         .aw-annie-scroll__branch{left:5px;right:1px;bottom:10px;height:8px}
         .aw-annie-scroll__bubble{
           width:min(224px,calc(100vw - 22px));
@@ -231,8 +238,7 @@
       }
       @media(prefers-reduced-motion:reduce){
         .aw-annie-scroll__bubble{transition:none!important}
-        .aw-annie-scroll__perch img,
-        .aw-annie-source-departing{animation:none!important}
+        .aw-annie-scroll__owl{animation:none!important}
       }
     `;
     document.head.appendChild(style);
@@ -244,8 +250,7 @@
 
   function buildGuide() {
     installStyles();
-    const oldGuide = document.getElementById('awAnnieScrollGuide');
-    oldGuide?.remove();
+    document.getElementById('awAnnieScrollGuide')?.remove();
 
     const guide = document.createElement('aside');
     guide.className = 'aw-annie-scroll is-right';
@@ -254,13 +259,13 @@
     guide.innerHTML = `
       <div class="aw-annie-scroll__bubble" role="status" aria-live="polite"></div>
       <button class="aw-annie-scroll__perch" type="button" aria-label="Toggle Annie's tree-care tip">
-        <img src="assets/annie.webp" alt="Annie, the Arborwise owl mascot">
+        <img class="aw-annie-scroll__owl" src="assets/annie.webp" alt="Annie, the Arborwise owl mascot">
         <span class="aw-annie-scroll__branch" aria-hidden="true"></span>
       </button>`;
 
     document.body.appendChild(guide);
     guide.querySelector('.aw-annie-scroll__perch')?.addEventListener('click', () => {
-      if (!emerged || flight) return;
+      if (!launched || flight) return;
 
       if (guide.classList.contains('has-tip')) {
         hideTip();
@@ -275,11 +280,16 @@
       window.setTimeout(() => guide.classList.remove('is-tapped'), 450);
       showTip(tips[tipIndex]);
     });
+
     return guide;
   }
 
   function getGuide() {
     return document.getElementById('awAnnieScrollGuide') || buildGuide();
+  }
+
+  function getOwl() {
+    return getGuide().querySelector('.aw-annie-scroll__owl');
   }
 
   function hideTip() {
@@ -295,6 +305,111 @@
     guide.classList.add('has-tip');
     window.clearTimeout(bubbleTimer);
     bubbleTimer = window.setTimeout(hideTip, 2000);
+  }
+
+  function getLogoSource() {
+    return document.querySelector(
+      '.aw-brand [data-brand-logo], .site-header [data-brand-logo], .brand [data-brand-logo], .aw-brand, .site-header .brand'
+    );
+  }
+
+  function placeAtLogo() {
+    if (launched) return;
+    const guide = getGuide();
+    const source = getLogoSource();
+    const rect = source?.getBoundingClientRect();
+    const width = guide.offsetWidth || (window.innerWidth <= 700 ? 92 : 118);
+    const height = guide.offsetHeight || (window.innerWidth <= 700 ? 108 : 138);
+
+    const left = rect
+      ? Math.max(8, Math.min(window.innerWidth - width - 8, rect.left + rect.width * .5 - width * .5))
+      : Math.max(8, window.innerWidth * .5 - width * .5);
+    const top = rect
+      ? Math.max(6, Math.min(window.innerHeight - height - 8, rect.top + rect.height * .34 - height * .42))
+      : 18;
+
+    guide.classList.remove('is-left', 'is-right');
+    guide.classList.add('is-at-logo', 'is-visible');
+    guide.style.left = `${left}px`;
+    guide.style.right = 'auto';
+    guide.style.top = `${top}px`;
+  }
+
+  function peekFromLogo() {
+    if (launched || peeked) return;
+    placeAtLogo();
+    const guide = getGuide();
+    guide.classList.remove('is-peeking');
+    void guide.offsetWidth;
+    guide.classList.add('is-peeking');
+    window.setTimeout(() => guide.classList.remove('is-peeking'), 1400);
+    peeked = true;
+  }
+
+  function prepareDestination(index, nextSide) {
+    const guide = getGuide();
+    const stop = stops[index];
+    guide.classList.remove('is-at-logo', 'is-left', 'is-right', 'is-settling');
+    guide.classList.add(`is-${nextSide}`, 'is-visible');
+    guide.style.left = '';
+    guide.style.right = '';
+    guide.style.top = '';
+    guide.style.setProperty('--annie-top', `${getStopTop(stop)}vh`);
+  }
+
+  async function animateOwlToDestination(startRect, duration) {
+    const guide = getGuide();
+    const owl = getOwl();
+    if (!owl) return;
+
+    const targetRect = owl.getBoundingClientRect();
+    const dx = startRect.left + startRect.width / 2 - (targetRect.left + targetRect.width / 2);
+    const dy = startRect.top + startRect.height / 2 - (targetRect.top + targetRect.height / 2);
+    const startScale = Math.max(.72, Math.min(1.05, startRect.width / Math.max(targetRect.width, 1)));
+
+    owl.getAnimations().forEach(animation => animation.cancel());
+    guide.classList.add('is-flying');
+
+    if (!reducedMotion.matches && owl.animate) {
+      flight = owl.animate([
+        {transform:`translate(${dx}px,${dy}px) scale(${startScale}) rotate(0deg)`,opacity:1,offset:0},
+        {transform:`translate(${dx * .8}px,${dy * .76 - 38}px) scale(1) rotate(-8deg)`,opacity:1,offset:.2},
+        {transform:`translate(${dx * .54}px,${dy * .48 - 76}px) rotate(8deg)`,opacity:1,offset:.46},
+        {transform:`translate(${dx * .28}px,${dy * .22 - 52}px) rotate(-6deg)`,opacity:1,offset:.68},
+        {transform:`translate(${dx * .1}px,-31px) rotate(5deg)`,opacity:1,offset:.82},
+        {transform:'translate(0,-17px) rotate(-4deg)',opacity:1,offset:.91},
+        {transform:'translate(0,-7px) rotate(2deg)',opacity:1,offset:.96},
+        {transform:'translate(0,0) rotate(0deg)',opacity:1,offset:1}
+      ], {
+        duration,
+        easing: 'cubic-bezier(.22,.72,.18,1)',
+        fill: 'both'
+      });
+      try { await flight.finished; } catch (_) {}
+    }
+
+    guide.classList.remove('is-flying');
+    guide.classList.add('is-settling');
+    window.setTimeout(() => guide.classList.remove('is-settling'), 920);
+    flight = null;
+  }
+
+  async function launchFromLogo() {
+    if (launched || flight) return;
+    const owl = getOwl();
+    if (!owl) return;
+
+    if (!peeked) peekFromLogo();
+    const startRect = owl.getBoundingClientRect();
+    const destinationSide = 'right';
+    prepareDestination(0, destinationSide);
+    side = destinationSide;
+
+    await animateOwlToDestination(startRect, 1700);
+    launched = true;
+    landedIndex = 0;
+    tipIndex = 0;
+    showTip(stops[0].tips[0]);
   }
 
   function getActiveStop() {
@@ -320,140 +435,54 @@
     return bestIndex;
   }
 
-  async function emergeFromOriginal() {
-    if (emerged || flight) return;
-
-    const source = document.querySelector('.annie-callout [data-annie], .annie-callout img');
-    const guide = getGuide();
-    const stop = stops[0];
-    guide.style.setProperty('--annie-top', `${getStopTop(stop)}vh`);
-    guide.classList.add('is-visible', 'is-emerging');
-
-    const endRect = guide.getBoundingClientRect();
-    const sourceRect = source?.getBoundingClientRect();
-    const dx = sourceRect ? sourceRect.left + sourceRect.width / 2 - (endRect.left + endRect.width / 2) : 0;
-    const dy = sourceRect ? sourceRect.top + sourceRect.height / 2 - (endRect.top + endRect.height / 2) : 120;
-    const scale = sourceRect ? Math.max(.75, Math.min(1.35, sourceRect.width / endRect.width)) : .85;
-
-    source?.classList.add('aw-annie-source-departing');
-
-    if (!reducedMotion.matches && guide.animate) {
-      flight = guide.animate([
-        {transform:`translate(${dx}px,${dy}px) scale(${scale}) rotate(0deg)`,opacity:.15,offset:0},
-        {transform:`translate(${dx * .78}px,${dy * .72 - 30}px) scale(1) rotate(-7deg)`,opacity:1,offset:.25},
-        {transform:`translate(${dx * .44}px,${dy * .38 - 70}px) rotate(7deg)`,opacity:1,offset:.55},
-        {transform:`translate(${dx * .12}px,-36px) rotate(-4deg)`,opacity:1,offset:.8},
-        {transform:'translate(0,-16px) rotate(3deg)',opacity:1,offset:.93},
-        {transform:'translate(0,0) rotate(0deg)',opacity:1,offset:1}
-      ], {
-        duration: 1550,
-        easing: 'cubic-bezier(.22,.74,.18,1)',
-        fill: 'both'
-      });
-      try { await flight.finished; } catch (_) {}
-    }
-
-    source?.classList.remove('aw-annie-source-departing');
-    guide.classList.remove('is-emerging');
-    guide.classList.add('is-settling');
-    window.setTimeout(() => guide.classList.remove('is-settling'), 800);
-    flight = null;
-    emerged = true;
-    landedIndex = 0;
-    tipIndex = 0;
-    showTip(stop.tips[0]);
-  }
-
   async function flyAndLand(index) {
-    if (!emerged || index === landedIndex || index < 0 || flight) return;
+    if (!launched || index === landedIndex || index < 0 || flight) return;
 
-    const guide = getGuide();
+    const owl = getOwl();
+    if (!owl) return;
+    const startRect = owl.getBoundingClientRect();
     const nextSide = side === 'right' ? 'left' : 'right';
-    const stop = stops[index];
     hideTip();
-
-    const startRect = guide.getBoundingClientRect();
-    guide.classList.remove(`is-${side}`, 'is-settling');
-    guide.classList.add(`is-${nextSide}`, 'is-flying');
-    guide.style.setProperty('--annie-top', `${getStopTop(stop)}vh`);
-    const endRect = guide.getBoundingClientRect();
-    const dx = startRect.left - endRect.left;
-    const dy = startRect.top - endRect.top;
+    prepareDestination(index, nextSide);
     side = nextSide;
     tipIndex = 0;
 
-    if (!reducedMotion.matches && guide.animate) {
-      flight = guide.animate([
-        {transform:`translate(${dx}px,${dy}px) rotate(0deg)`,offset:0},
-        {transform:`translate(${dx * .78}px,${dy * .76 - 38}px) rotate(-8deg)`,offset:.22},
-        {transform:`translate(${dx * .46}px,${dy * .42 - 72}px) rotate(7deg)`,offset:.5},
-        {transform:`translate(${dx * .18}px,${dy * .16 - 48}px) rotate(-5deg)`,offset:.72},
-        {transform:`translate(${dx * .06}px,-28px) rotate(4deg)`,offset:.84},
-        {transform:'translate(0,-16px) rotate(-3deg)',offset:.91},
-        {transform:'translate(0,-7px) rotate(2deg)',offset:.96},
-        {transform:'translate(0,0) rotate(0deg)',offset:1}
-      ], {
-        duration: 1450,
-        easing: 'cubic-bezier(.23,.72,.18,1)',
-        fill: 'both'
-      });
-      try { await flight.finished; } catch (_) {}
-    }
-
-    guide.classList.remove('is-flying');
-    guide.classList.add('is-settling');
-    window.setTimeout(() => guide.classList.remove('is-settling'), 800);
-    flight = null;
+    await animateOwlToDestination(startRect, 1500);
     landedIndex = index;
-    showTip(stop.tips[0]);
+    showTip(stops[index].tips[0]);
   }
 
   function settleAfterScroll() {
-    if (!emerged) return;
+    if (!launched) return;
     const active = getActiveStop();
     if (active !== landedIndex) flyAndLand(active);
   }
 
   function onScroll() {
+    if (!launched && Math.abs(window.scrollY - initialScrollY) > 6) {
+      launchFromLogo();
+      return;
+    }
+
     window.clearTimeout(scrollTimer);
     scrollTimer = window.setTimeout(settleAfterScroll, 180);
   }
 
-  function watchOriginalAnnie() {
-    const source = document.querySelector('.annie-callout [data-annie], .annie-callout img');
-    if (!source) {
-      window.setTimeout(emergeFromOriginal, 700);
-      return;
+  function start() {
+    buildGuide();
+    placeAtLogo();
+    window.setTimeout(peekFromLogo, 520);
+
+    if (window.scrollY > 24) {
+      window.setTimeout(launchFromLogo, 700);
     }
 
-    const tryStart = () => {
-      const rect = source.getBoundingClientRect();
-      if (rect.bottom > 0 && rect.top < window.innerHeight * .92) {
-        emergeFromOriginal();
-        return true;
-      }
-      return false;
-    };
-
-    if (tryStart()) return;
-
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        observer.disconnect();
-        emergeFromOriginal();
-      }
-    }, { threshold: .18, rootMargin: '10% 0px 10% 0px' });
-    observer.observe(source);
-  }
-
-  function start() {
-    if (!document.querySelector('.annie-callout')) return;
-    buildGuide();
-    watchOriginalAnnie();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', () => {
       window.clearTimeout(scrollTimer);
-      if (emerged) {
+      if (!launched) {
+        placeAtLogo();
+      } else {
         getGuide().style.setProperty('--annie-top', `${getStopTop(stops[landedIndex])}vh`);
       }
       scrollTimer = window.setTimeout(settleAfterScroll, 140);
