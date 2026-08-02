@@ -65,9 +65,9 @@
   let flight = null;
 
   function installStyles() {
-    document.getElementById('arborwise-annie-scroll-flight-v22')?.remove();
+    document.getElementById('arborwise-annie-scroll-flight-v23')?.remove();
     const style = document.createElement('style');
-    style.id = 'arborwise-annie-scroll-flight-v22';
+    style.id = 'arborwise-annie-scroll-flight-v23';
     style.textContent = `
       .aw-brand{position:relative!important;overflow:visible!important}
       .aw-annie-logo-home{
@@ -84,7 +84,7 @@
         background:#fffaf0;
         box-shadow:0 8px 22px rgba(0,0,0,.3);
         pointer-events:none;
-        transition:opacity .18s ease,transform .18s ease;
+        transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
       }
       .aw-annie-logo-home::after{
         content:'ANNIE';
@@ -157,10 +157,8 @@
       }
       .aw-annie-scroll.is-left .aw-annie-scroll__bubble::after{left:42px}
       .aw-annie-scroll.is-right .aw-annie-scroll__bubble::after{right:42px}
-      .aw-annie-scroll.has-tip .aw-annie-scroll__bubble{
-        opacity:1;
-        transform:translateY(0) scale(1);
-      }
+      .aw-annie-scroll.has-tip .aw-annie-scroll__bubble{opacity:1;transform:translateY(0) scale(1)}
+
       .aw-annie-scroll__perch{
         position:relative;
         display:flex;
@@ -191,6 +189,8 @@
         width:108px;
         height:108px;
         object-fit:contain;
+        object-position:center top;
+        clip-path:inset(0 0 17% 0);
         transform-origin:50% 78%;
         user-select:none;
         -webkit-user-drag:none;
@@ -220,7 +220,7 @@
       .aw-annie-scroll__branch::before{left:13px;top:-9px;transform:rotate(-24deg)}
       .aw-annie-scroll__branch::after{right:17px;top:-7px;transform:scaleX(-1) rotate(-18deg)}
       .aw-annie-scroll.is-flying .aw-annie-scroll__owl{animation:aw-flight-flutter .15s ease-in-out infinite alternate}
-      .aw-annie-scroll.is-settling .aw-annie-scroll__owl{animation:aw-gentle-land .9s ease-out both}
+      .aw-annie-scroll.is-settling .aw-annie-scroll__owl{animation:aw-gentle-land .95s ease-out both}
       .aw-annie-scroll.is-tapped .aw-annie-scroll__owl{animation:aw-annie-tap .42s ease-out both}
 
       @keyframes aw-home-peek{
@@ -235,11 +235,11 @@
         to{transform:translateY(-8px) rotate(5deg) scaleX(1.05)}
       }
       @keyframes aw-gentle-land{
-        0%{transform:translateY(-30px) rotate(-6deg)}
-        24%{transform:translateY(-21px) rotate(5deg)}
-        48%{transform:translateY(-13px) rotate(-4deg)}
-        69%{transform:translateY(-7px) rotate(3deg)}
-        85%{transform:translateY(-2px) rotate(-1deg)}
+        0%{transform:translateY(-34px) rotate(-6deg)}
+        22%{transform:translateY(-25px) rotate(5deg)}
+        45%{transform:translateY(-16px) rotate(-4deg)}
+        66%{transform:translateY(-9px) rotate(3deg)}
+        84%{transform:translateY(-3px) rotate(-1deg)}
         100%{transform:translateY(0) rotate(0)}
       }
       @keyframes aw-annie-tap{
@@ -367,9 +367,9 @@
         {transform:`translate(${dx*.82}px,${dy*.78-36}px) scale(1) rotate(-8deg)`,opacity:1,offset:.2},
         {transform:`translate(${dx*.56}px,${dy*.49-72}px) rotate(8deg)`,opacity:1,offset:.46},
         {transform:`translate(${dx*.3}px,${dy*.23-48}px) rotate(-6deg)`,opacity:1,offset:.69},
-        {transform:`translate(${dx*.11}px,-30px) rotate(5deg)`,opacity:1,offset:.83},
-        {transform:'translate(0,-17px) rotate(-4deg)',opacity:1,offset:.92},
-        {transform:'translate(0,-7px) rotate(2deg)',opacity:1,offset:.97},
+        {transform:`translate(${dx*.11}px,-34px) rotate(5deg)`,opacity:1,offset:.83},
+        {transform:'translate(0,-22px) rotate(-4deg)',opacity:1,offset:.91},
+        {transform:'translate(0,-11px) rotate(3deg)',opacity:1,offset:.96},
         {transform:'translate(0,0) rotate(0deg)',opacity:1,offset:1}
       ],{duration,easing:'cubic-bezier(.22,.72,.18,1)',fill:'both'});
       try { await flight.finished; } catch (_) {}
@@ -377,7 +377,7 @@
 
     guide.classList.remove('is-flying');
     guide.classList.add('is-settling');
-    window.setTimeout(() => guide.classList.remove('is-settling'), 920);
+    window.setTimeout(() => guide.classList.remove('is-settling'), 970);
     flight = null;
   }
 
@@ -398,6 +398,7 @@
     launched = true;
     launching = false;
     showTip('Hi, my name is Annie.');
+    settleAfterScroll();
   }
 
   function getActiveStop() {
@@ -447,17 +448,21 @@
     const home = buildLaunchpad();
     buildGuide();
     window.setTimeout(() => home?.classList.add('is-peeking'), 300);
-    window.setTimeout(launchFromLogo, 1450);
 
     const launchSoon = () => {
       if (!launched && !launching) launchFromLogo();
     };
+
     window.addEventListener('scroll', () => {
       launchSoon();
       window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(settleAfterScroll,180);
     },{passive:true});
+    window.addEventListener('wheel', launchSoon, {passive:true,once:true});
     window.addEventListener('touchstart', launchSoon, {passive:true,once:true});
+    window.addEventListener('keydown', event => {
+      if (['ArrowDown','PageDown',' ','End'].includes(event.key)) launchSoon();
+    },{once:true});
     window.addEventListener('resize', () => {
       if (launched) getGuide().style.setProperty('--annie-top', `${getStopTop(stops[landedIndex])}vh`);
       window.clearTimeout(scrollTimer);
