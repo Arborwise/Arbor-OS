@@ -35,6 +35,28 @@
     'annie-system.js',
     'concern-checker-v47.js'
   ];
+  const CONCERN_PHOTOS={
+    leaves:{
+      src:'assets/concern-leaves-real.webp',
+      alt:'Yellowing leaves showing visible canopy stress',
+      position:'center 55%'
+    },
+    canopy:{
+      src:'assets/concern-canopy-real.webp',
+      alt:'A tree with extensive dead branches and canopy decline',
+      position:'center 38%'
+    },
+    trunk:{
+      src:'assets/concern-trunk-real.webp',
+      alt:'A codominant trunk with a deep split between stems',
+      position:'center center'
+    },
+    lean:{
+      src:'assets/concern-lean-real.webp',
+      alt:'A visibly leaning tree in an open lawn',
+      position:'center 58%'
+    }
+  };
 
   function loadEnhancement(src){
     return new Promise((resolve,reject)=>{
@@ -47,6 +69,19 @@
     });
   }
 
+  function applyConcernPhotos(){
+    document.querySelectorAll('.concern-card[data-concern]').forEach(card=>{
+      const photo=CONCERN_PHOTOS[card.dataset.concern];
+      const image=card.querySelector('img');
+      if(!photo||!image)return;
+      image.src=photo.src;
+      image.alt=photo.alt;
+      image.style.objectPosition=photo.position;
+      image.loading='lazy';
+      image.decoding='async';
+    });
+  }
+
   async function finishWebsite(){
     for(const src of ENHANCEMENTS){
       try{
@@ -55,6 +90,7 @@
         console.error(error);
       }
     }
+    applyConcernPhotos();
     window.clearTimeout(fallbackReveal);
     requestAnimationFrame(()=>requestAnimationFrame(revealWebsite));
   }
