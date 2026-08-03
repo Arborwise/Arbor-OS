@@ -31,7 +31,8 @@
     'annie-guide-v39.js?v=20260803-0015',
     'annie-way-v40.js?v=20260803-0028',
     'annie-bark-bubble-v41.js?v=20260803-0034',
-    'annie-faq-v42.js?v=20260803-0044'
+    'annie-faq-v42.js?v=20260803-0044',
+    'annie-idle-v43.js?v=20260803-0051'
   ];
 
   function loadEnhancement(src){
