@@ -15,7 +15,7 @@
   const TARGETS = [
     ['.hero', OPENING],
     ['.trust-band', 'Certified guidance. Local accountability.'],
-    ['#concerns', 'Start with what changed—not a guess.'],
+    ['#concerns', 'Start with what changed—and when?'],
     ['#services', 'Every service should solve a real problem.'],
     ['#planting, .growth-section', 'Keep the root flare visible.'],
     ['#way', 'Good advice explains what can wait.'],
