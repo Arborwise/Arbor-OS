@@ -26,6 +26,25 @@ function headerIndex(headers,names){
   return headers.findIndex(value=>wanted.has(normalized(value)));
 }
 function cell(row,index){return index>=0?clean(row[index]):'';}
+function safeService(value){
+  return clean(value)
+    .replace(/(?:,?\s*)\b(?:invoice|estimate)\s*#?\s*\d+\b/gi,'')
+    .replace(/\s+,/g,',')
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
+function safeCrewNotes(value){
+  const text=clean(value);
+  if(!text)return '';
+  return text
+    .split(/\n+|(?<=[.!?])\s+/)
+    .map(part=>part.trim())
+    .filter(Boolean)
+    .filter(part=>!/(?:\$|\b(?:invoice|estimate amount|total|balance|paid|payment|revenue|labor cost|other cost|gross profit|gratuity|tax)\b)/i.test(part))
+    .join(' ')
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
 function isoDate(value){
   const text=clean(value);
   if(!text)return '';
@@ -52,7 +71,7 @@ async function readRows(){
   const sheets=google.sheets({version:'v4',auth});
   const response=await sheets.spreadsheets.values.get({
     spreadsheetId:SHEET_ID,
-    range:`'${TAB}'!A:U`,
+    range:`'${TAB}'!A:V`,
     valueRenderOption:'FORMATTED_VALUE',
     dateTimeRenderOption:'FORMATTED_STRING'
   });
@@ -71,7 +90,7 @@ function indexes(headers){
     time:headerIndex(headers,['Arrival Window','Appointment Time','Time','Time Window']),
     crew:headerIndex(headers,['Crew Lead','Assigned To','Assigned','Crew']),
     status:headerIndex(headers,['Status','Job Status']),
-    notes:headerIndex(headers,['Notes','Internal Notes','Job Notes','Customer Description / Notes']),
+    notes:headerIndex(headers,['Crew Notes']),
     before:headerIndex(headers,['Before Photos','Before Photo']),
     after:headerIndex(headers,['After Photos','After Photo','Photos'])
   };
@@ -87,12 +106,12 @@ function crewRecords(values){
     address:[cell(row,idx.address),cell(row,idx.city)].filter(Boolean).join(', '),
     phone:cell(row,idx.phone),
     equipment:cell(row,idx.equipment),
-    service:cell(row,idx.service),
+    service:safeService(cell(row,idx.service)),
     workDate:isoDate(cell(row,idx.date)),
     workTime:cell(row,idx.time),
     crew:cell(row,idx.crew)||'Unassigned',
     status:statusValue(cell(row,idx.status)),
-    notes:cell(row,idx.notes),
+    notes:safeCrewNotes(cell(row,idx.notes)),
     beforePhotos:cell(row,idx.before),
     afterPhotos:cell(row,idx.after)
   })).filter(record=>record.id&&record.status!=='Cancelled');
@@ -108,7 +127,7 @@ async function updateNotes(req){
   const {sheets,values}=await readRows();
   const [headers=[], ...rows]=values;
   const idx=indexes(headers);
-  if(idx.id<0||idx.notes<0)throw new Error('Jobs sheet is missing Job ID or Notes');
+  if(idx.id<0||idx.notes<0)throw new Error('Jobs sheet is missing Job ID or Crew Notes');
   const offset=rows.findIndex(row=>normalized(cell(row,idx.id))===normalized(id));
   if(offset<0){const error=new Error(`Job ${id} was not found`);error.status=404;throw error;}
   const rowNumber=offset+2;
