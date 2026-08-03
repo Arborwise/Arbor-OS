@@ -8,7 +8,7 @@
 
   const stops = [
     {
-      selector: '.annie-callout', insert: 'append', side: 'right', context: '.annie-callout',
+      selector: '.annie-badge', insert: 'after', side: 'right', context: '.annie-callout',
       lines: [
         'Hi, I’m Arborwise Annie. We’re glad you’re here.',
         'You do not need the diagnosis before you call. Show us what changed.',
@@ -151,6 +151,11 @@
       .aw-bark-rail.left{left:0;border-radius:0 8px 8px 0}
       .aw-bark-rail.right{right:0;border-radius:8px 0 0 8px}
 
+      .annie-callout{position:relative!important}
+      .annie-callout>.annie-badge{grid-column:1!important;grid-row:1!important}
+      .annie-callout>div:not(.annie-badge):not(.aw-annie-perch-lane){grid-column:2!important;grid-row:1!important}
+      .annie-callout>.aw-annie-perch-lane.first{grid-column:1/-1!important;grid-row:2!important}
+
       .aw-annie-perch-lane{
         position:relative!important;display:block!important;grid-column:1/-1!important;width:100%!important;
         height:142px!important;min-height:142px!important;margin:18px 0 26px!important;
@@ -280,6 +285,9 @@
       @keyframes awLeafRustle{0%{filter:none}42%{filter:brightness(1.16)}100%{filter:none}}
       @keyframes awWink{0%,12%,88%,100%{opacity:0;transform:scaleY(.12)}30%,66%{opacity:1;transform:scaleY(1)}}
 
+      @media(max-width:700px){
+        .annie-callout>.annie-badge,.annie-callout>div:not(.annie-badge):not(.aw-annie-perch-lane),.annie-callout>.aw-annie-perch-lane.first{grid-column:1!important;grid-row:auto!important}
+      }
       @media(min-width:701px){
         .aw-bark-rail{width:16px;opacity:.48}
         .aw-annie-perch-lane{height:160px!important;min-height:160px!important;margin:22px 0 30px!important}
@@ -563,7 +571,7 @@
     if (launched || launching || flying || !sourceSeen || !branchVisible(0)) return;
     const source = document.querySelector(SOURCE_SELECTOR);
     const rect = sourceRect() || lastSourceRect;
-    if (!source || !rect) return;
+    if (!source || !rect || rect.bottom < 12 || rect.top > window.innerHeight - 12) return;
 
     launching = true;
     growBranch(0);
