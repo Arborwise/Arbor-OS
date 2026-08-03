@@ -2,6 +2,7 @@
   'use strict';
 
   // Canonical website systems only: no stacked Annie overrides.
+  // Website preview deployment trigger: August 3, 2026.
   const root=document.documentElement;
   const body=document.body;
   root.style.background='#070b09';
