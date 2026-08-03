@@ -6,12 +6,12 @@
   const style = document.createElement('style');
   style.id = 'arborwise-annie-bubble-anchor-v46';
   style.textContent = `
-    /* One compact, smooth speech balloon close to Annie. */
+    /* Compact speech balloon positioned close to Annie. */
     .aw-v44-guide .aw-v44-bubble,
     .aw-v44-guide .aw-v43-bubble,
     .aw-v44-guide .aw-v39-bubble{
-      top:-24px!important;
-      width:122px!important;
+      top:-6px!important;
+      width:124px!important;
       min-height:40px!important;
       margin:0!important;
       padding:7px 10px!important;
@@ -19,7 +19,7 @@
       overflow:visible!important;
       isolation:isolate!important;
       border:2px solid #153c30!important;
-      border-radius:50% / 46%!important;
+      border-radius:50% / 45%!important;
       background:#fffdf5!important;
       color:#123d31!important;
       font:800 10px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif!important;
@@ -28,7 +28,7 @@
     }
 
     .aw-v44-guide .aw-v44-bubble.long{
-      width:144px!important;
+      width:146px!important;
       min-height:48px!important;
       padding:8px 11px!important;
       font-size:10.1px!important;
@@ -38,26 +38,24 @@
     .aw-v44-guide.right .aw-v43-bubble,
     .aw-v44-guide.right .aw-v39-bubble{
       left:auto!important;
-      right:5px!important;
+      right:4px!important;
     }
 
     .aw-v44-guide.left .aw-v44-bubble,
     .aw-v44-guide.left .aw-v43-bubble,
     .aw-v44-guide.left .aw-v39-bubble{
       right:auto!important;
-      left:5px!important;
+      left:4px!important;
     }
 
-    /* Classic tapered tail: no cloud lobe, no oversized white hook. */
+    /* One clean tapered tail whose point lands at Annie's mouth. */
     .aw-v44-guide .aw-v44-bubble::before,
     .aw-v44-guide .aw-v44-bubble::after{
       content:""!important;
       position:absolute!important;
       top:auto!important;
       display:block!important;
-      width:0!important;
-      height:0!important;
-      background:transparent!important;
+      border:0!important;
       border-radius:0!important;
       box-shadow:none!important;
       pointer-events:none!important;
@@ -65,82 +63,86 @@
 
     .aw-v44-guide.right .aw-v44-bubble::before{
       left:auto!important;
-      right:18px!important;
-      bottom:-18px!important;
-      border-left:11px solid transparent!important;
-      border-right:2px solid transparent!important;
-      border-top:20px solid #153c30!important;
-      border-bottom:0!important;
-      transform:rotate(-13deg)!important;
-      transform-origin:top center!important;
+      right:24px!important;
+      bottom:-28px!important;
+      width:24px!important;
+      height:30px!important;
+      background:#153c30!important;
+      clip-path:polygon(0 100%,0 0,100% 0)!important;
+      transform:rotate(-3deg)!important;
       z-index:31!important;
     }
 
     .aw-v44-guide.right .aw-v44-bubble::after{
       left:auto!important;
-      right:20px!important;
-      bottom:-13px!important;
-      border-left:8px solid transparent!important;
-      border-right:1px solid transparent!important;
-      border-top:16px solid #fffdf5!important;
-      border-bottom:0!important;
-      transform:rotate(-13deg)!important;
-      transform-origin:top center!important;
+      right:27px!important;
+      bottom:-24px!important;
+      width:18px!important;
+      height:26px!important;
+      background:#fffdf5!important;
+      clip-path:polygon(0 100%,0 0,100% 0)!important;
+      transform:rotate(-3deg)!important;
       z-index:32!important;
     }
 
     .aw-v44-guide.left .aw-v44-bubble::before{
       right:auto!important;
-      left:18px!important;
-      bottom:-18px!important;
-      border-right:11px solid transparent!important;
-      border-left:2px solid transparent!important;
-      border-top:20px solid #153c30!important;
-      border-bottom:0!important;
-      transform:rotate(13deg)!important;
-      transform-origin:top center!important;
+      left:24px!important;
+      bottom:-28px!important;
+      width:24px!important;
+      height:30px!important;
+      background:#153c30!important;
+      clip-path:polygon(0 0,100% 0,100% 100%)!important;
+      transform:rotate(3deg)!important;
       z-index:31!important;
     }
 
     .aw-v44-guide.left .aw-v44-bubble::after{
       right:auto!important;
-      left:20px!important;
-      bottom:-13px!important;
-      border-right:8px solid transparent!important;
-      border-left:1px solid transparent!important;
-      border-top:16px solid #fffdf5!important;
-      border-bottom:0!important;
-      transform:rotate(13deg)!important;
-      transform-origin:top center!important;
+      left:27px!important;
+      bottom:-24px!important;
+      width:18px!important;
+      height:26px!important;
+      background:#fffdf5!important;
+      clip-path:polygon(0 0,100% 0,100% 100%)!important;
+      transform:rotate(3deg)!important;
       z-index:32!important;
     }
 
-    /* Hero cleanup: one clear hierarchy and one job for each brand color. */
+    /* One white, bold hero label with no panel, border, or duplicate decoration. */
     html body .hero.aw-hero .aw-kicker{
-      color:#efc45f!important;
-      font-size:.78rem!important;
-      letter-spacing:.08em!important;
-      text-shadow:0 2px 8px rgba(0,0,0,.75)!important;
+      display:block!important;
+      width:auto!important;
+      max-width:100%!important;
+      margin:0 0 14px!important;
+      padding:0!important;
+      color:#fff!important;
+      background:transparent!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      outline:0!important;
+      font:950 clamp(.74rem,3.1vw,.98rem)/1.18 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+      font-style:normal!important;
+      letter-spacing:.075em!important;
+      text-align:center!important;
+      text-transform:uppercase!important;
+      text-shadow:0 2px 8px rgba(0,0,0,.82)!important;
+      white-space:nowrap!important;
+    }
+    html body .hero.aw-hero .aw-kicker::before,
+    html body .hero.aw-hero .aw-kicker::after{
+      content:none!important;
+      display:none!important;
     }
 
     html body .hero.aw-hero .aw-copy h1{
       color:#fff8e8!important;
       text-shadow:0 7px 24px rgba(0,0,0,.82)!important;
     }
-
-    html body .hero.aw-hero .aw-copy h1 span{
-      color:#d9f378!important;
-    }
-
-    html body .hero.aw-hero .aw-copy h1 sup{
-      color:#efc45f!important;
-    }
-
-    /* The slogan already appears directly beneath the logo. */
-    html body .hero.aw-hero .aw-slogan{
-      display:none!important;
-    }
-
+    html body .hero.aw-hero .aw-copy h1 span{color:#d9f378!important}
+    html body .hero.aw-hero .aw-copy h1 sup{color:#efc45f!important}
+    html body .hero.aw-hero .aw-slogan{display:none!important}
     html body .hero.aw-hero .aw-lead{
       max-width:560px!important;
       margin-top:17px!important;
@@ -150,7 +152,6 @@
       line-height:1.34!important;
       text-shadow:0 2px 9px rgba(0,0,0,.8)!important;
     }
-
     html body .hero.aw-hero .aw-honesty{
       max-width:560px!important;
       margin-top:14px!important;
@@ -170,69 +171,91 @@
       .aw-v44-guide .aw-v44-bubble,
       .aw-v44-guide .aw-v43-bubble,
       .aw-v44-guide .aw-v39-bubble{
-        top:-21px!important;
-        width:118px!important;
+        top:-4px!important;
+        width:120px!important;
         min-height:38px!important;
         padding:6px 9px!important;
         font-size:9.7px!important;
       }
-
       .aw-v44-guide .aw-v44-bubble.long{
-        width:140px!important;
+        width:142px!important;
         min-height:46px!important;
         padding:7px 10px!important;
         font-size:9.9px!important;
       }
-
-      .aw-v44-guide.right .aw-v44-bubble,
-      .aw-v44-guide.right .aw-v43-bubble,
-      .aw-v44-guide.right .aw-v39-bubble{right:4px!important}
-
-      .aw-v44-guide.left .aw-v44-bubble,
-      .aw-v44-guide.left .aw-v43-bubble,
-      .aw-v44-guide.left .aw-v39-bubble{left:4px!important}
-
       html body .hero.aw-hero .aw-kicker{
-        font-size:.72rem!important;
-        line-height:1.2!important;
+        font-size:clamp(.68rem,2.9vw,.82rem)!important;
+        letter-spacing:.055em!important;
       }
-
       html body .hero.aw-hero .aw-lead{
         margin-top:14px!important;
         font-size:.92rem!important;
       }
-
       html body .hero.aw-hero .aw-honesty{
         padding:11px 12px!important;
         font-size:.83rem!important;
       }
     }
   `;
-
   document.head.appendChild(style);
 
-  /* Keep routine idle tips short enough to remain a compact balloon. */
-  const shortenTip = bubble => {
-    if (!bubble) return;
-    const text = bubble.textContent.trim();
-    if (text === 'Show the whole tree, concern, and trunk base.') {
-      bubble.textContent = 'Whole tree. Concern. Trunk base.';
+  function normalizeHeroKicker(){
+    const hero=document.querySelector('.hero.aw-hero');
+    const copy=hero?.querySelector('.aw-copy');
+    if(!hero||!copy)return false;
+
+    const candidates=[...copy.querySelectorAll('.aw-kicker,.section-label,.section-label-light')];
+    let kicker=candidates[0];
+    if(!kicker){
+      kicker=document.createElement('p');
+      copy.prepend(kicker);
+    }
+    kicker.className='aw-kicker';
+    kicker.textContent='PROFESSIONAL NORTH TEXAS TREE CARE';
+    candidates.filter(node=>node!==kicker).forEach(node=>node.remove());
+    return true;
+  }
+
+  function repairConcernPhoto(){
+    const image=document.querySelector('.concern-card[data-concern="leaves"] img');
+    if(!image)return false;
+    image.alt='North Texas tree foliage viewed for visible leaf stress';
+    if(!image.currentSrc||/concern-leaves\.webp(?:$|\?)/i.test(image.currentSrc)||!image.complete||image.naturalWidth===0){
+      image.src='assets/healthy-tree.webp';
+    }
+    image.onerror=()=>{
+      image.onerror=null;
+      image.src='assets/healthy-tree.webp';
+    };
+    return true;
+  }
+
+  function shortenTip(bubble){
+    if(!bubble)return;
+    const text=bubble.textContent.trim();
+    if(text==='Show the whole tree, concern, and trunk base.'){
+      bubble.textContent='Whole tree. Concern. Trunk base.';
       bubble.classList.remove('long');
     }
-  };
+  }
 
-  const installTipGuard = () => {
-    const bubble = document.querySelector('.aw-v44-bubble');
-    if (!bubble) return false;
-    shortenTip(bubble);
-    const observer = new MutationObserver(() => shortenTip(bubble));
-    observer.observe(bubble,{childList:true,characterData:true,subtree:true});
-    return true;
-  };
+  function install(){
+    const bubble=document.querySelector('.aw-v44-bubble');
+    const heroReady=normalizeHeroKicker();
+    const photoReady=repairConcernPhoto();
+    if(bubble){
+      shortenTip(bubble);
+      if(bubble.dataset.v46Guard!=='1'){
+        bubble.dataset.v46Guard='1';
+        new MutationObserver(()=>shortenTip(bubble)).observe(bubble,{childList:true,characterData:true,subtree:true});
+      }
+    }
+    return Boolean(bubble&&heroReady&&photoReady);
+  }
 
   let attempts=0;
   const timer=window.setInterval(()=>{
     attempts+=1;
-    if(installTipGuard()||attempts>70)window.clearInterval(timer);
+    if(install()||attempts>80)window.clearInterval(timer);
   },100);
 })();
