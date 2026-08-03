@@ -1,15 +1,12 @@
 (() => {
   'use strict';
   document.getElementById('aw-hero-unify-v48')?.remove();
-  const oldV49 = document.querySelector('script[data-aw-hero-v49]');
-  if (oldV49) oldV49.remove();
-  const oldV50 = document.querySelector('script[data-aw-hero-v50]');
-  if (oldV50) oldV50.remove();
-  const oldV51 = document.querySelector('script[data-aw-hero-v51]');
-  if (oldV51) oldV51.remove();
+  ['v49','v50','v51','v52'].forEach(version => {
+    document.querySelector(`script[data-aw-hero-${version}]`)?.remove();
+  });
   const script = document.createElement('script');
-  script.src = 'hero-unify-v51.js?rev=orange-bubble-tm-20260803-1048';
+  script.src = 'hero-unify-v52.js?rev=merged-orange-hero-20260803-1052';
   script.async = false;
-  script.dataset.awHeroV51 = 'true';
+  script.dataset.awHeroV52 = 'true';
   document.head.appendChild(script);
 })();
