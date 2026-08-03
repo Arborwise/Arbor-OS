@@ -5,10 +5,24 @@
   const style=document.createElement('style');
   style.id='arborwise-way-cards';
   style.textContent=`
+    html body .way-section{
+      gap:36px!important;
+      align-items:start!important;
+    }
+    html body .way-section .way-intro{
+      position:static!important;
+      min-height:0!important;
+      height:auto!important;
+      margin:0!important;
+      padding:0!important;
+    }
+    html body .way-section .way-intro>p:last-child{
+      margin-bottom:0!important;
+    }
     html body .way-section .process{
       display:grid!important;
       gap:12px!important;
-      margin-top:24px!important;
+      margin:0!important;
     }
     html body .way-section .process>li{
       --aw-card-accent:#d9f378;
@@ -61,7 +75,25 @@
       line-height:1.36!important;
     }
     @media(max-width:700px){
-      html body .way-section .process{gap:10px!important;margin-top:18px!important}
+      html body .way-section{
+        gap:12px!important;
+        padding-top:34px!important;
+        padding-bottom:34px!important;
+      }
+      html body .way-section .way-intro{
+        margin:0!important;
+        padding:0 4px!important;
+      }
+      html body .way-section .way-intro h2{
+        margin-bottom:12px!important;
+      }
+      html body .way-section .way-intro>p:last-child{
+        margin:0!important;
+      }
+      html body .way-section .process{
+        gap:10px!important;
+        margin:0!important;
+      }
       html body .way-section .process>li{
         grid-template-columns:47px minmax(0,1fr)!important;
         gap:10px!important;
