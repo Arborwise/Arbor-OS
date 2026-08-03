@@ -34,7 +34,7 @@
     'hero-unify-v48.js?rev=orange-actions-type-20260803-1144',
     'annie-system-v2.js?rev=classic-curved-hook-20260803-1144',
     'concern-checker-v47.js',
-    'final-fixes-v57.js?rev=annie-beak-green-call-20260803-1245'
+    'final-fixes-v57.js?rev=annie-beak-green-call-20260803-1250'
   ];
   const CONCERN_PHOTOS={
     leaves:{
