@@ -28,7 +28,7 @@
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@f63013983ef3a82fe01acb614a710122e5c57a81/website-preview/professional.js';
   const ENHANCEMENTS=[
     'chamber-memberships-v17.js?v=20260802-2248',
-    'annie-portrait-to-perch-v31.js?v=20260802-2238'
+    'annie-portrait-to-perch-v32.js?v=20260802-2250'
   ];
 
   function installReadOnlyAnnie(){
