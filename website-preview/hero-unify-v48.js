@@ -5,7 +5,7 @@
     document.querySelector(`script[data-aw-hero-${version}]`)?.remove();
   });
   const script = document.createElement('script');
-  script.src = 'hero-unify-v52.js?rev=merged-orange-hero-20260803-1052';
+  script.src = 'hero-unify-v52.js?rev=orange-actions-type-20260803-1144';
   script.async = false;
   script.dataset.awHeroV52 = 'true';
   document.head.appendChild(script);
