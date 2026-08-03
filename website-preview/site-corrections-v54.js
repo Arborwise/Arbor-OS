@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const STYLE_ID = 'aw-site-corrections-v55';
+  const STYLE_ID = 'aw-site-corrections-v56';
   const CALL_GREEN = '#2f9e4f';
   const CALL_GREEN_DARK = '#1f7139';
   const TEXT_ORANGE = '#ff6700';
@@ -13,7 +13,9 @@
   const FOREST = '#174438';
 
   function installStyle() {
-    document.getElementById(STYLE_ID)?.remove();
+    if (document.getElementById(STYLE_ID)) return;
+    ['aw-site-corrections-v54','aw-site-corrections-v55'].forEach(id => document.getElementById(id)?.remove());
+
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
@@ -51,6 +53,19 @@
         display:none!important;
       }
 
+      /* Smaller hero headline with readable space between all three lines. */
+      html body .hero.aw-hero .aw-copy h1{
+        max-width:12ch!important;
+        margin:0 auto 24px!important;
+        font-size:clamp(2.9rem,7vw,5rem)!important;
+        line-height:1.04!important;
+        letter-spacing:-.02em!important;
+      }
+      html body .hero.aw-hero .aw-copy h1 span{
+        line-height:inherit!important;
+      }
+
+      /* Action colors based on the action itself. */
       html body .mobile-bar a.aw-action-call,
       html body a.aw-action-call.button,
       html body a.aw-action-call.aw-primary,
@@ -136,7 +151,7 @@
         border-left:1px solid rgba(0,0,0,.34)!important;
       }
 
-      /* Annie tip control is a text link, never a block button. */
+      /* Annie tip is an orange text link, not a block button. */
       html body #annieButton,
       html body .annie-callout #annieButton.plain-button{
         appearance:none!important;
@@ -166,7 +181,6 @@
         color:var(--aw-text-orange-dark)!important;
         background:transparent!important;
         transform:none!important;
-        outline:2px solid transparent!important;
       }
       html body #annieButton::before,
       html body #annieButton::after{
@@ -174,13 +188,13 @@
         display:none!important;
       }
 
-      /* Compact opaque balloon with one short filled curve into Annie's beak. */
+      /* Stable speech balloon centered over Annie. Tail endpoint is her beak. */
       html body .aw2-bubble{
         box-sizing:border-box!important;
-        right:-2px!important;
+        right:17px!important;
         bottom:84px!important;
-        width:116px!important;
-        min-height:50px!important;
+        width:114px!important;
+        min-height:49px!important;
         padding:9px 10px!important;
         overflow:visible!important;
         border:2px solid ${FOREST}!important;
@@ -196,12 +210,12 @@
         isolation:isolate!important;
       }
       html body .aw2-guide.left .aw2-bubble{
-        left:-2px!important;
+        left:17px!important;
         right:auto!important;
       }
       html body .aw2-bubble.long{
-        width:122px!important;
-        min-height:54px!important;
+        width:120px!important;
+        min-height:53px!important;
         padding:9px 10px!important;
         font-size:8.8px!important;
       }
@@ -214,41 +228,44 @@
         display:block!important;
         position:absolute!important;
         z-index:5!important;
-        right:26px!important;
+        left:67px!important;
         bottom:-3px!important;
-        width:24px!important;
+        width:25px!important;
         height:9px!important;
         border:0!important;
         border-radius:50%!important;
         background:${IVORY}!important;
       }
       html body .aw2-guide.left .aw2-bubble::after{
-        left:26px!important;
-        right:auto!important;
+        left:auto!important;
+        right:67px!important;
       }
-      html body .aw55-tail{
+      html body .aw56-tail{
         position:absolute!important;
         z-index:4!important;
-        right:17px!important;
-        bottom:-24px!important;
-        width:30px!important;
-        height:27px!important;
+        left:69px!important;
+        bottom:-39px!important;
+        width:34px!important;
+        height:42px!important;
         overflow:visible!important;
         transform:none!important;
       }
-      html body .aw2-guide.left .aw55-tail{
-        left:17px!important;
-        right:auto!important;
+      html body .aw2-guide.left .aw56-tail{
+        left:auto!important;
+        right:69px!important;
         transform:scaleX(-1)!important;
       }
-      html body .aw55-tail path{
+      html body .aw56-tail path{
         fill:${IVORY}!important;
         stroke:${FOREST}!important;
         stroke-width:2!important;
         stroke-linejoin:round!important;
         vector-effect:non-scaling-stroke!important;
       }
-      html body .aw2-tail{display:none!important}
+      html body .aw2-tail,
+      html body .aw55-tail{
+        display:none!important;
+      }
 
       @media(max-width:700px){
         html body .hero.aw-hero .aw-kicker{
@@ -256,25 +273,32 @@
           margin-bottom:17px!important;
           font-size:clamp(.98rem,4.25vw,1.1rem)!important;
         }
+        html body .hero.aw-hero .aw-copy h1{
+          max-width:12ch!important;
+          margin-bottom:24px!important;
+          font-size:clamp(2.45rem,10.2vw,3rem)!important;
+          line-height:1.07!important;
+          letter-spacing:-.015em!important;
+        }
         html body .mobile-bar,
         html body .mobile-bar a{
           min-height:78px!important;
           height:78px!important;
         }
         html body .aw2-bubble{
-          right:-2px!important;
-          bottom:82px!important;
+          right:17px!important;
+          bottom:84px!important;
           width:114px!important;
           min-height:49px!important;
           font-size:8.9px!important;
         }
         html body .aw2-guide.left .aw2-bubble{
-          left:-2px!important;
+          left:17px!important;
           right:auto!important;
         }
         html body .aw2-bubble.long{width:120px!important;min-height:53px!important}
-        html body .aw55-tail{right:16px!important;bottom:-23px!important;width:29px!important;height:26px!important}
-        html body .aw2-guide.left .aw55-tail{left:16px!important;right:auto!important}
+        html body .aw56-tail{left:69px!important;bottom:-39px!important;width:34px!important;height:42px!important}
+        html body .aw2-guide.left .aw56-tail{left:auto!important;right:69px!important}
       }
     `;
     document.head.appendChild(style);
@@ -310,28 +334,24 @@
     return true;
   }
 
+  function cleanText(text) {
+    return text
+      .replace(/\s*[—–]\s*/g, '. ')
+      .replace(/\.\s*\./g, '.')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
   function normalizeAnnieCopy() {
     const section = document.querySelector('.annie-callout');
     if (section) {
       const heading = section.querySelector('h2');
-      if (heading && heading.textContent !== 'Don’t worry about diagnosing the tree. That’s our job.') {
-        heading.textContent = 'Don’t worry about diagnosing the tree. That’s our job.';
-      }
+      if (heading) heading.textContent = 'Don’t worry about diagnosing the tree. That’s our job.';
 
       const tipButton = section.querySelector('#annieButton');
-      if (tipButton && tipButton.textContent.trim() !== 'See another Annie tip') {
+      if (tipButton) {
         tipButton.textContent = 'See another Annie tip';
         tipButton.setAttribute('aria-label','See another Annie tip');
-      }
-
-      const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT);
-      let node;
-      while ((node = walker.nextNode())) {
-        if (node.parentElement?.closest('script,style')) continue;
-        const clean = node.nodeValue
-          .replace(/\s*[—–]\s*/g, ', ')
-          .replace(/,\s*,/g, ',');
-        if (clean !== node.nodeValue) node.nodeValue = clean;
       }
     }
 
@@ -340,73 +360,69 @@
       if (/^Hi! I'm Arborwise Annie/i.test(text)) {
         text = "Hi! I'm Arborwise Annie. Glad you're here.";
       } else {
-        text = text.replace(/\s*[—–]\s*/g, ', ').replace(/,\s*,/g, ',');
+        text = cleanText(text);
       }
       if (copy.textContent !== text) copy.textContent = text;
     });
-    return true;
+    return Boolean(section);
   }
 
-  function rebuildAnnieTail() {
+  function attachTextCleaner(copy) {
+    if (copy.dataset.awTextCleaner === '56') return;
+    copy.dataset.awTextCleaner = '56';
+    const observer = new MutationObserver(() => {
+      const cleaned = cleanText(copy.textContent);
+      if (cleaned && cleaned !== copy.textContent) copy.textContent = cleaned;
+    });
+    observer.observe(copy,{childList:true,characterData:true,subtree:true});
+  }
+
+  function buildStableTail() {
     const bubbles = document.querySelectorAll('.aw2-bubble');
     if (!bubbles.length) return false;
 
     bubbles.forEach(bubble => {
-      bubble.querySelectorAll('.aw2-tail,.aw55-tail').forEach(tail => tail.remove());
-
       let copy = bubble.querySelector('.aw2-bubble-copy');
       if (!copy) {
         copy = document.createElement('span');
         copy.className = 'aw2-bubble-copy';
-        copy.textContent = bubble.textContent || '';
+        copy.textContent = cleanText(bubble.textContent || '');
         bubble.replaceChildren(copy);
       }
+      attachTextCleaner(copy);
+
+      if (bubble.dataset.awTailVersion === '56' && bubble.querySelector('.aw56-tail')) return;
+      bubble.querySelectorAll('.aw2-tail,.aw55-tail,.aw56-tail').forEach(tail => tail.remove());
 
       const tail = document.createElementNS('http://www.w3.org/2000/svg','svg');
-      tail.setAttribute('class','aw55-tail');
-      tail.setAttribute('viewBox','0 0 30 27');
+      tail.setAttribute('class','aw56-tail');
+      tail.setAttribute('viewBox','0 0 34 42');
       tail.setAttribute('aria-hidden','true');
       tail.setAttribute('focusable','false');
 
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d','M2 2 C9 4 16 7 21 12 C24 16 24 21 22 25 C19 22 16 19 12 17 C8 14 5 9 2 2 Z');
+      path.setAttribute('d','M3 2 C12 4 20 9 25 17 C29 24 25 33 18 40 C17 34 14 29 10 25 C6 20 4 12 3 2 Z');
       tail.appendChild(path);
       bubble.appendChild(tail);
+      bubble.dataset.awTailVersion = '56';
     });
     return true;
   }
 
   function applyCorrections() {
     installStyle();
-    normalizeHeroKicker();
-    normalizeAnnieCopy();
+    const kickerReady = normalizeHeroKicker();
+    const annieReady = normalizeAnnieCopy();
+    const bubbleReady = buildStableTail();
     classifyActions();
-    rebuildAnnieTail();
+    return kickerReady && annieReady && bubbleReady;
   }
 
   let attempts = 0;
   const timer = window.setInterval(() => {
     attempts += 1;
-    const kickerReady = normalizeHeroKicker();
-    const bubbleReady = rebuildAnnieTail();
-    normalizeAnnieCopy();
-    classifyActions();
-    installStyle();
-    if ((kickerReady && bubbleReady) || attempts > 100) window.clearInterval(timer);
+    if (applyCorrections() || attempts > 100) window.clearInterval(timer);
   },100);
-
-  let observerTimer = 0;
-  const observer = new MutationObserver(() => {
-    window.clearTimeout(observerTimer);
-    observerTimer = window.setTimeout(() => {
-      normalizeHeroKicker();
-      normalizeAnnieCopy();
-      classifyActions();
-      rebuildAnnieTail();
-      installStyle();
-    },100);
-  });
-  observer.observe(document.documentElement,{subtree:true,childList:true});
 
   applyCorrections();
 })();
