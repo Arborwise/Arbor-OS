@@ -82,6 +82,60 @@
     });
   }
 
+  function refinePlantingSection(){
+    document.getElementById('aw-planting-refinement')?.remove();
+    const style=document.createElement('style');
+    style.id='aw-planting-refinement';
+    style.textContent=`
+      html body .nursery a.aw-nursery-link{
+        color:#145c43!important;
+        font-weight:950!important;
+        text-decoration:underline!important;
+        text-decoration-thickness:2px!important;
+        text-underline-offset:3px!important;
+      }
+      html body .nursery a.aw-nursery-link:hover,
+      html body .nursery a.aw-nursery-link:focus-visible{
+        color:#8a6116!important;
+      }
+      @media(max-width:700px){
+        html body .growth-section{
+          min-height:0!important;
+          height:auto!important;
+          margin-bottom:0!important;
+          padding:38px 18px 28px!important;
+        }
+        html body .growth-section .growth-inner{
+          gap:14px!important;
+        }
+        html body .growth-section h2{
+          margin-bottom:14px!important;
+        }
+        html body .growth-section p{
+          margin-bottom:14px!important;
+        }
+        html body .growth-section .text-link-light{
+          margin-top:0!important;
+          margin-bottom:0!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const nursery=document.querySelector('.nursery');
+    if(!nursery)return;
+    const nurseryUrl='https://shadesofgreeninc.com/celina-tx/';
+    const julieUrl='https://shadesofgreeninc.com/about/meet-our-staff/';
+    const strong=nursery.querySelector('strong');
+    const paragraph=nursery.querySelector('p');
+    if(strong){
+      strong.innerHTML=`Planted by Arborwise · Purchased from <a class="aw-nursery-link" href="${nurseryUrl}" target="_blank" rel="noopener">Shades of Green Nursery in Celina</a>`;
+    }
+    if(paragraph){
+      paragraph.innerHTML=`Arborwise planted this tree after purchasing it from <a class="aw-nursery-link" href="${nurseryUrl}" target="_blank" rel="noopener">Shades of Green Nursery + Landscape in Celina</a>. We appreciate <a class="aw-nursery-link" href="${julieUrl}" target="_blank" rel="noopener">Julie Holland</a>’s help with the tree purchase.`;
+    }
+  }
+
   async function finishWebsite(){
     for(const src of ENHANCEMENTS){
       try{
@@ -91,6 +145,7 @@
       }
     }
     applyConcernPhotos();
+    refinePlantingSection();
     window.clearTimeout(fallbackReveal);
     requestAnimationFrame(()=>requestAnimationFrame(revealWebsite));
   }
