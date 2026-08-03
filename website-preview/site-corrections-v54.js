@@ -13,7 +13,7 @@
   const FOREST = '#174438';
 
   function installStyle() {
-    document.getElementById(STYLE_ID)?.remove();
+    if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
@@ -134,7 +134,6 @@
         color:var(--aw-call-green)!important;
         text-decoration-color:var(--aw-call-green)!important;
       }
-
       html body .mobile-bar a+ a{
         border-left:1px solid rgba(0,0,0,.34)!important;
       }
@@ -144,16 +143,16 @@
         box-sizing:border-box!important;
         right:4px!important;
         bottom:96px!important;
-        width:112px!important;
-        min-height:50px!important;
-        padding:9px 10px!important;
+        width:108px!important;
+        min-height:48px!important;
+        padding:8px 9px!important;
         overflow:visible!important;
         border:2px solid ${FOREST}!important;
         border-radius:49% 51% 47% 53% / 53% 47% 55% 45%!important;
         background:${IVORY}!important;
         color:#123d31!important;
-        font-size:9px!important;
-        line-height:1.16!important;
+        font-size:8.9px!important;
+        line-height:1.15!important;
         box-shadow:0 7px 16px rgba(7,34,26,.2),2px 3px 0 rgba(20,61,49,.12)!important;
         filter:none!important;
         mix-blend-mode:normal!important;
@@ -165,10 +164,10 @@
         right:auto!important;
       }
       html body .aw2-bubble.long{
-        width:118px!important;
-        min-height:54px!important;
-        padding:9px 10px!important;
-        font-size:8.8px!important;
+        width:114px!important;
+        min-height:52px!important;
+        padding:8px 9px!important;
+        font-size:8.7px!important;
       }
       html body .aw2-bubble.show{
         opacity:1!important;
@@ -179,9 +178,9 @@
         display:block!important;
         position:absolute!important;
         z-index:4!important;
-        left:55px!important;
+        left:53px!important;
         bottom:-3px!important;
-        width:22px!important;
+        width:20px!important;
         height:8px!important;
         border:0!important;
         border-radius:50%!important;
@@ -189,12 +188,12 @@
       }
       html body .aw2-guide.left .aw2-bubble::after{
         left:auto!important;
-        right:55px!important;
+        right:53px!important;
       }
       html body .aw2-tail{
         position:absolute!important;
         z-index:3!important;
-        left:55px!important;
+        left:53px!important;
         right:auto!important;
         bottom:-31px!important;
         width:32px!important;
@@ -204,7 +203,7 @@
       }
       html body .aw2-guide.left .aw2-tail{
         left:auto!important;
-        right:55px!important;
+        right:53px!important;
         transform:scaleX(-1)!important;
       }
       html body .aw2-tail-outline,
@@ -229,27 +228,25 @@
           margin-bottom:17px!important;
           font-size:clamp(.98rem,4.25vw,1.1rem)!important;
         }
-        html body .mobile-bar{
-          min-height:78px!important;
-          height:78px!important;
-        }
+        html body .mobile-bar,
         html body .mobile-bar a{
           min-height:78px!important;
+          height:78px!important;
         }
         html body .aw2-bubble{
           right:3px!important;
           bottom:94px!important;
-          width:108px!important;
-          min-height:48px!important;
-          font-size:8.8px!important;
+          width:106px!important;
+          min-height:47px!important;
+          font-size:8.7px!important;
         }
         html body .aw2-guide.left .aw2-bubble{
           left:3px!important;
           right:auto!important;
         }
-        html body .aw2-bubble.long{width:114px!important;min-height:52px!important}
-        html body .aw2-tail{left:53px!important;bottom:-30px!important;width:31px!important;height:33px!important}
-        html body .aw2-guide.left .aw2-tail{left:auto!important;right:53px!important}
+        html body .aw2-bubble.long{width:112px!important;min-height:51px!important}
+        html body .aw2-tail{left:52px!important;bottom:-30px!important;width:31px!important;height:33px!important}
+        html body .aw2-guide.left .aw2-tail{left:auto!important;right:52px!important}
       }
     `;
     document.head.appendChild(style);
@@ -258,28 +255,29 @@
   function normalizeHeroKicker() {
     const kicker = document.querySelector('.hero.aw-hero .aw-kicker');
     if (!kicker) return false;
-    kicker.textContent = 'PROFESSIONAL NORTH TEXAS TREE CARE';
+    const correctText = 'PROFESSIONAL NORTH TEXAS TREE CARE';
+    if (kicker.textContent.trim() !== correctText) kicker.textContent = correctText;
     return true;
   }
 
   function classifyActions() {
     document.querySelectorAll('a[href],button').forEach(element => {
-      element.classList.remove('aw-action-call','aw-action-text','aw-action-estimate');
       const href = element.getAttribute('href') || '';
       const text = (element.textContent || '').trim().toLowerCase();
-      const isSubmit = element.matches('button[type="submit"],input[type="submit"]');
+      const isSubmit = element.matches('button[type="submit"]');
+      let targetClass = '';
 
       if (/^tel:/i.test(href) || /\bcall\b/.test(text)) {
-        element.classList.add('aw-action-call');
-        return;
+        targetClass = 'aw-action-call';
+      } else if (/^sms:/i.test(href) || /text photos|send photos|text us/.test(text)) {
+        targetClass = 'aw-action-text';
+      } else if (/#estimate(?:$|\?)/i.test(href) || /free estimate|\bestimate\b/.test(text) || isSubmit) {
+        targetClass = 'aw-action-estimate';
       }
-      if (/^sms:/i.test(href) || /text photos|send photos|text us/.test(text)) {
-        element.classList.add('aw-action-text');
-        return;
-      }
-      if (/#estimate(?:$|\?)/i.test(href) || /free estimate|\bestimate\b/.test(text) || isSubmit) {
-        element.classList.add('aw-action-estimate');
-      }
+
+      ['aw-action-call','aw-action-text','aw-action-estimate'].forEach(className => {
+        element.classList.toggle(className,className === targetClass);
+      });
     });
     return true;
   }
@@ -289,6 +287,8 @@
     if (!bubbles.length) return false;
 
     bubbles.forEach(bubble => {
+      if (bubble.dataset.awTailV54 === 'true' && bubble.querySelector('.aw2-tail[data-aw-tail-v54]')) return;
+
       let copy = bubble.querySelector('.aw2-bubble-copy');
       if (!copy) {
         copy = document.createElement('span');
@@ -299,20 +299,23 @@
 
       const tail = document.createElementNS('http://www.w3.org/2000/svg','svg');
       tail.setAttribute('class','aw2-tail');
+      tail.setAttribute('data-aw-tail-v54','true');
       tail.setAttribute('viewBox','0 0 32 34');
       tail.setAttribute('aria-hidden','true');
       tail.setAttribute('focusable','false');
 
+      const curve = 'M3 3 C12 6 20 11 22 17 C24 23 21 29 16 32';
       const outline = document.createElementNS('http://www.w3.org/2000/svg','path');
       outline.setAttribute('class','aw2-tail-outline');
-      outline.setAttribute('d','M3 3 C12 6 20 11 22 17 C24 23 21 29 16 32');
+      outline.setAttribute('d',curve);
 
       const fill = document.createElementNS('http://www.w3.org/2000/svg','path');
       fill.setAttribute('class','aw2-tail-fill');
-      fill.setAttribute('d','M3 3 C12 6 20 11 22 17 C24 23 21 29 16 32');
+      fill.setAttribute('d',curve);
 
       tail.append(outline,fill);
       bubble.appendChild(tail);
+      bubble.dataset.awTailV54 = 'true';
     });
     return true;
   }
@@ -330,20 +333,19 @@
     const kickerReady = normalizeHeroKicker();
     const bubbleReady = rebuildAnnieTail();
     classifyActions();
-    if ((kickerReady && bubbleReady) || attempts > 100) {
-      window.clearInterval(timer);
-      installStyle();
-    }
+    installStyle();
+    if ((kickerReady && bubbleReady) || attempts > 100) window.clearInterval(timer);
   },100);
 
+  let observerTimer = 0;
   const observer = new MutationObserver(() => {
-    window.clearTimeout(observer._timer);
-    observer._timer = window.setTimeout(() => {
+    window.clearTimeout(observerTimer);
+    observerTimer = window.setTimeout(() => {
       normalizeHeroKicker();
       classifyActions();
       rebuildAnnieTail();
       installStyle();
-    },60);
+    },80);
   });
   observer.observe(document.documentElement,{subtree:true,childList:true});
 
