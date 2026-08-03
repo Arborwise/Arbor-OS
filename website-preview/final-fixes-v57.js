@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const DEPLOY_REV = '20260803-1247';
   const STYLE_ID = 'aw-final-fixes-v57';
   const GREEN = '#2f9e4f';
   const GREEN_DARK = '#1f7139';
@@ -11,6 +12,7 @@
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
+    style.dataset.deployRev = DEPLOY_REV;
     style.textContent = `
       /* Phone-call text links are green. Text-message actions remain orange. */
       html body .annie-callout a[href^='tel:'],
