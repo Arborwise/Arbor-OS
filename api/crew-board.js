@@ -90,9 +90,7 @@ function indexes(headers){
     time:headerIndex(headers,['Arrival Window','Appointment Time','Time','Time Window']),
     crew:headerIndex(headers,['Crew Lead','Assigned To','Assigned','Crew']),
     status:headerIndex(headers,['Status','Job Status']),
-    notes:headerIndex(headers,['Crew Notes']),
-    before:headerIndex(headers,['Before Photos','Before Photo']),
-    after:headerIndex(headers,['After Photos','After Photo','Photos'])
+    notes:headerIndex(headers,['Crew Notes'])
   };
 }
 function crewRecords(values){
@@ -111,9 +109,7 @@ function crewRecords(values){
     workTime:cell(row,idx.time),
     crew:cell(row,idx.crew)||'Unassigned',
     status:statusValue(cell(row,idx.status)),
-    notes:safeCrewNotes(cell(row,idx.notes)),
-    beforePhotos:cell(row,idx.before),
-    afterPhotos:cell(row,idx.after)
+    notes:safeCrewNotes(cell(row,idx.notes))
   })).filter(record=>record.id&&record.status!=='Cancelled');
 }
 
