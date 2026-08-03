@@ -2,8 +2,6 @@
   'use strict';
 
   // Canonical website systems only: no stacked Annie overrides.
-  // Website preview deployment trigger: August 3, 2026.
-  // Deployment retry after Vercel build-rate cooldown.
   const root=document.documentElement;
   const body=document.body;
   root.style.background='#070b09';
@@ -33,8 +31,8 @@
     'chamber-memberships-v17.js',
     'arborwise-way.js',
     'faq-cards.js',
-    'hero-unify-v48.js',
-    'annie-system-v2.js?rev=anchored-bubble-20260803-1102',
+    'hero-unify-v48.js?rev=orange-actions-type-20260803-1144',
+    'annie-system-v2.js?rev=classic-curved-hook-20260803-1144',
     'concern-checker-v47.js'
   ];
   const CONCERN_PHOTOS={
@@ -100,7 +98,7 @@
     style.id='aw-annie-copy-refinement';
     style.textContent=`
       html body .annie-callout .aw-annie-estimate-link{
-        color:#145c43!important;
+        color:#ff6700!important;
         font-weight:950!important;
         text-decoration:underline!important;
         text-decoration-thickness:2px!important;
@@ -108,7 +106,7 @@
       }
       html body .annie-callout .aw-annie-estimate-link:hover,
       html body .annie-callout .aw-annie-estimate-link:focus-visible{
-        color:#8a6116!important;
+        color:#c94700!important;
       }
     `;
     document.head.appendChild(style);
@@ -120,7 +118,7 @@
     style.id='aw-planting-refinement';
     style.textContent=`
       html body .nursery a.aw-nursery-link{
-        color:#145c43!important;
+        color:#ff6700!important;
         font-weight:950!important;
         text-decoration:underline!important;
         text-decoration-thickness:2px!important;
@@ -128,7 +126,7 @@
       }
       html body .nursery a.aw-nursery-link:hover,
       html body .nursery a.aw-nursery-link:focus-visible{
-        color:#8a6116!important;
+        color:#c94700!important;
       }
       @media(max-width:700px){
         html body .growth-section{
