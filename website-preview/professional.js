@@ -34,6 +34,7 @@
     'arborwise-way.js',
     'faq-cards.js',
     'annie-system.js',
+    'hero-unify-v48.js',
     'concern-checker-v47.js'
   ];
   const CONCERN_PHOTOS={
