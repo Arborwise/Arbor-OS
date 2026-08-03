@@ -27,16 +27,11 @@
   const fallbackReveal=window.setTimeout(revealWebsite,5000);
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@f63013983ef3a82fe01acb614a710122e5c57a81/website-preview/professional.js';
   const ENHANCEMENTS=[
-    'chamber-memberships-v17.js?v=20260802-2248',
-    'annie-guide-v39.js?v=20260803-0015',
-    'annie-way-v40.js?v=20260803-0028',
-    'annie-bark-bubble-v41.js?v=20260803-0034',
-    'annie-faq-v42.js?v=20260803-0044',
-    'annie-idle-v43.js?v=20260803-0051',
-    'annie-motion-bubble-v44.js?v=20260803-0122',
-    'annie-bubble-center-v45.js?v=20260803-0104',
-    'annie-bubble-anchor-v46.js?v=20260803-0138',
-    'concern-checker-v47.js?v=20260803-0118'
+    'chamber-memberships-v17.js',
+    'arborwise-way.js',
+    'faq-cards.js',
+    'annie-system.js',
+    'concern-checker-v47.js'
   ];
 
   function loadEnhancement(src){
