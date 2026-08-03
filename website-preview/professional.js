@@ -82,6 +82,36 @@
     });
   }
 
+  function refineAnnieIntroduction(){
+    const section=document.querySelector('.annie-callout');
+    if(!section)return;
+    const heading=section.querySelector('h2');
+    const paragraph=section.querySelector('#annieTip')||section.querySelector('h2 + p');
+    if(heading){
+      heading.textContent='Don’t worry about diagnosing the tree—that’s our job.';
+    }
+    if(paragraph){
+      paragraph.innerHTML='Tell us what changed, send a few clear photos, and let the tree tell its story. We’ll read the signs, explain what matters, and you can <a class="aw-annie-estimate-link" href="tel:+19724308330">call us for a free estimate</a> when you’re ready.';
+    }
+    document.getElementById('aw-annie-copy-refinement')?.remove();
+    const style=document.createElement('style');
+    style.id='aw-annie-copy-refinement';
+    style.textContent=`
+      html body .annie-callout .aw-annie-estimate-link{
+        color:#145c43!important;
+        font-weight:950!important;
+        text-decoration:underline!important;
+        text-decoration-thickness:2px!important;
+        text-underline-offset:3px!important;
+      }
+      html body .annie-callout .aw-annie-estimate-link:hover,
+      html body .annie-callout .aw-annie-estimate-link:focus-visible{
+        color:#8a6116!important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function refinePlantingSection(){
     document.getElementById('aw-planting-refinement')?.remove();
     const style=document.createElement('style');
@@ -145,6 +175,7 @@
       }
     }
     applyConcernPhotos();
+    refineAnnieIntroduction();
     refinePlantingSection();
     window.clearTimeout(fallbackReveal);
     requestAnimationFrame(()=>requestAnimationFrame(revealWebsite));
