@@ -33,9 +33,9 @@
     'annie-bark-bubble-v41.js?v=20260803-0034',
     'annie-faq-v42.js?v=20260803-0044',
     'annie-idle-v43.js?v=20260803-0051',
-    'annie-motion-bubble-v44.js?v=20260803-0058',
+    'annie-motion-bubble-v44.js?v=20260803-0122',
     'annie-bubble-center-v45.js?v=20260803-0104',
-    'annie-bubble-anchor-v46.js?v=20260803-0108',
+    'annie-bubble-anchor-v46.js?v=20260803-0122',
     'concern-checker-v47.js?v=20260803-0118'
   ];
 
