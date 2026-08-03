@@ -1,11 +1,13 @@
 (() => {
   'use strict';
   document.getElementById('aw-hero-unify-v48')?.remove();
-  const previous = document.querySelector('script[data-aw-hero-v49]');
-  if (previous) previous.remove();
+  const oldV49 = document.querySelector('script[data-aw-hero-v49]');
+  if (oldV49) oldV49.remove();
+  const oldV50 = document.querySelector('script[data-aw-hero-v50]');
+  if (oldV50) oldV50.remove();
   const script = document.createElement('script');
-  script.src = 'hero-unify-v49.js?rev=hero-bubble-20260803-1034';
+  script.src = 'hero-unify-v50.js?rev=spring-green-bubble-20260803-1042';
   script.async = false;
-  script.dataset.awHeroV49 = 'true';
+  script.dataset.awHeroV50 = 'true';
   document.head.appendChild(script);
 })();
