@@ -33,8 +33,8 @@
     'chamber-memberships-v17.js',
     'arborwise-way.js',
     'faq-cards.js',
-    'annie-system.js',
     'hero-unify-v48.js',
+    'annie-system-v2.js?rev=anchored-bubble-20260803-1102',
     'concern-checker-v47.js'
   ];
   const CONCERN_PHOTOS={
