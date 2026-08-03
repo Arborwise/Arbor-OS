@@ -1,6 +1,7 @@
 (()=>{
   'use strict';
 
+  // Canonical website systems only: no stacked Annie overrides.
   const root=document.documentElement;
   const body=document.body;
   root.style.background='#070b09';
