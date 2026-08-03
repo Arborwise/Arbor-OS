@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const STYLE_ID = 'aw-site-corrections-v54';
+  const STYLE_ID = 'aw-site-corrections-v55';
   const CALL_GREEN = '#2f9e4f';
   const CALL_GREEN_DARK = '#1f7139';
   const TEXT_ORANGE = '#ff6700';
@@ -13,7 +13,7 @@
   const FOREST = '#174438';
 
   function installStyle() {
-    if (document.getElementById(STYLE_ID)) return;
+    document.getElementById(STYLE_ID)?.remove();
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
@@ -27,7 +27,6 @@
         --aw-action-ink:${INK};
       }
 
-      /* The hero kicker is one phrase, once. Kill inherited pseudo-copy. */
       html body .hero.aw-hero .aw-kicker{
         display:block!important;
         width:auto!important;
@@ -52,7 +51,6 @@
         display:none!important;
       }
 
-      /* Action colors are based on what the button actually does. */
       html body .mobile-bar a.aw-action-call,
       html body a.aw-action-call.button,
       html body a.aw-action-call.aw-primary,
@@ -138,21 +136,59 @@
         border-left:1px solid rgba(0,0,0,.34)!important;
       }
 
-      /* Annie: opaque sweet balloon, compact body, short curved mouth hook. */
+      /* Annie tip control is a text link, never a block button. */
+      html body #annieButton,
+      html body .annie-callout #annieButton.plain-button{
+        appearance:none!important;
+        -webkit-appearance:none!important;
+        display:inline!important;
+        width:auto!important;
+        min-width:0!important;
+        min-height:0!important;
+        height:auto!important;
+        margin:14px auto 0!important;
+        padding:0!important;
+        color:var(--aw-text-orange)!important;
+        background:transparent!important;
+        border:0!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+        font:900 1rem/1.25 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+        letter-spacing:0!important;
+        text-decoration:underline!important;
+        text-decoration-thickness:2px!important;
+        text-underline-offset:3px!important;
+        text-shadow:none!important;
+        cursor:pointer!important;
+      }
+      html body #annieButton:hover,
+      html body #annieButton:focus-visible{
+        color:var(--aw-text-orange-dark)!important;
+        background:transparent!important;
+        transform:none!important;
+        outline:2px solid transparent!important;
+      }
+      html body #annieButton::before,
+      html body #annieButton::after{
+        content:none!important;
+        display:none!important;
+      }
+
+      /* Compact opaque balloon with one short filled curve into Annie's beak. */
       html body .aw2-bubble{
         box-sizing:border-box!important;
-        right:4px!important;
-        bottom:96px!important;
-        width:108px!important;
-        min-height:48px!important;
-        padding:8px 9px!important;
+        right:-2px!important;
+        bottom:84px!important;
+        width:116px!important;
+        min-height:50px!important;
+        padding:9px 10px!important;
         overflow:visible!important;
         border:2px solid ${FOREST}!important;
-        border-radius:49% 51% 47% 53% / 53% 47% 55% 45%!important;
+        border-radius:50% 50% 47% 53% / 54% 47% 56% 44%!important;
         background:${IVORY}!important;
         color:#123d31!important;
-        font-size:8.9px!important;
-        line-height:1.15!important;
+        font-size:9px!important;
+        line-height:1.16!important;
         box-shadow:0 7px 16px rgba(7,34,26,.2),2px 3px 0 rgba(20,61,49,.12)!important;
         filter:none!important;
         mix-blend-mode:normal!important;
@@ -160,14 +196,14 @@
         isolation:isolate!important;
       }
       html body .aw2-guide.left .aw2-bubble{
-        left:4px!important;
+        left:-2px!important;
         right:auto!important;
       }
       html body .aw2-bubble.long{
-        width:114px!important;
-        min-height:52px!important;
-        padding:8px 9px!important;
-        font-size:8.7px!important;
+        width:122px!important;
+        min-height:54px!important;
+        padding:9px 10px!important;
+        font-size:8.8px!important;
       }
       html body .aw2-bubble.show{
         opacity:1!important;
@@ -177,50 +213,42 @@
         content:''!important;
         display:block!important;
         position:absolute!important;
-        z-index:4!important;
-        left:53px!important;
+        z-index:5!important;
+        right:26px!important;
         bottom:-3px!important;
-        width:20px!important;
-        height:8px!important;
+        width:24px!important;
+        height:9px!important;
         border:0!important;
         border-radius:50%!important;
         background:${IVORY}!important;
       }
       html body .aw2-guide.left .aw2-bubble::after{
-        left:auto!important;
-        right:53px!important;
-      }
-      html body .aw2-tail{
-        position:absolute!important;
-        z-index:3!important;
-        left:53px!important;
+        left:26px!important;
         right:auto!important;
-        bottom:-31px!important;
-        width:32px!important;
-        height:34px!important;
+      }
+      html body .aw55-tail{
+        position:absolute!important;
+        z-index:4!important;
+        right:17px!important;
+        bottom:-24px!important;
+        width:30px!important;
+        height:27px!important;
         overflow:visible!important;
         transform:none!important;
       }
-      html body .aw2-guide.left .aw2-tail{
-        left:auto!important;
-        right:53px!important;
+      html body .aw2-guide.left .aw55-tail{
+        left:17px!important;
+        right:auto!important;
         transform:scaleX(-1)!important;
       }
-      html body .aw2-tail-outline,
-      html body .aw2-tail-fill{
-        fill:none!important;
-        stroke-linecap:round!important;
+      html body .aw55-tail path{
+        fill:${IVORY}!important;
+        stroke:${FOREST}!important;
+        stroke-width:2!important;
         stroke-linejoin:round!important;
         vector-effect:non-scaling-stroke!important;
       }
-      html body .aw2-tail-outline{
-        stroke:${FOREST}!important;
-        stroke-width:7!important;
-      }
-      html body .aw2-tail-fill{
-        stroke:${IVORY}!important;
-        stroke-width:3.8!important;
-      }
+      html body .aw2-tail{display:none!important}
 
       @media(max-width:700px){
         html body .hero.aw-hero .aw-kicker{
@@ -234,19 +262,19 @@
           height:78px!important;
         }
         html body .aw2-bubble{
-          right:3px!important;
-          bottom:94px!important;
-          width:106px!important;
-          min-height:47px!important;
-          font-size:8.7px!important;
+          right:-2px!important;
+          bottom:82px!important;
+          width:114px!important;
+          min-height:49px!important;
+          font-size:8.9px!important;
         }
         html body .aw2-guide.left .aw2-bubble{
-          left:3px!important;
+          left:-2px!important;
           right:auto!important;
         }
-        html body .aw2-bubble.long{width:112px!important;min-height:51px!important}
-        html body .aw2-tail{left:52px!important;bottom:-30px!important;width:31px!important;height:33px!important}
-        html body .aw2-guide.left .aw2-tail{left:auto!important;right:52px!important}
+        html body .aw2-bubble.long{width:120px!important;min-height:53px!important}
+        html body .aw55-tail{right:16px!important;bottom:-23px!important;width:29px!important;height:26px!important}
+        html body .aw2-guide.left .aw55-tail{left:16px!important;right:auto!important}
       }
     `;
     document.head.appendChild(style);
@@ -282,40 +310,68 @@
     return true;
   }
 
+  function normalizeAnnieCopy() {
+    const section = document.querySelector('.annie-callout');
+    if (section) {
+      const heading = section.querySelector('h2');
+      if (heading && heading.textContent !== 'Don’t worry about diagnosing the tree. That’s our job.') {
+        heading.textContent = 'Don’t worry about diagnosing the tree. That’s our job.';
+      }
+
+      const tipButton = section.querySelector('#annieButton');
+      if (tipButton && tipButton.textContent.trim() !== 'See another Annie tip') {
+        tipButton.textContent = 'See another Annie tip';
+        tipButton.setAttribute('aria-label','See another Annie tip');
+      }
+
+      const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.parentElement?.closest('script,style')) continue;
+        const clean = node.nodeValue
+          .replace(/\s*[—–]\s*/g, ', ')
+          .replace(/,\s*,/g, ',');
+        if (clean !== node.nodeValue) node.nodeValue = clean;
+      }
+    }
+
+    document.querySelectorAll('.aw2-bubble-copy').forEach(copy => {
+      let text = copy.textContent.trim();
+      if (/^Hi! I'm Arborwise Annie/i.test(text)) {
+        text = "Hi! I'm Arborwise Annie. Glad you're here.";
+      } else {
+        text = text.replace(/\s*[—–]\s*/g, ', ').replace(/,\s*,/g, ',');
+      }
+      if (copy.textContent !== text) copy.textContent = text;
+    });
+    return true;
+  }
+
   function rebuildAnnieTail() {
     const bubbles = document.querySelectorAll('.aw2-bubble');
     if (!bubbles.length) return false;
 
     bubbles.forEach(bubble => {
-      if (bubble.dataset.awTailV54 === 'true' && bubble.querySelector('.aw2-tail[data-aw-tail-v54]')) return;
+      bubble.querySelectorAll('.aw2-tail,.aw55-tail').forEach(tail => tail.remove());
 
       let copy = bubble.querySelector('.aw2-bubble-copy');
       if (!copy) {
         copy = document.createElement('span');
         copy.className = 'aw2-bubble-copy';
         copy.textContent = bubble.textContent || '';
+        bubble.replaceChildren(copy);
       }
-      bubble.replaceChildren(copy);
 
       const tail = document.createElementNS('http://www.w3.org/2000/svg','svg');
-      tail.setAttribute('class','aw2-tail');
-      tail.setAttribute('data-aw-tail-v54','true');
-      tail.setAttribute('viewBox','0 0 32 34');
+      tail.setAttribute('class','aw55-tail');
+      tail.setAttribute('viewBox','0 0 30 27');
       tail.setAttribute('aria-hidden','true');
       tail.setAttribute('focusable','false');
 
-      const curve = 'M3 3 C12 6 20 11 22 17 C24 23 21 29 16 32';
-      const outline = document.createElementNS('http://www.w3.org/2000/svg','path');
-      outline.setAttribute('class','aw2-tail-outline');
-      outline.setAttribute('d',curve);
-
-      const fill = document.createElementNS('http://www.w3.org/2000/svg','path');
-      fill.setAttribute('class','aw2-tail-fill');
-      fill.setAttribute('d',curve);
-
-      tail.append(outline,fill);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M2 2 C9 4 16 7 21 12 C24 16 24 21 22 25 C19 22 16 19 12 17 C8 14 5 9 2 2 Z');
+      tail.appendChild(path);
       bubble.appendChild(tail);
-      bubble.dataset.awTailV54 = 'true';
     });
     return true;
   }
@@ -323,6 +379,7 @@
   function applyCorrections() {
     installStyle();
     normalizeHeroKicker();
+    normalizeAnnieCopy();
     classifyActions();
     rebuildAnnieTail();
   }
@@ -332,6 +389,7 @@
     attempts += 1;
     const kickerReady = normalizeHeroKicker();
     const bubbleReady = rebuildAnnieTail();
+    normalizeAnnieCopy();
     classifyActions();
     installStyle();
     if ((kickerReady && bubbleReady) || attempts > 100) window.clearInterval(timer);
@@ -342,10 +400,11 @@
     window.clearTimeout(observerTimer);
     observerTimer = window.setTimeout(() => {
       normalizeHeroKicker();
+      normalizeAnnieCopy();
       classifyActions();
       rebuildAnnieTail();
       installStyle();
-    },80);
+    },100);
   });
   observer.observe(document.documentElement,{subtree:true,childList:true});
 
