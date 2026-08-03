@@ -28,16 +28,15 @@
   const BASE_BUILD='https://cdn.jsdelivr.net/gh/Arborwise/Arbor-OS@f63013983ef3a82fe01acb614a710122e5c57a81/website-preview/professional.js';
   const ENHANCEMENTS=[
     'chamber-memberships-v17.js?v=20260802-2248',
-    'annie-character-v26.js?v=20260803-0438'
+    'website-revision-v36.js?v=20260802-2348'
   ];
 
-  function installReadOnlyAnnie(){
+  function setAnnieButton(){
     const button=document.getElementById('annieButton');
     if(!button)return;
-    try{window.speechSynthesis?.cancel();}catch{}
-    button.textContent='Read another Annie tip';
-    button.setAttribute('aria-label','Read another Annie tree-care tip');
-    button.title='Show another Annie tree-care tip';
+    button.textContent='Hear another tip';
+    button.setAttribute('aria-label','Hear another Annie tree-care tip');
+    button.title='Hear another Annie tree-care tip';
   }
 
   function loadEnhancement(src){
@@ -52,7 +51,7 @@
   }
 
   async function finishWebsite(){
-    installReadOnlyAnnie();
+    setAnnieButton();
     for(const src of ENHANCEMENTS){
       try{
         await loadEnhancement(src);
