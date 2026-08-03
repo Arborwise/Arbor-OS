@@ -33,7 +33,8 @@
     'faq-cards.js',
     'hero-unify-v48.js?rev=orange-actions-type-20260803-1144',
     'annie-system-v2.js?rev=classic-curved-hook-20260803-1144',
-    'concern-checker-v47.js'
+    'concern-checker-v47.js',
+    'final-fixes-v57.js?rev=annie-beak-green-call-20260803-1240'
   ];
   const CONCERN_PHOTOS={
     leaves:{
@@ -88,7 +89,7 @@
     const heading=section.querySelector('h2');
     const paragraph=section.querySelector('#annieTip')||section.querySelector('h2 + p');
     if(heading){
-      heading.textContent='Don’t worry about diagnosing the tree—that’s our job.';
+      heading.textContent='Don’t worry about diagnosing the tree. That’s our job.';
     }
     if(paragraph){
       paragraph.innerHTML='Tell us what changed, send a few clear photos, and let the tree tell its story. We’ll read the signs, explain what matters, and you can <a class="aw-annie-estimate-link" href="tel:+19724308330">call us for a free estimate</a> when you’re ready.';
@@ -98,15 +99,17 @@
     style.id='aw-annie-copy-refinement';
     style.textContent=`
       html body .annie-callout .aw-annie-estimate-link{
-        color:#ff6700!important;
+        color:#2f9e4f!important;
         font-weight:950!important;
         text-decoration:underline!important;
+        text-decoration-color:#2f9e4f!important;
         text-decoration-thickness:2px!important;
         text-underline-offset:3px!important;
       }
       html body .annie-callout .aw-annie-estimate-link:hover,
       html body .annie-callout .aw-annie-estimate-link:focus-visible{
-        color:#c94700!important;
+        color:#1f7139!important;
+        text-decoration-color:#1f7139!important;
       }
     `;
     document.head.appendChild(style);
