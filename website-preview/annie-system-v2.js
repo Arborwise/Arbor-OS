@@ -81,13 +81,12 @@
     .aw2-edge.left{left:0;clip-path:polygon(0 0,78% 0,91% 8%,72% 18%,96% 29%,74% 40%,89% 52%,69% 64%,95% 76%,73% 88%,87% 100%,0 100%)}
     .aw2-edge.right{right:0;clip-path:polygon(22% 0,100% 0,100% 100%,14% 100%,27% 88%,6% 76%,31% 64%,11% 52%,25% 40%,5% 29%,29% 18%,10% 8%)}
 
-    /* Annie, her perch, and her balloon share one coordinate system. */
     .aw2-guide{
       position:fixed;
       z-index:950;
-      bottom:78px;
+      bottom:80px;
       width:156px;
-      height:160px;
+      height:168px;
       opacity:0;
       visibility:hidden;
       pointer-events:none;
@@ -126,16 +125,9 @@
       background:radial-gradient(ellipse,#1a0904 0 28%,#5a321d 31% 56%,transparent 60%);
       opacity:.9;
     }
-    .aw2-guide.right .aw2-perch{
-      right:0;
-      clip-path:polygon(0 24%,100% 4%,100% 96%,0 72%);
-    }
+    .aw2-guide.right .aw2-perch{right:0;clip-path:polygon(0 24%,100% 4%,100% 96%,0 72%)}
     .aw2-guide.right .aw2-perch::after{right:8px}
-    .aw2-guide.left .aw2-perch{
-      left:0;
-      transform:scaleX(-1);
-      clip-path:polygon(0 24%,100% 4%,100% 96%,0 72%);
-    }
+    .aw2-guide.left .aw2-perch{left:0;transform:scaleX(-1);clip-path:polygon(0 24%,100% 4%,100% 96%,0 72%)}
     .aw2-guide.left .aw2-perch::after{right:8px}
 
     .aw2-button{
@@ -147,6 +139,7 @@
       bottom:4px;
       width:88px;
       padding:0;
+      overflow:visible;
       border:0;
       background:transparent;
       opacity:0;
@@ -164,74 +157,90 @@
     .aw2-button:focus{outline:none}
     .aw2-button:focus-visible{outline:2px solid #ff6a00;outline-offset:4px;border-radius:50%}
 
-    /* The balloon sits directly above Annie. Its tapered tail ends at her beak. */
+    /* A classic comic balloon: soft oval body and a curved hook that ends at Annie's beak. */
     .aw2-bubble{
       box-sizing:border-box;
       position:absolute;
       z-index:7;
-      bottom:96px;
+      right:-10px;
+      bottom:88px;
       display:flex;
       align-items:center;
       justify-content:center;
-      width:108px;
-      min-height:44px;
+      width:124px;
+      min-height:48px;
       margin:0;
-      padding:8px 9px;
+      padding:9px 11px;
       overflow:visible;
       border:2px solid #174438;
-      border-radius:25px 27px 24px 28px;
+      border-radius:48% 52% 46% 54% / 54% 46% 58% 42%;
       background:#fffaf0;
       color:#123d31;
       font:850 9.1px/1.16 system-ui,-apple-system,"Segoe UI",sans-serif;
       letter-spacing:-.01em;
       text-align:center;
-      box-shadow:0 7px 16px rgba(7,34,26,.18),2px 3px 0 rgba(20,61,49,.1);
+      box-shadow:0 7px 16px rgba(7,34,26,.2),2px 3px 0 rgba(20,61,49,.11);
       opacity:0;
+      filter:none;
+      mix-blend-mode:normal;
+      backdrop-filter:none;
       transform:translateY(4px) scale(.98);
       transition:opacity .2s ease,transform .2s ease;
       pointer-events:none;
     }
-    .aw2-bubble.long{width:114px;min-height:48px;padding:8px 9px;font-size:8.9px}
+    .aw2-guide.left .aw2-bubble{left:-10px;right:auto}
+    .aw2-bubble.long{width:130px;min-height:52px;padding:9px 11px;font-size:8.9px}
     .aw2-bubble.show{opacity:1;transform:none}
-    .aw2-guide.right .aw2-bubble{right:2px}
-    .aw2-guide.left .aw2-bubble{left:2px}
-    .aw2-bubble-copy{position:relative;z-index:2}
+    .aw2-bubble-copy{position:relative;z-index:4}
+
+    .aw2-bubble::after{
+      content:"";
+      position:absolute;
+      z-index:3;
+      bottom:-4px;
+      left:40px;
+      width:25px;
+      height:10px;
+      border-radius:50%;
+      background:#fffaf0;
+    }
+    .aw2-guide.left .aw2-bubble::after{left:auto;right:40px}
 
     .aw2-tail{
       position:absolute;
-      z-index:1;
-      bottom:-26px;
-      width:34px;
-      height:28px;
+      z-index:2;
+      right:27px;
+      bottom:-47px;
+      width:50px;
+      height:54px;
       overflow:visible;
     }
-    .aw2-tail path{
-      fill:#fffaf0;
-      stroke:#174438;
-      stroke-width:2;
+    .aw2-guide.left .aw2-tail{left:27px;right:auto;transform:scaleX(-1)}
+    .aw2-tail-outline,
+    .aw2-tail-fill{
+      fill:none;
       stroke-linecap:round;
       stroke-linejoin:round;
       vector-effect:non-scaling-stroke;
     }
-    .aw2-guide.right .aw2-tail{left:42px}
-    .aw2-guide.left .aw2-tail{right:42px;transform:scaleX(-1)}
+    .aw2-tail-outline{stroke:#174438;stroke-width:10}
+    .aw2-tail-fill{stroke:#fffaf0;stroke-width:6}
 
     @media(max-width:700px){
       .aw2-token{width:180px;height:180px}
       .aw2-token img{width:154px;height:154px}
       .aw2-edge{width:14px}
-      .aw2-guide{bottom:70px;width:148px;height:154px}
+      .aw2-guide{bottom:72px;width:148px;height:162px}
       .aw2-trunk-mask{width:14px}
       .aw2-button{width:84px}
       .aw2-guide.right .aw2-button{right:4px}
       .aw2-guide.left .aw2-button{left:4px}
       .aw2-perch{bottom:11px;width:90px;height:17px}
-      .aw2-bubble{bottom:92px;width:102px;min-height:42px;padding:7px 8px;font-size:8.7px}
-      .aw2-bubble.long{width:108px;min-height:46px;font-size:8.5px}
-      .aw2-guide.right .aw2-bubble{right:1px}
-      .aw2-guide.left .aw2-bubble{left:1px}
-      .aw2-guide.right .aw2-tail{left:39px}
-      .aw2-guide.left .aw2-tail{right:39px}
+      .aw2-bubble{right:-11px;bottom:85px;width:118px;min-height:46px;padding:8px 10px;font-size:8.8px}
+      .aw2-guide.left .aw2-bubble{left:-11px;right:auto}
+      .aw2-bubble.long{width:124px;min-height:50px;font-size:8.6px}
+      .aw2-tail{right:25px;bottom:-45px;width:48px;height:52px}
+      .aw2-guide.left .aw2-tail{left:25px;right:auto}
     }
 
     @media(prefers-reduced-motion:reduce){
@@ -279,12 +288,6 @@
     guide.className = 'aw2-guide right';
     guide.setAttribute('aria-live','polite');
     guide.innerHTML = `
-      <div class="aw2-bubble">
-        <span class="aw2-bubble-copy"></span>
-        <svg class="aw2-tail" viewBox="0 0 34 28" aria-hidden="true" focusable="false">
-          <path d="M2 2 C11 4 18 8 23 14 C27 18 30 23 32 26 C26 24 21 22 17 19 C13 16 9 15 5 16 C8 12 7 7 2 2 Z"></path>
-        </svg>
-      </div>
       <div class="aw2-perch" aria-hidden="true"></div>
       <div class="aw2-trunk-mask" aria-hidden="true"></div>
     `;
@@ -293,16 +296,27 @@
     button.type = 'button';
     button.className = 'aw2-button';
     button.setAttribute('aria-label','See another Annie tip');
+
     const travelingImage = new Image();
     travelingImage.src = annieSource;
     travelingImage.alt = '';
     travelingImage.decoding = 'async';
     button.appendChild(travelingImage);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'aw2-bubble';
+    bubble.innerHTML = `
+      <span class="aw2-bubble-copy"></span>
+      <svg class="aw2-tail" viewBox="0 0 50 54" aria-hidden="true" focusable="false">
+        <path class="aw2-tail-outline" d="M5 4 C20 7 32 18 34 30 C36 39 32 45 24 50"></path>
+        <path class="aw2-tail-fill" d="M5 4 C20 7 32 18 34 30 C36 39 32 45 24 50"></path>
+      </svg>
+    `;
+    button.appendChild(bubble);
     guide.appendChild(button);
     document.body.appendChild(guide);
 
-    const bubble = guide.querySelector('.aw2-bubble');
-    const bubbleCopy = guide.querySelector('.aw2-bubble-copy');
+    const bubbleCopy = bubble.querySelector('.aw2-bubble-copy');
     const targets = TARGETS.map(([selector,message]) => {
       const element = document.querySelector(selector);
       return element ? { element, message } : null;
