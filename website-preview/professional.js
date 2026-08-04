@@ -35,7 +35,7 @@
     'annie-system-v2.js?rev=classic-curved-hook-20260803-1144',
     'concern-checker-v47.js',
     'final-fixes-v57.js?rev=annie-beak-green-call-20260803-1245',
-    'hero-premium-v58.js?rev=verified-live-20260804-1644'
+    'hero-premium-v58.js?rev=actual-dom-fix-20260804-1648'
   ];
   const CONCERN_PHOTOS={
     leaves:{src:'assets/concern-leaves-real.webp',alt:'Yellowing leaves showing visible canopy stress',position:'center 55%'},
