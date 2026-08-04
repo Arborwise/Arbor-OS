@@ -18,11 +18,99 @@
     brand.appendChild(domain);
   }
 
+  const upsertMeta = (name, content) => {
+    let meta = document.head.querySelector(`meta[name="${name}"]`);
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = name;
+      document.head.appendChild(meta);
+    }
+    meta.content = content;
+  };
+
+  document.title = 'Tree Service North Texas | Arborwise Tree Care';
+  upsertMeta(
+    'description',
+    'Arborwise Tree Care provides professional tree trimming, tree pruning, tree removal, tree-risk assessment, and property tree care in Collin County, Grayson County, and North Texas. Free estimates: 972-430-8330.'
+  );
+  upsertMeta(
+    'keywords',
+    'tree service North Texas, tree trimming, tree pruning, tree removal, tree limb removal, certified arborist, emergency tree service, Collin County tree service, Grayson County tree service'
+  );
+
+  if (!document.getElementById('arborwise-service-schema')) {
+    const schema = document.createElement('script');
+    schema.id = 'arborwise-service-schema';
+    schema.type = 'application/ld+json';
+    schema.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: 'Professional Tree Service in North Texas',
+      provider: {
+        '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'],
+        name: 'Arborwise Tree Care',
+        url: 'https://arborwisetreecare.com/',
+        telephone: '+1-972-430-8330',
+        email: 'greg@arborwisetreecare.com'
+      },
+      areaServed: [
+        'Collin County, Texas',
+        'Grayson County, Texas',
+        'Van Alstyne, Texas',
+        'Anna, Texas',
+        'Melissa, Texas',
+        'Celina, Texas',
+        'Farmersville, Texas',
+        'Princeton, Texas',
+        'Howe, Texas'
+      ],
+      serviceType: [
+        'Tree trimming',
+        'Tree pruning',
+        'Tree removal',
+        'Tree limb removal',
+        'Tree risk assessment',
+        'Emergency tree service',
+        'Property and HOA tree care'
+      ]
+    });
+    document.head.appendChild(schema);
+  }
+
   const style = document.createElement('style');
-  style.id = 'arborwise-final-mobile-brand-repair';
+  style.id = 'arborwise-premium-website-repair';
   style.textContent = `
-    html,body{max-width:100%;overflow-x:hidden}
+    html{
+      max-width:100%;
+      overflow-x:hidden;
+      background:#010604;
+    }
+    body{
+      max-width:100%;
+      overflow-x:hidden;
+      margin:0;
+      background-color:#fbf7ea;
+    }
     main,.site-header,.site-footer{max-width:100%}
+    .site-header{
+      width:100%;
+      margin:calc(-1 * env(safe-area-inset-top,0px)) 0 0;
+      padding-top:env(safe-area-inset-top,0px);
+      border-radius:0!important;
+      background-color:#010604;
+      background-clip:border-box;
+      overflow:hidden;
+    }
+    .site-header::before{
+      content:"";
+      position:absolute;
+      z-index:-1;
+      top:-3px;
+      right:-3px;
+      bottom:0;
+      left:-3px;
+      background:linear-gradient(180deg,#010604 0%,#03130e 58%,#052118 100%);
+    }
     .brand-domain{
       display:block;
       margin-top:-6px;
@@ -63,6 +151,51 @@
         0 12px 24px rgba(0,0,0,.78);
       filter:drop-shadow(0 0 9px rgba(240,205,117,.3));
     }
+
+    /* Annie's message is a real speech bubble with one small, clean hook. */
+    .hero-annie{
+      overflow:visible;
+      grid-template-columns:105px minmax(0,1fr);
+      background:transparent;
+      border:0;
+      box-shadow:none;
+      padding:8px 0;
+    }
+    .hero-annie img{position:relative;z-index:2}
+    .hero-annie p{
+      position:relative;
+      z-index:1;
+      margin:0;
+      padding:15px 17px;
+      background:#fffaf0;
+      border:2px solid #0b3f2f;
+      border-radius:19px;
+      box-shadow:0 8px 20px rgba(6,40,31,.11);
+    }
+    .hero-annie p::before{
+      content:"";
+      position:absolute;
+      left:-14px;
+      top:44%;
+      width:17px;
+      height:12px;
+      border-left:2px solid #0b3f2f;
+      border-bottom:2px solid #0b3f2f;
+      border-radius:0 0 0 13px;
+      background:transparent;
+      transform:translateY(-50%) rotate(13deg);
+      transform-origin:right center;
+    }
+    .hero-annie p::after{
+      content:"";
+      position:absolute;
+      left:-4px;
+      top:calc(44% - 5px);
+      width:7px;
+      height:14px;
+      background:#fffaf0;
+    }
+
     .estimate-section,.estimate-section>*,.estimate-actions,.estimate-actions>*{min-width:0}
     .email-link,.footer-domain{overflow-wrap:anywhere;word-break:break-word}
     .site-footer{width:100%;overflow:hidden}
@@ -130,6 +263,10 @@
         -webkit-text-stroke:1.25px #4c2d00;
       }
       .hero-promise span{font-size:.92rem}
+      .hero-annie{grid-template-columns:88px minmax(0,1fr);gap:10px}
+      .hero-annie img{width:88px;height:88px}
+      .hero-annie p{padding:13px 14px;font-size:.87rem}
+      .hero-annie p::before{left:-12px;width:15px;height:11px}
 
       .estimate-section{
         width:calc(100% - 24px);
@@ -196,12 +333,15 @@
       .brand-proof strong{font-size:.69rem}
       .hero-promise{padding-left:23px;padding-right:23px}
       .hero-promise strong{font-size:clamp(2.12rem,10.8vw,2.7rem)}
+      .hero-annie{grid-template-columns:78px minmax(0,1fr);gap:9px}
+      .hero-annie img{width:78px;height:78px}
+      .hero-annie p{font-size:.82rem;line-height:1.38}
     }
   `;
   document.head.appendChild(style);
 
   const baseScript = document.createElement('script');
-  baseScript.src = 'professional-base.js?v=20260730-2103';
+  baseScript.src = 'professional-base.js?v=20260804-annie-seo';
   baseScript.async = false;
   document.body.appendChild(baseScript);
 })();
