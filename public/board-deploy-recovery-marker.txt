@@ -1,3 +1,3 @@
-epoch=1786003368
-utc=2026-08-06T08:02:48Z
-reason=controlled Arborwise board retry after Vercel build-rate limit
+epoch=1786045200
+utc=2026-08-06T20:40:00Z
+reason=deploy Arborwise board fuel expense display
