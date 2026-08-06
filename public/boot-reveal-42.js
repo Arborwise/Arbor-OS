@@ -49,6 +49,15 @@
     document.head.appendChild(script);
   };
 
+  const loadOperatingExpenses=()=>{
+    if(document.querySelector('script[data-arborwise-operating-expenses]'))return;
+    const script=document.createElement('script');
+    script.src='/operating-expenses-89.js?v=89';
+    script.defer=true;
+    script.dataset.arborwiseOperatingExpenses='89';
+    document.head.appendChild(script);
+  };
+
   const installEmptyViewRepair=()=>{
     if(document.documentElement.dataset.emptyViewRepair==='88')return;
     document.documentElement.dataset.emptyViewRepair='88';
@@ -121,6 +130,7 @@
     loadWorkflowStatusBoard();
     loadCardColors();
     loadPaidStatus();
+    loadOperatingExpenses();
     reveal();
     installLiveRefresh();
     installEmptyViewRepair();
@@ -132,6 +142,7 @@
     loadWorkflowStatusBoard();
     loadCardColors();
     loadPaidStatus();
+    loadOperatingExpenses();
     document.body.classList.remove('booting');
     installLiveRefresh();
     installEmptyViewRepair();
