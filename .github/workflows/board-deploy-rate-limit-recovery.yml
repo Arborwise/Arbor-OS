@@ -45,7 +45,7 @@ jobs:
             && grep -Fq 'Goodwin &amp; Company' /tmp/pmg.js \
             && grep -Fq 'KW Landscaping' /tmp/pmg.js \
             && grep -Fq 'KANAM Realty' /tmp/pmg.js \
-            && grep -Fq "ARBORWISE_PERSONALITY_VERSION='60'" /tmp/personality.js; then
+            && grep -Fq "ARBORWISE_PERSONALITY_VERSION='61'" /tmp/personality.js; then
             echo 'live=true' >> "$GITHUB_OUTPUT"
             echo 'Current Arborwise board is live.'
           else
@@ -113,7 +113,7 @@ jobs:
               && grep -Fq 'Goodwin &amp; Company' /tmp/pmg.js \
               && grep -Fq 'KW Landscaping' /tmp/pmg.js \
               && grep -Fq 'KANAM Realty' /tmp/pmg.js \
-              && grep -Fq "ARBORWISE_PERSONALITY_VERSION='60'" /tmp/personality.js; then
+              && grep -Fq "ARBORWISE_PERSONALITY_VERSION='61'" /tmp/personality.js; then
               echo 'Current Arborwise board is live and verified.'
               exit 0
             fi
