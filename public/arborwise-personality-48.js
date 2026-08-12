@@ -4,6 +4,9 @@
   const UI_KEY='arborwise-board-ui-v57';
   const main=document.getElementById('main');
   const operationsVoice=document.getElementById('operationsVoice');
+  const statusButton=document.getElementById('statusButton');
+  const googleLink=document.getElementById('connectGoogleDirect');
+  const quickBooksLink=document.getElementById('connectQuickBooksDirect');
   if(!main)return;
 
   try{
@@ -25,14 +28,50 @@
       letter-spacing:.07em;
       text-transform:uppercase;
     }
+    header{
+      min-height:268px!important;
+      padding-bottom:10px!important;
+    }
+    .status{
+      width:min(470px,88%)!important;
+      padding:6px 9px!important;
+      font-size:10.5px!important;
+      letter-spacing:.035em!important;
+    }
+    .connectionLinks{
+      width:min(500px,88%)!important;
+      margin:7px auto 0!important;
+      gap:6px!important;
+    }
+    .connectionLinks a{
+      min-height:38px!important;
+      border-width:1px!important;
+      padding:0 9px!important;
+      font-size:11px!important;
+      letter-spacing:.025em!important;
+      box-shadow:none!important;
+    }
     .operationsVoice{
+      width:min(470px,88%)!important;
       margin:6px auto 0!important;
-      font-size:12.5px!important;
-      line-height:1.1!important;
-      letter-spacing:.03em;
+      padding:5px 9px!important;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      background:rgba(255,255,255,.07);
+      color:#edf5ef!important;
+      font-size:11px!important;
+      font-weight:900!important;
+      line-height:1!important;
+      letter-spacing:.045em;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+    }
+    @media(max-width:430px){
+      header{min-height:258px!important}
+      .connectionLinks{width:90%!important}
+      .connectionLinks a{min-height:36px!important;font-size:10.5px!important}
+      .operationsVoice,.status{width:90%!important}
     }
   `;
   document.head.appendChild(style);
@@ -85,12 +124,36 @@
     const holds=Number(match[4]);
     const summary=[];
 
-    if(active)summary.push(`TODAY ${active}`);
-    if(unscheduled)summary.push(`TO SCHEDULE ${unscheduled}`);
-    if(holds)summary.push(`HOLD ${holds}`);
-    if(completed)summary.push(`DONE TODAY ${completed}`);
+    if(active)summary.push(`${active} TODAY`);
+    if(unscheduled)summary.push(`${unscheduled} TO SCHEDULE`);
+    if(holds)summary.push(`${holds} HOLD`);
+    if(completed)summary.push(`${completed} DONE`);
 
-    operationsVoice.textContent=summary.length?summary.join(' • '):'NO ITEMS NEED ATTENTION';
+    operationsVoice.hidden=!summary.length;
+    if(summary.length)operationsVoice.textContent=summary.join(' • ');
+  }
+
+  function compactStatus(){
+    if(!statusButton)return;
+    const text=statusButton.textContent?.trim()||'';
+    const live=text.match(/^LIVE\s*•\s*\d+\s+RECORDS\s*•\s*(.+)$/i);
+    if(live){statusButton.textContent=`LIVE • ${live[1]}`;return;}
+    const stale=text.match(/^STALE\s*•\s*LAST GOOD\s*(.+)$/i);
+    if(stale)statusButton.textContent=`STALE • ${stale[1]}`;
+  }
+
+  function compactConnectionLabel(link,name){
+    if(!link)return;
+    const text=link.textContent?.trim().toUpperCase()||'';
+    if(text.includes('CONNECTED')){
+      const next=`${name} ✓`;
+      if(link.textContent!==next)link.textContent=next;
+      return;
+    }
+    if(text.startsWith('CONNECT')){
+      const next=`CONNECT ${name}`;
+      if(link.textContent!==next)link.textContent=next;
+    }
   }
 
   let observer;
@@ -130,11 +193,24 @@
     compactOperationsSummary();
   }
 
+  if(statusButton){
+    const statusObserver=new MutationObserver(compactStatus);
+    statusObserver.observe(statusButton,{childList:true,characterData:true,subtree:true});
+    compactStatus();
+  }
+
+  [[googleLink,'GOOGLE'],[quickBooksLink,'QUICKBOOKS']].forEach(([link,name])=>{
+    if(!link)return;
+    const connectionObserver=new MutationObserver(()=>compactConnectionLabel(link,name));
+    connectionObserver.observe(link,{childList:true,characterData:true,subtree:true});
+    compactConnectionLabel(link,name);
+  });
+
   const allCrew=document.querySelector('#filters button[data-filter="ALL"]');
   if(allCrew&&!allCrew.classList.contains('on'))allCrew.click();
   const allGroup=document.querySelector('#groupFilters54 button[data-group="ALL"]');
   if(allGroup&&!allGroup.classList.contains('on'))allGroup.click();
 
   decorateBoard();
-  window.ARBORWISE_PERSONALITY_VERSION='60';
+  window.ARBORWISE_PERSONALITY_VERSION='61';
 })();
