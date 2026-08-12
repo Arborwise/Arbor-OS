@@ -3,6 +3,7 @@
   const TIME_ZONE='America/Chicago';
   const UI_KEY='arborwise-board-ui-v57';
   const main=document.getElementById('main');
+  const operationsVoice=document.getElementById('operationsVoice');
   if(!main)return;
 
   try{
@@ -23,6 +24,15 @@
       font-weight:950;
       letter-spacing:.07em;
       text-transform:uppercase;
+    }
+    .operationsVoice{
+      margin:6px auto 0!important;
+      font-size:12.5px!important;
+      line-height:1.1!important;
+      letter-spacing:.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
   `;
   document.head.appendChild(style);
@@ -63,6 +73,26 @@
     return match?match[0]:'';
   }
 
+  function compactOperationsSummary(){
+    if(!operationsVoice)return;
+    const text=operationsVoice.textContent?.trim()||'';
+    const match=text.match(/(\d+)\s+active today\s*•\s*(\d+)\s+completed today\s*•\s*(\d+)\s+unscheduled\s*•\s*(\d+)\s+on hold/i);
+    if(!match)return;
+
+    const active=Number(match[1]);
+    const completed=Number(match[2]);
+    const unscheduled=Number(match[3]);
+    const holds=Number(match[4]);
+    const summary=[];
+
+    if(active)summary.push(`TODAY ${active}`);
+    if(unscheduled)summary.push(`TO SCHEDULE ${unscheduled}`);
+    if(holds)summary.push(`HOLD ${holds}`);
+    if(completed)summary.push(`DONE TODAY ${completed}`);
+
+    operationsVoice.textContent=summary.length?summary.join(' • '):'NO ITEMS NEED ATTENTION';
+  }
+
   let observer;
   function decorateBoard(){
     observer?.disconnect();
@@ -94,11 +124,17 @@
   observer=new MutationObserver(decorateBoard);
   observer.observe(main,{childList:true,subtree:true});
 
+  if(operationsVoice){
+    const operationsObserver=new MutationObserver(compactOperationsSummary);
+    operationsObserver.observe(operationsVoice,{childList:true,characterData:true,subtree:true});
+    compactOperationsSummary();
+  }
+
   const allCrew=document.querySelector('#filters button[data-filter="ALL"]');
   if(allCrew&&!allCrew.classList.contains('on'))allCrew.click();
   const allGroup=document.querySelector('#groupFilters54 button[data-group="ALL"]');
   if(allGroup&&!allGroup.classList.contains('on'))allGroup.click();
 
   decorateBoard();
-  window.ARBORWISE_PERSONALITY_VERSION='59';
+  window.ARBORWISE_PERSONALITY_VERSION='60';
 })();
