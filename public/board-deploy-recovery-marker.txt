@@ -1,3 +1,3 @@
-epoch=1786536341
-utc=2026-08-12T12:05:41Z
-reason=controlled Arborwise board retry after Vercel build-rate limit
+epoch=1786540500
+utc=2026-08-12T13:15:00Z
+reason=manual production redeploy requested for Arborwise OS v61 header cleanup
