@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17402b">
+<title>Brandon Command View • Arborwise OS</title>
+<link rel="icon" type="image/svg+xml" href="/assets/annie-launcher-v42.svg">
+<link rel="stylesheet" href="/brandon-command-70.css">
+</head>
+<body>
+<header>
+  <div class="headrow">
+    <div class="brand"><img src="/assets/annie-main-icon.png" alt="Annie"><div><strong>BRANDON • DAILY COMMAND</strong><small>ARBORWISE OS • NEON</small></div></div>
+    <div id="summary" class="summary">LOADING</div>
+  </div>
+  <div id="days" class="days" aria-label="Select day"></div>
+</header>
+<main>
+  <div class="bar"><div id="title" class="title">Daily schedule</div><button id="refresh" class="refresh" type="button">REFRESH</button></div>
+  <div class="legend"><span class="key"><span class="swatch est"></span>ESTIMATE</span><span class="key"><span class="swatch job"></span>JOB</span><span>• Everything happening that day</span></div>
+  <div id="content" class="wrap"><div class="empty">Opening Arborwise operations…</div></div>
+</main>
+<div id="veil" class="veil" hidden><section id="sheet" class="sheet"></section></div>
+<script src="/brandon-command-70.js" defer></script>
+</body>
+</html>
