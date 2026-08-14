@@ -2,13 +2,6 @@ name: Recover Arborwise board deployment after Vercel rate limit
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/board-deploy-rate-limit-recovery.yml'
-  schedule:
-    - cron: '4,14,24,34,44,54 * * * *'
 
 permissions:
   contents: write
